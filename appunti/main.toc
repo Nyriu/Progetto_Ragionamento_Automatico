@@ -1,5 +1,0 @@
-\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
-\babel@toc {italian}{}
-\babel@toc {italian}{}
-\defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {1}Chap Esempio}{1}{section.1}% 
