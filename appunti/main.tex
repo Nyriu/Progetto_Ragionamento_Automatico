@@ -1,0 +1,185 @@
+\documentclass{article}
+%\documentclass[draft]{article}
+
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+
+
+\usepackage{graphicx} % Immagini fantastiche e...
+\graphicspath{        % dove trovarle
+  {./images/},
+  {../images/}        % Necessario se cartella chapters
+}
+
+% Bibliografia
+\usepackage{csquotes}
+\usepackage[
+backend=biber, % backend... boh
+style=numeric, % altri stili https://www.overleaf.com/learn/latex/Biblatex_bibliography_styles
+sorting=nty % name, title, year % ynt % tny
+]{biblatex}
+\addbibresource{bibl.bib} % Il file della bibliografia
+
+% Per blocchi di codice
+\usepackage{listings}
+\lstset{ % per apici e pedici nel codice
+  mathescape
+}
+
+% Grafici direttamente in latex
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,calc}
+\colorlet{lightgray}{gray!20}
+
+% Immagini galleggiano
+%\usepackage{float}
+
+\usepackage{caption}
+% per caption ad immagini in tab annidiate
+\usepackage{subcaption}
+
+\usepackage{hyperref} % lasciare per ultimo
+%\hypersetup{colorlinks=true, linkcolor=blue, citecolor=black, plainpages=false, urlcolor=blue}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, plainpages=false, urlcolor=blue}
+
+% Usato nella copertina
+\usepackage{wallpaper}
+
+
+% Esempio di impostazione per listings
+\lstset{  %TODO migliorare stile
+   language=SQL,
+   showspaces=false,
+   showstringspaces=false,
+   basicstyle=\ttfamily,
+%   %numbers=left,
+%   %numberstyle=\tiny,
+   commentstyle=\color{gray}
+ }
+
+% Simboli matematici
+%\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{mathabx} % per \topdoteq
+%\usepackage{mathtools, amsthm}
+
+% Comodo per evidenziare zone da modificare
+\usepackage{todonotes} 
+
+% Lorem ipsum...
+\usepackage{lipsum} 
+
+
+ 
+% ================================ %
+%          Cose Personali          %
+% ================================ %
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+
+% DSD Syntax Symbols
+% DA USARE DENTRO MATH ENVIRONMENT
+\newcommand{\toe}{^\wedge}
+\newcommand{\cmpl}{^*}
+\newcommand{\toec}{^{\wedge *}}
+
+% Alcune comodita' logico/matematiche
+\let\implies\rightarrow
+\let\Implies\Rightarrow
+\let\impliedby\leftarrow
+\let\Impliedby\Leftarrow
+\let\iff\Leftrightarrow
+
+\let\et\wedge
+\let\vel\vee
+
+\newcommand\N{\ensuremath{\mathbb{N}}}
+\newcommand\R{\ensuremath{\mathbb{R}}}
+\newcommand\Z{\ensuremath{\mathbb{Z}}}
+\renewcommand\O{\ensuremath{\emptyset}}
+\newcommand\Q{\ensuremath{\mathbb{Q}}}
+\newcommand\C{\ensuremath{\mathbb{C}}}
+
+% DA USARE DENTRO NEL TESTO
+% per evitare di scrivere "emph"
+% notare spazio finale
+\newcommand{\pattern}{\emph{pattern} }
+\newcommand{\toehold}{\emph{toehold} }
+\newcommand{\bind}{\emph{bind} }
+\newcommand{\unbind}{\emph{unbind} }
+\newcommand{\displacement}{\emph{displacement} }
+\newcommand{\bond}{\emph{bond} }
+\newcommand{\sg}{\emph{strand graph} }
+\newcommand{\DNAcomp}{ \emph{DNA-Computing} }
+\newcommand{\foot} {\emph{foot} }
+\newcommand{\leg}  {\emph{leg}  }
+\newcommand{\hand} {\emph{hand} }
+\newcommand{\arm}  {\emph{arm}  }
+% vari
+%\newcommand{\lsti{args}}
+%           {\lstinline{args}} % TODO cercare sintassi args
+
+
+
+% ================================ %
+%            Il Documento          %
+% ================================ %
+\begin{document}
+
+% ================================ %
+%        Creo Prima Pagina         %
+% ================================ %
+
+\ThisCenterWallPaper{0.95}{polloPallido}
+% Intestazione
+% TODO Migliorare esteticamente
+\begin{titlepage}
+ 	\centering
+  \Huge{\textbf{Approfondimento per\\ Bella Materia}}\\
+ 	[25mm]
+  \raggedright
+  \Large{\textbf{Studente:}}\\
+  \Large{\textbf{Tristano Munini}}\\
+ 	[25mm]
+  \raggedright
+  \Large{\textbf{Relatore:}}\\
+  \Large{\textbf{Prof. Professore}}\\
+ 	[80mm]
+ 	\centering
+  \LARGE{\underline{\textbf{ANNO ACCADEMICO 2019-2020}}}\\
+\end{titlepage}
+
+% ================================ %
+%              Indice              %
+% ================================ %
+\tableofcontents
+\thispagestyle{empty}
+\cleardoublepage
+\setcounter{page}{1}
+
+
+% ================================ %
+%      Qua Inizia La Tesina        %
+% ================================ %
+%\abstract{
+%  \lipsum[1]
+%}
+
+\input{./chapters/chap_esempio.tex}
+\cleardoublepage
+
+
+%\input{./chapters/conclusione}
+%\cleardoublepage
+
+
+% ================================ %
+%           Bibliografia           %
+% ================================ %
+%\cleardoublepage
+%\printbibliography
+
+
+
+\end{document}
