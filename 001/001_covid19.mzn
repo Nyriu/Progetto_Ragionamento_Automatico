@@ -35,90 +35,84 @@
 include "globals.mzn"; 
 
 %============================================================%
-% INPUT
+% INPUT 1
 
-int: k=2; % corridoi/piani
-int: h=3; % stanze per lato
-int: n=10; % persone
+int: K=2; % corridoi/piani
+int: H=3; % stanze per lato
+int: N=10; % persone
 
 % condizioni delle persone
-array [1..n] of labels: cond = [ 1,1,1,1, 2,2,2, 3, 4,4 ]; % 4 3 1 2
-%array [1..n] of labels: cond = [1,1,1,1,1,1,1,1,1,1]; % 10 persone tutte malate
+int: M = 4; % malati
+int: P = 3; % positivi
+int: O = 1; % osservazione
+int: Q = 2; % quarantena precauzionale
 
-% FINE INPUT
+% FINE % INPUT 1
 %============================================================%
 
+%%============================================================%
+%% INPUT 2
+%
+%int: K=2; % corridoi/piani
+%int: H=3; % stanze per lato
+%int: N=10; % persone
+%
+%% condizioni delle persone
+%int: M = 10; % malati
+%int: P = 0; % positivi
+%int: O = 0; % osservazione
+%int: Q = 0; % quarantena precauzionale
+%
+%% FINE % INPUT 2
+%%============================================================%
 
-% possibili condizioni di una persona
-% 1 malata % 2 positiva % 3 osservazione % 4 quarantena precauzionale
-set of int: labels = 1..4;
+% Verifico correttezza input
+constraint M + P + O + Q = N; % ogni persona deve avere esattamente una condizione
+% FINE % Verifico correttezza input
 
-% creo la matrice delle stanze dei corridoi
+set of int: RangeCorridoi = 1..K;
+set of int: RangeStanze   = 1..2*H;
+set of int: RangeLetti    = 1..2;
+
+
+% Creo la matrice dei posti letto delle stanze dei corridoi
+% Stanze con numero dispari sono a sx le altre a dx
+% Quindi 1 avra' di fronte 2, 3 avra' davanti 4, ...
+
+% ogni letto puo' essere occupato da 
+% 0 nessuno
+% 1 malato
+% 2 positivo
+% 3 osservazione
+% 4 quarantena precauzionale
+set of int: labels = 0..4;
+
 % corridoi x stanze x posti letto
-array[1..h, 1..2*h, 1..2] of var 0..1: stanze;
+array[RangeCorridoi, RangeStanze, RangeLetti] of var labels: letto;
 
 
 % Per ora
 % - Considero solo stanze a destra e a sinistra
 % - Voglio minimizzare il numero di malati a distanza <= 2 dai precauzionali
 
-constraint forall(i in CHEIGHT)(t[i,0] = left);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-array [1..n] of int: weight= [1, 2, 4, 8,16,32, 64,128,256,512];
-array [1..n] of int: cost  = [1, 3, 7,15,31,63,127,255,511,1023];
-
-%%% Examples (of "yes" limits)
-% 127, 247
-% 255, 502
-% 511, 1013
-% 1023, 2036
-
-int: space  =1023;
-var int: profit; %% =2037;
-
-array [1..n] of var 0..100: sol; % 0..1 in the standard case
-
+%% constraint forall(i in RangeCorridoi, j in RangeStanze, k in RangeLetti) (t[i,0] = left);
 constraint
-    sum(i in 1..n)(sol[i]*weight[i]) <=  space
-/\
-    sum(i in 1..n)(sol[i]*cost[i]) =  profit
-;
-
-
-    
-solve maximize profit;
-%satisfy;
- 
-output[
-  show(sol) ++ show(profit)
-] ;
+ (
+  sum( i in RangeCorridoi,
+       j in RangeStanze,
+       k in RangeLetti)
+     (letto[i,j,k] div 4) % 
+ ) = N;
 
 
 
 
 
+
+
+
+
+
+
+%solve minimize profit;
+solve satisfy;
