@@ -34,37 +34,16 @@
 
 include "globals.mzn"; 
 
-%============================================================%
-% INPUT 1
-
-int: K=2; % corridoi/piani
-int: H=3; % stanze per lato
-int: N=10; % persone
+int: K; % corridoi/piani
+int: H; % stanze per lato
+int: N; % persone
 
 % condizioni delle persone
-int: M = 4; % malati
-int: P = 3; % positivi
-int: O = 1; % osservazione
-int: Q = 2; % quarantena precauzionale
+int: M; % malati
+int: P; % positivi
+int: O; % osservazione
+int: Q; % quarantena precauzionale
 
-% FINE % INPUT 1
-%============================================================%
-
-%%============================================================%
-%% INPUT 2
-%
-%int: K=2; % corridoi/piani
-%int: H=3; % stanze per lato
-%int: N=10; % persone
-%
-%% condizioni delle persone
-%int: M = 10; % malati
-%int: P = 0; % positivi
-%int: O = 0; % osservazione
-%int: Q = 0; % quarantena precauzionale
-%
-%% FINE % INPUT 2
-%%============================================================%
 
 % Verifico correttezza input
 constraint M + P + O + Q = N; % ogni persona deve avere esattamente una condizione
@@ -95,24 +74,72 @@ array[RangeCorridoi, RangeStanze, RangeLetti] of var labels: letto;
 % - Considero solo stanze a destra e a sinistra
 % - Voglio minimizzare il numero di malati a distanza <= 2 dai precauzionali
 
-%% constraint forall(i in RangeCorridoi, j in RangeStanze, k in RangeLetti) (t[i,0] = left);
 constraint
- (
-  sum( i in RangeCorridoi,
-       j in RangeStanze,
-       k in RangeLetti)
-     (letto[i,j,k] div 4) % 
- ) = N;
+  % Ogni persona deve essere associata ad un letto
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (if letto[i,j,k] > 0 then 1 else 0 endif)
+  ) = N;
+constraint
+  % Ogni persona deve mantenere la sua condizione
+  % Caso: malato
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (if letto[i,j,k] = 1 then 1 else 0 endif) % 
+  ) = M;
+constraint
+  % Caso: positivo
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (if letto[i,j,k] = 2 then 1 else 0 endif) % 
+  ) = P;
+constraint
+  % Caso: osservazione
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (if letto[i,j,k] = 3 then 1 else 0 endif) % 
+  ) = O;
+constraint
+  % Caso: quarantena precauzionale
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (if letto[i,j,k] = 4 then 1 else 0 endif) % 
+  ) = Q;
+
+
+
+
+% - Voglio minimizzare il numero di malati a distanza <= 2 dai precauzionali
+int malati_scomodi =
+  % distanza 1 da precauzionale
+  ( sum( i in RangeCorridoi,
+         j in RangeStanze,
+         k in RangeLetti)
+       (
+        % Considero i malati
+        if letto[i,j,k] = 1
+        then
+          % se precauzionale di fronte
+          if (
+              ((j mod 2 = 1) /\ (letto[i,j+1,1] = 4 \/ letto[i,j+1,2] = 4))
+              \/
+              ((j mod 2 = 0) /\ (letto[i,j-1,1] = 4 \/ letto[i,j-1,2] = 4))
+              )
+then 1
+        else 0 endif)
+
+        endif)
+  ) = N;
+  % distanza 2 da precauzionale
 
 
 
 
 
-
-
-
-
-
-
-%solve minimize profit;
-solve satisfy;
+%solve satisfy;
+solve minimize malati_scomodi;
