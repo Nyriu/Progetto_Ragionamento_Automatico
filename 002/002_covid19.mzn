@@ -89,11 +89,22 @@ constraint forall(u in RoomRange)
         (not ( quarantena(v) /\ ( vicini1(u,v) \/ vicini2(u,v) ) ))
   endif);
   
+%% SYMMETRY
+% Specifici del prblema semplificato
+constraint if M>1 then malato(1) endif;
+constraint if Q>1 then quarantena(2*H) endif;
 
-%% DEBUGGING
-int: mal=1;
-constraint sol[mal] == 1;
-%% FINE % DEBUGGING
+% Per evitare permutazioni
+% TODO
+% Cercare di max distanza M->Q e min tra M->M e Q->Q
+
+%% FINE % SYMMETRY
+
+
+%% %% DEBUGGING
+%% int: mal=3;
+%% constraint sol[mal] == 1;
+%% %% FINE % DEBUGGING
 
 
 
@@ -103,16 +114,20 @@ output
   %%["Malato     = 1\n"] ++
   %%["Quarantena = 2\n\n"] ++
   %%["P0:\n"] ++
-  ["V1(" ++ show(mal) ++ ")= " ] ++
-  [show(i) ++ " " | i in RoomRange where (vicini1(mal,i))]
-  ++
-  ["\n"]
-  ++
-  ["V2(" ++ show(mal) ++ ")= " ] ++
-  [show(i) ++ " " | i in RoomRange where (vicini2(mal,i))]
-  ++
-  ["\n"]
-  ++
+
+  %% %% DEBUGGING
+  %% ["V1(" ++ show(mal) ++ ")= " ] ++
+  %% [show(i) ++ " " | i in RoomRange where (vicini1(mal,i))]
+  %% ++
+  %% ["\n"]
+  %% ++
+  %% ["V2(" ++ show(mal) ++ ")= " ] ++
+  %% [show(i) ++ " " | i in RoomRange where (vicini2(mal,i))]
+  %% ++
+  %% ["\n"]
+  %% ++
+  %% %% FINE % DEBUGGING
+
   [show(sol[i]) ++
     if (i == 2*H-1 \/ i == 2*H) then "\n" else " " endif |
         i in [j | j in 1..2*H where (j mod 2 == 1)] ++ % prima i dispari (sx)
