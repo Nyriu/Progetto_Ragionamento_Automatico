@@ -1,7 +1,0 @@
-% SAT Si
-K=1; % stanze per lato
-H=3; % stanze per lato
-%N=2; % persone
-
-M = 1; % malati
-Q = 1; % quarantena precauzionale

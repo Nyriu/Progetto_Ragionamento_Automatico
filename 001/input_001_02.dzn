@@ -1,9 +1,0 @@
-K=2; % corridoi/piani
-H=3; % stanze per lato
-N=10; % persone
-
-% condizioni delle persone
-M = 10; % malati
-P = 0; % positivi
-O = 0; % osservazione
-Q = 0; % quarantena precauzionale
