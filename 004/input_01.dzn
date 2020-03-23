@@ -4,6 +4,6 @@ H=3; % stanze per lato
 
 
 M=1; % malati
-P=0; % positivi
-O=0; % osservazione
+P=1; % positivi
+O=1; % osservazione
 Q=1; % quarantena precauzionale

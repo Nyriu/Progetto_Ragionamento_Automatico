@@ -33,6 +33,7 @@
 %
 % VERSIONE SEMPLIFICATA !
 % Fare in modo che NON ci siano malati a distanza <= 2 dai precauzionali
+%            e che NON ci siano malati a distanza <= 1 dai positivi sani
 %
 
 include "globals.mzn"; 
@@ -71,7 +72,7 @@ set of int: RangeLati     = 1..2;
 % 6 due positivi
 % 7 due quarantena precauzionale
 
-set of int: ospite = 0..4;
+set of int: ospite = 0..7;
 
 % corridoi x stanze x lati
 array[RangeCorridoi, RangeStanze, RangeLati] of var ospite: sol;
@@ -119,14 +120,19 @@ constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 
 
 % Verifico che non ci siano malato/i vicini1 o vicini2 di quarantena/i
+%        e che non ci siano malato/i vicini1 o vicini2 dai positivi
 % Probabilmente altamente inefficiente
-% Sarebbe meglio avere funzione che torna i vicini
+% Sarebbe meglio avere funzione che torna i vicini1 e 2
 constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
   (if (malato(k1,s1,l1) \/ malati(k1,s1,l1)) then
     forall(k2 in RangeCorridoi, s2 in RangeStanze, l2 in RangeLati)
       (not ( (quarantena(k2,s2,l2) \/ quaranteni(k2,s2,l2))
              /\
-             (vicini1(k1,s1,l1, k2,s2,l2) \/ vicini2(k1,s1,l1, k2,s2,l2))
+             (vicini1(k1,s1,l1, k2,s2,l2) \/ vicini2(k1,s1,l1, k2,s2,l2)))
+       /\
+       not ( (positivo(k2,s2,l2) \/ positivi(k2,s2,l2))
+             /\
+             (vicini1(k1,s1,l1, k2,s2,l2))
            ))
   endif);
   
@@ -142,12 +148,12 @@ constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 %% FINE % SYMMETRY
 
 
-%% %% DEBUGGING
-%% int: cmal=1;
-%% int: mal =1;
-%% constraint (sol[cmal,mal] == 1 \/
-%%             sol[cmal,mal] == 2);
-%% %% %% FINE % DEBUGGING
+%% DEBUGGING
+int: kx=1;
+int: sx=2;
+int: lx=1;
+%% constraint (sol[cmal,mal] == 1 \/ sol[cmal,mal] == 2);
+%% %% FINE % DEBUGGING
 
 
 
@@ -155,35 +161,34 @@ solve satisfy;
 
 output
   %% %% DEBUGGING
-  %% ["("++show(cu)++","++show(u)++") " ++
-  %%   if (u == 2*H-1 \/ u == 2*H) then "\n" else " " endif |
-  %%       cu in CorridorRange,
-  %%       u in [j | j in 1..2*H where (j mod 2 == 1)] ++ % prima i dispari (sx)
-  %%            [j | j in 1..2*H where (j mod 2 == 0)]    % poi i pari (dx)
-  %% ]
-  %% ++
-  %% ["\n"]
-  %% ++
   %% ["Vicinato1\n"]
   %% ++
-  %% ["("++show(cu)++","++show(u)++") " |
-  %%       cu in CorridorRange,
-  %%       u in RoomRange where (vicini1(cmal,mal,cu,u))
+  %% ["("++show(k1)++","++show(s1)++","++show(l1)++") " |
+  %%       k1 in RangeCorridoi, l1 in RangeLati, s1 in RangeStanze
+  %%       where
+  %%         (vicini1(kx,sx,lx, k1,s1,l1))
   %% ]
   %% ++
   %% ["\n"]
   %% ++
   %% ["Vicinato2\n"]
   %% ++
-  %% ["("++show(cu)++","++show(u)++") " |
-  %%       cu in CorridorRange,
-  %%       u in RoomRange where (vicini2(cmal,mal,cu,u))
+  %% ["("++show(k1)++","++show(s1)++","++show(l1)++") " |
+  %%       k1 in RangeCorridoi, l1 in RangeLati, s1 in RangeStanze
+  %%       where
+  %%         (vicini2(kx,sx,lx, k1,s1,l1))
   %% ]
   %% ++
   %% ["\n\n"]
   %% ++
   %% %% FINE % DEBUGGING
 
+
+
+  %% ["1,5:M   2,6:P   3:O   4,7:Q" ]
+  %% ++
+  %% ["\n\n"]
+  %% ++
 
   [show(sol[k1,s1,l1]) ++
     if (s1==H) then "\n" else " " endif |

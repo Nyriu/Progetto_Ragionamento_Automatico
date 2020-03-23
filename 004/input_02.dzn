@@ -1,0 +1,9 @@
+% SAT Si
+K=1; % corridoi
+H=3; % stanze per lato
+
+
+M=1; % malati
+P=1; % positivi
+O=1; % osservazione
+Q=1; % quarantena precauzionale
