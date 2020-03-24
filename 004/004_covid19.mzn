@@ -135,9 +135,19 @@ constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
   endif);
   
 % Funzioni Ausiliari
-% Ritorna il numero di quaranteni in Vicinato1 dalla stanza data
-function RangeCorridoi: 
+function array[int] of RangeCorridoi: vicini1_k(RangeCorridoi k1) =
+  [ if (1 <= k1+d && k-d <= K) | d in -1..1];
+
+function array[int] of RangeStanze: vicini1_s(RangeStanze s1) =
+  [ if (1 <= s1+d && s-d <= H) | d in -1..1];
+  % TODO!!!
+  
+
+% Ritorna l'insieme delle camere in Vicinato1 a quella data
+function set of list[3] of int: 
     %TODO
+  if     (k1 < K /\ quarantena(k1+1,s1,l1)) then 1 %camera sopra
+  elseif (k1 < K /\ quaranteni(k1+1,s1,l1)) then 2 %camera sopra
 
 % q_vicinato1 per ora inutile
 function var int: q_vicinato1(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) =
