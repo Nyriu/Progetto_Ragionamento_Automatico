@@ -77,6 +77,7 @@ set of int: ospite = 0..7;
 % corridoi x stanze x lati
 array[RangeCorridoi, RangeStanze, RangeLati] of var ospite: sol;
 
+
 % Predicati Ausiliari
 % True se camera contiene ospite empty/malato(uno o due)/positivo(uno o due)/...
 predicate empty        (RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) = (sol[k1,s1,l1] == 0);
@@ -110,13 +111,16 @@ predicate vicini2(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1,
 % Vincoli
 % Ogni malato/positivo/... deve essere associato ad una stanza(solo o con un altro)
 constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
-  (if malato(k1,s1,l1) then 1 else if malati(k1,s1,l1) then 2 else 0 endif endif) == M;
+  (if malato(k1,s1,l1) then 1 elseif malati(k1,s1,l1) then 2 else 0 endif) == M;
+
 constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
-  (if positivo(k1,s1,l1) then 1 else if positivi(k1,s1,l1) then 2 else 0 endif endif) == P;
+  (if positivo(k1,s1,l1) then 1 elseif positivi(k1,s1,l1) then 2 else 0 endif) == P;
+
 constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
   (if osservazione(k1,s1,l1) then 1 else 0 endif) == O;
+
 constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
-  (if quarantena(k1,s1,l1) then 1 else if quaranteni(k1,s1,l1) then 2 else 0 endif endif) == Q;
+  (if quarantena(k1,s1,l1) then 1 elseif quaranteni(k1,s1,l1) then 2 else 0 endif) == Q;
 
 
 % Verifico che non ci siano malato/i vicini1 o vicini2 di quarantena/i
@@ -148,50 +152,13 @@ constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 %% FINE % SYMMETRY
 
 
-%% DEBUGGING
-int: kx=1;
-int: sx=2;
-int: lx=1;
-%% constraint (sol[cmal,mal] == 1 \/ sol[cmal,mal] == 2);
-%% %% FINE % DEBUGGING
-
-
-
 solve satisfy;
 
+
+
 output
-  %% %% DEBUGGING
-  %% ["Vicinato1\n"]
-  %% ++
-  %% ["("++show(k1)++","++show(s1)++","++show(l1)++") " |
-  %%       k1 in RangeCorridoi, l1 in RangeLati, s1 in RangeStanze
-  %%       where
-  %%         (vicini1(kx,sx,lx, k1,s1,l1))
-  %% ]
-  %% ++
-  %% ["\n"]
-  %% ++
-  %% ["Vicinato2\n"]
-  %% ++
-  %% ["("++show(k1)++","++show(s1)++","++show(l1)++") " |
-  %%       k1 in RangeCorridoi, l1 in RangeLati, s1 in RangeStanze
-  %%       where
-  %%         (vicini2(kx,sx,lx, k1,s1,l1))
-  %% ]
-  %% ++
-  %% ["\n\n"]
-  %% ++
-  %% %% FINE % DEBUGGING
-
-
-
-  %% ["1,5:M   2,6:P   3:O   4,7:Q" ]
-  %% ++
-  %% ["\n\n"]
-  %% ++
-
-  [show(sol[k1,s1,l1]) ++
-    if (s1==H) then "\n" else " " endif |
+  [show(sol[k1,s1,l1])++
+    if (s1==H) then "\n" else "  " endif |
         k1 in RangeCorridoi,
         l1 in RangeLati,
         s1 in RangeStanze

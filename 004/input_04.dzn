@@ -3,7 +3,7 @@ K=2; % corridoi
 H=3; % stanze per lato
 
 
-M=2; % malati
-P=4; % positivi
+M=3; % malati
+P=6; % positivi
 O=2; % osservazione
 Q=2; % quarantena precauzionale
