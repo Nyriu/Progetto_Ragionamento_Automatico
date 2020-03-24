@@ -40,7 +40,6 @@ include "globals.mzn";
 
 int: K; % corridoi/piani
 int: H; % stanze per lato
-%int: N; % persone
 
 % condizioni delle persone
 int: M; % malati
@@ -48,10 +47,6 @@ int: P; % positivi
 int: O; % osservazione
 int: Q; % quarantena precauzionale
 
-
-%% % Verifico correttezza input
-%% constraint M + P + O + Q = N; % ogni persona deve avere esattamente una condizione
-%% % FINE % Verifico correttezza input
 
 set of int: RangeCorridoi = 1..K;
 set of int: RangeStanze   = 1..H;
@@ -72,14 +67,15 @@ set of int: RangeLati     = 1..2;
 % 6 due positivi
 % 7 due quarantena precauzionale
 
-set of int: ospite = 0..7;
+set of int: tipo_ospite = 0..7;
 
 % corridoi x stanze x lati
-array[RangeCorridoi, RangeStanze, RangeLati] of var ospite: sol;
+array[RangeCorridoi, RangeStanze, RangeLati] of var tipo_ospite: sol;
+
 
 
 % Predicati Ausiliari
-% True se camera contiene ospite empty/malato(uno o due)/positivo(uno o due)/...
+% True se camera contiene tipo_ospite empty/malato(uno o due)/positivo(uno o due)/...
 predicate empty        (RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) = (sol[k1,s1,l1] == 0);
 predicate malato       (RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) = (sol[k1,s1,l1] == 1);
 predicate positivo     (RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) = (sol[k1,s1,l1] == 2);
@@ -129,10 +125,8 @@ constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 % Sarebbe meglio avere funzione che torna i vicini1 e 2
 constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
   (if (malato(k1,s1,l1) \/ malati(k1,s1,l1)) then
-    forall(k2 in RangeCorridoi, s2 in RangeStanze, l2 in RangeLati)
-      (not ( (quarantena(k2,s2,l2) \/ quaranteni(k2,s2,l2))
-             /\
-             (vicini1(k1,s1,l1, k2,s2,l2) \/ vicini2(k1,s1,l1, k2,s2,l2)))
+    forall(k2 in vicini1_k(k1), s2 in vicini1_s(s1), l2 in vicini1_l(l1))
+      (not ( (quarantena(k2,s2,l2) \/ quaranteni(k2,s2,l2)) )
        /\
        not ( (positivo(k2,s2,l2) \/ positivi(k2,s2,l2))
              /\
@@ -140,12 +134,45 @@ constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
            ))
   endif);
   
+% Funzioni Ausiliari
+% Ritorna il numero di quaranteni in Vicinato1 dalla stanza data
+function RangeCorridoi: 
+    %TODO
+
+% q_vicinato1 per ora inutile
+function var int: q_vicinato1(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) =
+  if     (k1 < K /\ quarantena(k1+1,s1,l1)) then 1 %camera sopra
+  elseif (k1 < K /\ quaranteni(k1+1,s1,l1)) then 2 %camera sopra
+  else 0 endif +
+
+  if     (k1 > 2 /\ quarantena(k1-1,s1,l1)) then 1 %camera sotto
+  elseif (k1 > 2 /\ quaranteni(k1-1,s1,l1)) then 2 %camera sotto
+  else 0 endif +
+
+  if     (s1 < H /\ quarantena(k1,s1+1,l1)) then 1 %camera da un lato
+  elseif (s1 < H /\ quaranteni(k1,s1+1,l1)) then 2 %camera da un lato
+  else 0 endif +
+
+  if     (s1 > 2 /\ quarantena(k1,s1-1,l1)) then 1 %camera altro lato
+  elseif (s1 > 2 /\ quaranteni(k1,s1-1,l1)) then 2 %camera altro lato
+  else 0 endif +
+
+  if     (l1 == 1 /\ quarantena(k1,s1+1,2)) then 1 %camera di fronte caso 1
+  elseif (l1 == 1 /\ quaranteni(k1,s1+1,2)) then 2 %camera di fronte caso 1
+  elseif (l1 == 2 /\ quarantena(k1,s1-1,1)) then 1 %camera di fronte caso 2
+  elseif (l1 == 2 /\ quaranteni(k1,s1-1,1)) then 2 %camera di fronte caso 2
+  else 0 endif
+  ;
+
+% FINE % Funzioni Ausiliari
+  
 %% SYMMETRY
 % Specifici del prblema semplificato
 %constraint if M>1 then malato(1) endif;
 %constraint if Q>1 then quarantena(2*H) endif;
 
-% Per evitare permutazioni
+% Per evitare rotazioni/specchiamenti
+% Potrei fissare un malato sempre nel primo angolo del primo corridoio
 % TODO
 % Cercare di max distanza M->Q e min tra M->M e Q->Q
 
@@ -153,8 +180,6 @@ constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 
 
 solve satisfy;
-
-
 
 output
   [show(sol[k1,s1,l1])++
