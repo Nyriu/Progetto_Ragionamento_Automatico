@@ -1,7 +1,7 @@
 % SAT Boh
 % Non ho ottenuto risposta
 K=5; % corridoi
-H=10; % stanze per lato
+H=5; % stanze per lato
 
 
 M=30; % malati

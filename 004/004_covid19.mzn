@@ -73,6 +73,31 @@ set of int: tipo_ospite = 0..7;
 array[RangeCorridoi, RangeStanze, RangeLati] of var tipo_ospite: sol;
 
 
+% Funzioni Ausiliari
+%%function set of RangeCorridoi: vicini1_k(RangeCorridoi k1) =
+function set of RangeCorridoi: vicini1_k(RangeCorridoi: k1) =
+  { if (1 <= k1+d /\ k1+d <= K) then k1+d else k1 endif | d in -1..1};
+
+function set of RangeStanze: vicini1_s(RangeStanze: s1) =
+  { if (1 <= s1+d /\ s1+d <= H) then s1+d else s1 endif | d in -1..1};
+
+function set of RangeLati: vicini1_l(RangeLati: l1) =
+  {1,2};
+
+function set of RangeCorridoi: vicini2_k(RangeCorridoi: k1) =
+  { k3
+  | k2 in vicini1_k(k1), k3 in vicini1_k(k2)
+  };
+
+function set of RangeStanze: vicini2_s(RangeStanze: s1) =
+  { s3
+  | s2 in vicini1_s(s1), s3 in vicini1_s(s2)
+  };
+
+function set of RangeLati: vicini2_l(RangeLati: l1) =
+  {1,2};
+% FINE % Funzioni Ausiliari
+
 
 % Predicati Ausiliari
 % True se camera contiene tipo_ospite empty/malato(uno o due)/positivo(uno o due)/...
@@ -126,57 +151,35 @@ constraint sum(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
 constraint forall(k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati)
   (if (malato(k1,s1,l1) \/ malati(k1,s1,l1)) then
     forall(k2 in vicini1_k(k1), s2 in vicini1_s(s1), l2 in vicini1_l(l1))
-      (not ( (quarantena(k2,s2,l2) \/ quaranteni(k2,s2,l2)) )
-       /\
-       not ( (positivo(k2,s2,l2) \/ positivi(k2,s2,l2))
+      (not ( vicini1(k1,s1,l1, k2,s2,l2)
              /\
-             (vicini1(k1,s1,l1, k2,s2,l2))
-           ))
+             ( quarantena(k2,s2,l2) \/
+               quaranteni(k2,s2,l2) \/
+               positivo(k2,s2,l2)   \/
+               positivi(k2,s2,l2)
+             )
+           )
+      )
+    /\
+    forall(k3 in vicini2_k(k1), s3 in vicini2_s(s1), l3 in vicini2_l(l1))
+      (not ( vicini2(k1,s1,l1, k3,s3,l3)
+             /\
+             ( quarantena(k3,s3,l3) \/
+               quaranteni(k3,s3,l3)
+             )
+           )
+      )
   endif);
   
-% Funzioni Ausiliari
-function array[int] of RangeCorridoi: vicini1_k(RangeCorridoi k1) =
-  [ if (1 <= k1+d && k-d <= K) | d in -1..1];
-
-function array[int] of RangeStanze: vicini1_s(RangeStanze s1) =
-  [ if (1 <= s1+d && s-d <= H) | d in -1..1];
-  % TODO!!!
   
 
-% Ritorna l'insieme delle camere in Vicinato1 a quella data
-function set of list[3] of int: 
-    %TODO
-  if     (k1 < K /\ quarantena(k1+1,s1,l1)) then 1 %camera sopra
-  elseif (k1 < K /\ quaranteni(k1+1,s1,l1)) then 2 %camera sopra
 
-% q_vicinato1 per ora inutile
-function var int: q_vicinato1(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1) =
-  if     (k1 < K /\ quarantena(k1+1,s1,l1)) then 1 %camera sopra
-  elseif (k1 < K /\ quaranteni(k1+1,s1,l1)) then 2 %camera sopra
-  else 0 endif +
+%% SYMMETRY % TODO
 
-  if     (k1 > 2 /\ quarantena(k1-1,s1,l1)) then 1 %camera sotto
-  elseif (k1 > 2 /\ quaranteni(k1-1,s1,l1)) then 2 %camera sotto
-  else 0 endif +
+%% Fissare un malato o due in (1,1,1)
+constraint (sol[1,1,1]==1 \/ sol[1,1,1]==5);
 
-  if     (s1 < H /\ quarantena(k1,s1+1,l1)) then 1 %camera da un lato
-  elseif (s1 < H /\ quaranteni(k1,s1+1,l1)) then 2 %camera da un lato
-  else 0 endif +
 
-  if     (s1 > 2 /\ quarantena(k1,s1-1,l1)) then 1 %camera altro lato
-  elseif (s1 > 2 /\ quaranteni(k1,s1-1,l1)) then 2 %camera altro lato
-  else 0 endif +
-
-  if     (l1 == 1 /\ quarantena(k1,s1+1,2)) then 1 %camera di fronte caso 1
-  elseif (l1 == 1 /\ quaranteni(k1,s1+1,2)) then 2 %camera di fronte caso 1
-  elseif (l1 == 2 /\ quarantena(k1,s1-1,1)) then 1 %camera di fronte caso 2
-  elseif (l1 == 2 /\ quaranteni(k1,s1-1,1)) then 2 %camera di fronte caso 2
-  else 0 endif
-  ;
-
-% FINE % Funzioni Ausiliari
-  
-%% SYMMETRY
 % Specifici del prblema semplificato
 %constraint if M>1 then malato(1) endif;
 %constraint if Q>1 then quarantena(2*H) endif;
@@ -188,10 +191,49 @@ function var int: q_vicinato1(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1)
 
 %% FINE % SYMMETRY
 
+%% %% DEBUG STUFF
+%% int: kx=2;
+%% int: sx=2;
+%% int: lx=2;
+%% %% END %DEBUG STUFF
+
 
 solve satisfy;
 
 output
+
+  %% %% DEBUG STUFF
+  %% ["Considero ("++ show(kx) ++","++ show(sx)++","++ show(lx) ++")\n"]++
+  %% ["Vicini1\n"]++
+  %% [ if (vicini1(kx,sx,lx, k2,s2,l2)) then
+  %%   "("++ show(k2) ++","++ show(s2)++","++ show(l2) ++") " else "" endif 
+  %%   | k2 in vicini1_k(kx), s2 in vicini1_s(sx), l2 in vicini1_l(lx)
+  %% ]
+
+  %% ++["\n"]++
+
+  %% ["Vicini2\n"]++
+  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+  %%   | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
+  %% ]
+  %% ++["\n"]++
+
+  %% ["Vicini2 Forall\n"]++
+  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+  %%   | k3 in RangeCorridoi, s3 in RangeStanze, l3 in RangeLati
+  %% ]
+  %%  ++["\n"]++
+  %%  ["Vicini2 True\n"]++
+  %%  %%[ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+  %%  [ if (true) then
+  %%    "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+  %%    | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
+  %%  ]
+  %% ++["\n\n"]++
+  %% %% END %DEBUG STUFF
+
   [show(sol[k1,s1,l1])++
     if (s1==H) then "\n" else "  " endif |
         k1 in RangeCorridoi,
