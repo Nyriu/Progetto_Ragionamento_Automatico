@@ -1,0 +1,10 @@
+% SAT Boh
+% Non ho ottenuto risposta
+K=1; % corridoi
+H=10; % stanze per lato
+
+
+M=10; % malati
+P=1; % positivi
+O=1; % osservazione
+Q=10; % quarantena precauzionale
