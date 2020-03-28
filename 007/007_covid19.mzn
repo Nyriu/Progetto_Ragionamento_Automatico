@@ -25,7 +25,8 @@
 % Applico Vicinato 1 due volte
 %
 %
-%% Si vuole disporre le persone per MINIMIZZARE
+% SEMPLIFICAZIONE IN SATISFY
+%% Si vuole disporre le persone per AVERE UGUALE A ZERO
 %% numero di malati a distanza <= 2 dai precauzionali e
 %%                  a distanza <= 1 dai positivi sani
 %%
@@ -44,78 +45,134 @@ int: O; % osservazione
 int: Q; % quarantena precauzionale
 
 
-set of int: RangeCorridoi = 1..K;
-set of int: RangeStanze   = 1..H;
-set of int: RangeLati     = 1..2;
+% in totale ci sono 2*H*K stanze
+% le prime H sono del primo corridio lato dx
+% da H..2*H-1 sono del primo corridio lato sx
+% da 2*H..3*H-1 sono del secondo corridio lato dx
+% ecc...
+set of int: stanze = 0..2*H*K-1;
 
-% dato che si aspetta un set dopo "of"
-% ho trovato escamotage...
-% posso entrare in profondità per ogni malato
-% in posizione 1 metto il corridoio
-% in posizione 2 metto la stanza
-% in posizione 3 metto il lato
-% cosi' e' come se ci fosse una tripletta
-array[1..M, 1..3] of var int: malati;
-array[1..P, 1..3] of var int: positivi;
-array[1..O, 1..3] of var int: osservazione;
-array[1..Q, 1..3] of var int: quarantena;
+% 
+array[1..M] of var stanze: malati;
+array[1..P] of var stanze: positivi;
+array[1..O] of var stanze: osservazione;
+array[1..Q] of var stanze: quarantena;
 
 
-% TODO ampliare
-% Per ora una camera per ospite
-constraint alldifferent(malati);
+constraint
+  % Al piu' due Malati nella stessa stanza
+  forall(i in 1..M)
+    (sum(j in 1..M)
+      (if (malati[i]==malati[j]) then 1 else 0 endif) <= 2)
+  /\
+  % Al piu' due Positivi nella stessa stanza
+  forall(i in 1..P)
+    (sum(j in 1..P)
+      (if (positivi[i]==positivi[j]) then 1 else 0 endif) <= 2)
+  /\
+  % In Osservazione isolati uno per stanza
+  alldifferent(osservazione)
+  /\
+  % Al piu' due Quarantena nella stessa stanza
+  forall(i in 1..Q)
+    (sum(j in 1..Q)
+      (if (quarantena[i]==quarantena[j]) then 1 else 0 endif) <= 2)
+  /\
+  % No stanze miste
+  % TODO esiste un modo migliore?
+  forall(i in 1..M)
+    (sum(j in 1..P)(if (malati[i] == positivi[j]    ) then 1 else 0 endif) + 
+     sum(j in 1..O)(if (malati[i] == osservazione[j]) then 1 else 0 endif) +
+     sum(j in 1..Q)(if (malati[i] == quarantena[j]  ) then 1 else 0 endif)
+     == 0)
+  /\
+  forall(i in 1..P)
+    (sum(j in 1..O)(if (positivi[i] == osservazione[j]) then 1 else 0 endif) +
+     sum(j in 1..Q)(if (positivi[i] == quarantena[j]  ) then 1 else 0 endif)
+     == 0)
+  /\
+  forall(i in 1..O)
+     (sum(j in 1..Q)(if (osservazione[i] == quarantena[j]  ) then 1 else 0 endif)
+     == 0)
+;
+
+% Date due stanze verifico se sono in reciproco Vicinato1
+predicate vicini1(var stanze: s1, var stanze: s2) =
+  % Di fronte
+  (s1 == s2+H \/ s1 == s2-H)
+  \/
+  % Sopra/Sotto
+  (s1 == s2+2*H \/ s1 == s2-2*H)
+  \/
+  % Lato dx/sx
+  (s1 == s2+1 \/ s1 == s2-1);
+
+% Date due stanze verifico se sono in reciproco Vicinato2
+predicate vicini2(var stanze: s1, var stanze: s2) =
+  (s1 != s2 /\
+   exists (s3 in stanze)
+    (vicini1(s1,s3) /\ vicini1(s3,s2)));
 
 
+% No Malati in Vicinato1 con Quarantena o con Positivi e
+% No Vicinato2 con Quarantena
+constraint
+  forall(i in 1..M, j in 1..Q)
+    (not vicini1(malati[i], quarantena[j]) /\
+     not vicini2(malati[i], quarantena[j]))
+  /\
+  forall(i in 1..M, j in 1..P)
+    (not vicini1(malati[i], positivi[j]))
+;
 
 
-%% %% DEBUG STUFF
-%% int: kx=2;
-%% int: sx=2;
-%% int: lx=2;
-%% %% END %DEBUG STUFF
+% Symmetry
+constraint (malati[1] == 0);
 
-% Richesta stupida giusto
-% per vedere se va
-var int: s;
-constraint s >= 0;
-solve minimize s;
-
+solve satisfy;
 
 output
+  ["[\n"] ++
+  [" \"K\":" ++ show(K)] ++
+  [",\n"] ++
+  [" \"H\":" ++ show(H)] ++
+  [",\n"] ++
 
-  %% %% DEBUG STUFF
-  %% ["Considero ("++ show(kx) ++","++ show(sx)++","++ show(lx) ++")\n"]++
-  %% ["Vicini1\n"]++
-  %% [ if (vicini1(kx,sx,lx, k2,s2,l2)) then
-  %%   "("++ show(k2) ++","++ show(s2)++","++ show(l2) ++") " else "" endif 
-  %%   | k2 in vicini1_k(kx), s2 in vicini1_s(sx), l2 in vicini1_l(lx)
-  %% ]
+  [" ["] ++
+  [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M] ++
+  ["],\n"] ++
 
-  %% ++["\n"]++
+  [" ["] ++
+  [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P] ++
+  ["],\n"] ++
 
-  %% ["Vicini2\n"]++
-  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-  %%   | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
-  %% ]
-  %% ++["\n"]++
+  [" ["] ++
+  [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O] ++
+  ["],\n"] ++
 
-  %% ["Vicini2 Forall\n"]++
-  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-  %%   | k3 in RangeCorridoi, s3 in RangeStanze, l3 in RangeLati
-  %% ]
-  %%  ++["\n"]++
-  %%  ["Vicini2 True\n"]++
-  %%  %%[ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-  %%  [ if (true) then
-  %%    "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-  %%    | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
-  %%  ]
-  %% ++["\n\n"]++
-  %% %% END %DEBUG STUFF
+  [" ["] ++
+  [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q] ++
+  ["]\n"] ++
 
-  ["ROBA:"++ show(s) ++"\n"]
-  ++
-  [show(malati[i,j]) ++"\n"]
-  ;
+  ["]\n"]
+;
+
+%% % Circa human readable
+%% output
+%%   ["Malati:\t\t["] ++
+%%   [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Positivi:\t["] ++
+%%   [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Osservazione:\t["] ++
+%%   [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Quarantena:\t["] ++
+%%   [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q]
+%%   ++ ["]\n"]
+%% ;
+

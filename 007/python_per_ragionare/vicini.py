@@ -35,9 +35,21 @@ def vicinato2(i):
         di_fronte = i-H
     lati_fronte = [x for x in [di_fronte-1,di_fronte+1] if (di_fronte/H -1 < x//H and x//H <= di_fronte/H)]
 
-
     # devo andare di fronte di quello sopra
+    sopra_di_fronte = []
+    if i//H < H:
+        if i%2 == 0:
+            sopra_di_fronte = [i+3*H]
+        else:
+            sopra_di_fronte = [i+H]
+
     # devo andare di fronte di quello sotto
+    sotto_di_fronte = []
+    if 2 <= i//H:
+        if i%2 == 0:
+            sotto_di_fronte = [i-H]
+        else:
+            sotto_di_fronte = [i-3*H]
 
     # devo andare alla dx e sx di quello sopra
     sopra = i+2*H
@@ -51,15 +63,15 @@ def vicinato2(i):
     if sotto >= 0:
         dx_sx_sotto = [x for x in [sotto-1,sotto+1] if (sotto/H -1 < x//H and x//H <= sotto/H)]
 
-    v = lati2 + sopra_sotto2 + lati_fronte + dx_sx_sopra + dx_sx_sotto
+    #v = lati2 + sopra_sotto2 + lati_fronte + sopra_di_fronte + sotto_di_fronte + dx_sx_sopra + dx_sx_sotto
+    v = lati2\nv=sopra_sotto2\nv=lati_fronte\nv=sopra_di_fronte\nv=sotto_di_fronte\nv=dx_sx_sopra\nv=dx_sx_sotto
     v.sort()
     return v
 
 
 
 
-#for i in [0,5, 13,18,19,20, 29]:
-for i in [0,5]:
+for i in [0,5, 13,18,19,20, 29]:
     # print("ai_lati(%d) = %s" %(i, ai_lati(i)))
     # print("sopra_sotto(%d) = %s" %(i, sopra_sotto(i)))
     # print("di_fronte(%d) = %s" %(i, di_fronte(i)))
