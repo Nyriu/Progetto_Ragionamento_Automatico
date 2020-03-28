@@ -1,0 +1,5 @@
+005 ci metteva la vita su input_06.dzn
+Provo a scrivere hard coded i vicini1 e 2 in modo che diventino costanti
+In pratica toglo gli exist
+
+TODO

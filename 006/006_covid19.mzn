@@ -119,7 +119,8 @@ predicate vicini1(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1,
 predicate vicini2(RangeCorridoi: k1, RangeStanze: s1, RangeLati: l1,
                   RangeCorridoi: k2, RangeStanze: s2, RangeLati: l2) =
   not (k1==k2 /\ s1==s2 /\ l1==l2) /\ 
-  exists(k3 in vicini1_k(k1), s3 in vicini1_s(s1), l3 in vicini1_l(l1))
+  % TODO ottimizzare ulteriormente
+  exists(k3 in vicini1_k, s3 in RangeStanze, l3 in RangeLati)
     (vicini1(k1,s1,l1, k3,s3,l3) /\ (vicini1(k3,s3,l3, k2,s2,l2)))
   ;
 

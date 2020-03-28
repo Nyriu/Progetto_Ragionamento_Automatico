@@ -1,0 +1,9 @@
+TODO 006
+
+Non creo piu' la matriciona
+Invece creo un vettore per ogni tipologia di ospite
+per l'i-esimo malato ad esempio associo la tripletta (k,h,l) per indicare
+che è stato messo al corridoio k stanza h lato l
+
+L'idea è evitare di scorrere una matrice che dipende dal numero di stanze
+e non dal numero di persone che voglio piazzare
