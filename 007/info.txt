@@ -10,3 +10,6 @@ e non dal numero di persone che voglio piazzare
 TODO fare confronto con tempistiche di 005
 Sembra estremamente piu' veloce
 Provare confronto su input_06.dzn
+
+Per Python
+https://minizinc-python.readthedocs.io/en/latest/getting_started.html
