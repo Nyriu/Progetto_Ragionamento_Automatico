@@ -132,29 +132,29 @@ constraint (malati[1] == 0);
 solve satisfy;
 
 output
-  ["[\n"] ++
+  ["{\n"] ++
   [" \"K\":" ++ show(K)] ++
   [",\n"] ++
   [" \"H\":" ++ show(H)] ++
   [",\n"] ++
 
-  [" ["] ++
+  [" \"M\":["] ++
   [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M] ++
   ["],\n"] ++
 
-  [" ["] ++
+  [" \"P\":["] ++
   [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P] ++
   ["],\n"] ++
 
-  [" ["] ++
+  [" \"O\":["] ++
   [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O] ++
   ["],\n"] ++
 
-  [" ["] ++
+  [" \"Q\":["] ++
   [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q] ++
   ["]\n"] ++
 
-  ["]\n"]
+  ["}\n"]
 ;
 
 %% % Circa human readable
