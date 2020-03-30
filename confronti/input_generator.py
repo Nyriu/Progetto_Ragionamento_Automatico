@@ -39,6 +39,18 @@ def read_dzn(fpath):
 
     return values
 
+
+def get_input(num):
+    if num >  100:
+        print("ERROR! get_input() num troppo grande")
+        exit(2)
+    fpath = dest_dir + fname_prefix
+    fpath += '{:02d}'.format(num)
+    fpath += fname_suffix
+    # TODO try catch
+    return read_dzn(fpath)
+
+
 def write_dzn(values, fpath):
     # TODO try catch
     f = open(fpath,'w')

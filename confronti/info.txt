@@ -1,5 +1,4 @@
 TODO
-- script python per generare input
 - script python per prendere modello e creare json con prestazioni su output
   (soluzione, valore, tempo di flat, tempo di resol, tempo totale)
 
