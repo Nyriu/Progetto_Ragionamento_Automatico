@@ -80,19 +80,16 @@ constraint
   % No stanze miste
   % TODO esiste un modo migliore?
   forall(i in 1..M)
-    (sum(j in 1..P)(if (malati[i] == positivi[j]    ) then 1 else 0 endif) + 
-     sum(j in 1..O)(if (malati[i] == osservazione[j]) then 1 else 0 endif) +
-     sum(j in 1..Q)(if (malati[i] == quarantena[j]  ) then 1 else 0 endif)
-     == 0)
+    (forall(j in 1..P)(malati[i] != positivi[j]    ) /\
+     forall(j in 1..O)(malati[i] != osservazione[j]) /\
+     forall(j in 1..Q)(malati[i] != quarantena[j]  ))
   /\
   forall(i in 1..P)
-    (sum(j in 1..O)(if (positivi[i] == osservazione[j]) then 1 else 0 endif) +
-     sum(j in 1..Q)(if (positivi[i] == quarantena[j]  ) then 1 else 0 endif)
-     == 0)
+    (forall(j in 1..O)(positivi[i] != osservazione[j]) /\
+     forall(j in 1..Q)(positivi[i] != quarantena[j]  ))
   /\
   forall(i in 1..O)
-     (sum(j in 1..Q)(if (osservazione[i] == quarantena[j]  ) then 1 else 0 endif)
-     == 0)
+     (forall(j in 1..Q)(osservazione[i] != quarantena[j]))
 ;
 
 % Date due stanze verifico se sono in reciproco Vicinato1
@@ -109,6 +106,10 @@ predicate vicini1(var stanze: s1, var stanze: s2) =
 % Date due stanze verifico se sono in reciproco Vicinato2
 predicate vicini2(var stanze: s1, var stanze: s2) =
   (s1 != s2 /\
+  % TODO non mi serve scandire tutte le stanze...
+  % mi basta scandire quelle che potrebbero essere vicini1 = num costante
+  %% se solo si riuscisse a fare delle cacchio di funzioni che tornino set of int
+  %% e non var opt set of int che poi che cavolo vuol dire?!?
    exists (s3 in stanze)
     (vicini1(s1,s3) /\ vicini1(s3,s2)));
 
