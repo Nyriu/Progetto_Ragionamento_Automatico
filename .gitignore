@@ -8,4 +8,5 @@
 *.toc
 
 ./confronti/inputs
-./confronti/inputs/*
+./confronti/mat_outputs
+./confronti/arr_outputs
