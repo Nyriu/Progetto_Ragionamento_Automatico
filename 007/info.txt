@@ -1,3 +1,5 @@
+PROBLEMA SATIFY
+
 Non creo piu' la matriciona
 Invece creo un vettore per ogni tipologia di ospite
 per l'i-esimo malato ad esempio associo la tripletta (k,h,l) per indicare

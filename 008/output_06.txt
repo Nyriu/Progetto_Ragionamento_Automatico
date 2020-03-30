@@ -1,0 +1,5 @@
+malati = array1d(1..10, [0, 4, 4, 3, 3, 2, 2, 1, 1, 0]);
+positivi = array1d(1..1, [14]);
+osservazione = array1d(1..1, [7]);
+quarantena = array1d(1..10, [13, 13, 12, 12, 11, 11, 10, 6, 5, 5]);
+----------
