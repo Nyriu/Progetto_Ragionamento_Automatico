@@ -1,0 +1,13 @@
+- fix modello su istanze con 0 MALATI
+- fix generatore input per generare anche istanze con 0 di qualsiasi tipo
+
+- IMPORTANTE! Eseguire 008 su
+K=2;
+H=2;
+M=3;
+P=2;
+O=3;
+Q=4;
+  obj dovrebbe essere 2 NON 0!!!
+
+

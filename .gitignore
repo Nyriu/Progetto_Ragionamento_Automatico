@@ -6,3 +6,6 @@
 *.synctex(busy)
 *.synctex.gz
 *.toc
+
+./confronti/inputs
+./confronti/inputs/*
