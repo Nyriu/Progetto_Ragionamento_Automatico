@@ -1,0 +1,31 @@
+{
+ "model_type": "MAT",
+ "obj": 0,
+ "stats": {
+  "method": "minimize",
+  "time": 0.09,
+  "solveTime": 0.00272,
+  "flatTime": 0.0791,
+  "solutions": 2
+ },
+ "sol": {
+  "K": 2,
+  "H": 2,
+  "M": [
+   0,
+   0,
+   3,
+   3
+  ],
+  "P": [
+   5,
+   5,
+   6,
+   6
+  ],
+  "O": [
+   2
+  ],
+  "Q": []
+ }
+}

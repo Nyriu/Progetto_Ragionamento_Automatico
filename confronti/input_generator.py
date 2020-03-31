@@ -8,9 +8,12 @@ random.seed(datetime.now())
 
 from minizinc import Instance, Model, Solver
 
-
 def read_dzn(fpath):
     # TODO try catch
+
+    if not os.path.isfile(fpath):
+        return None
+
     f = open(fpath)
 
     comment_char = '%'

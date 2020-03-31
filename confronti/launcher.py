@@ -1,4 +1,4 @@
-import sys
+import os
 import json
 from input_generator import get_input
 from minizinc import Instance, Model, Solver
@@ -88,6 +88,8 @@ def show_solution(sol):
 
 
 def show_arr_solution(solution,instance):
+    if solution is None:
+        return None
     sol = {}
     sol['K'] = instance['K']
     sol['H'] = instance['H']
@@ -104,12 +106,15 @@ def show_arr_solution(solution,instance):
         sol['Q'] = solution["quarantena"]
 
     show_solution(sol)
+    return sol
 
 
 # Qua faccio una cosa un po' brutta # Converto la solution di un modello MAT
 # in un dizionario che simula una solution
 # di un modello ARR
 def to_sol(solution):
+    if solution is None:
+        return None
     solution = solution.sol
 
     K = len(solution)
@@ -154,15 +159,52 @@ def to_sol(solution):
 
 
 
-def show_statistic(stats):
-    # valore, tempo di flat, tempo di resol, tempo totale)
-    print('{:10}:{:>10}'.format('method',stats['method']))
+def show_statistic(statistics):
+    if not type(statistics) == dict:
+        stats = {}
+        # valore, tempo di flat, tempo di resol, tempo totale)
+        stats['method']    = statistics['method']
 
-    print('{:10}:{:10f}'.format('time',stats['time'].total_seconds()))
-    print('{:10}:{:10f}'.format('flatTime',stats['flatTime'].total_seconds()))
-    print('{:10}:{:10f}'.format('solveTime',stats['solveTime'].total_seconds()))
+        try:
+            stats['time']      = statistics['time'].total_seconds()
+        except:
+            stats['time'] = .0
 
-    print('{:10}:{:10d}'.format('solutions', stats['solutions']))
+        try:
+            stats['solveTime'] = statistics['solveTime'].total_seconds()
+        except:
+            stats['solveTime'] = .0
+
+        try:
+            stats['flatTime']  = statistics['flatTime'].total_seconds()
+        except:
+            stats['flatTime']  = .0
+
+        try:
+            stats['solutions'] = statistics['solutions']
+        except:
+            stats['solutions'] = .0
+    else:
+        stats = statistics
+
+    for k in stats.keys():
+        val = stats[k]
+        if type(val) == str:
+            print('{:10}:{:>10}'.format(k, stats[k]))
+        elif type(val) == float:
+            print('{:10}:{:10f}'.format(k, stats[k]))
+        elif type(val) == int:
+            print('{:10}:{:10d}'.format(k, stats[k]))
+        else:
+            print('mandi')
+
+    return stats
+
+def show_objective(obj):
+    if obj is None:
+        print('{:10}:{:>10}'.format('objective', 'None'))
+    else:
+        print('{:10}:{:10d}'.format('objective',obj))
 
 
 def show_result(result, instance, model_type):
@@ -170,7 +212,8 @@ def show_result(result, instance, model_type):
         print("ERROR! show_result() unknown model_type")
 
     show_statistic(result.statistics)
-    print('{:10}:{:10d}'.format('objective',result.objective))
+    show_objective(result.objective)
+
     print()
     if model_type == 'MAT':
         show_arr_solution(to_sol(result.solution), instance)
@@ -179,39 +222,88 @@ def show_result(result, instance, model_type):
 
 
 
+# TODO silenziare i print
+def save_result(result, instance, model_type, fpath):
+    if not model_type in ['ARR', 'MAT']:
+        print("ERROR! save_result() unknown model_type")
+    stats = show_statistic(result.statistics)
+    obj = result.objective
+    if model_type == 'MAT':
+        sol = show_arr_solution(to_sol(result.solution), instance)
+    else:
+        sol = show_arr_solution(result.solution, instance)
+
+    data = {}
+    data['model_type'] = model_type
+    data['obj'] = obj
+    data['stats'] = stats
+    data['sol'] = sol
+
+    # TODO try catch
+    json.dump(data, open(fpath, 'w+'), indent=True)
+    #json.dump(indent=True)
+
+
+def run_on_all_inputs(model_path, model_type, output_dir):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+    if not output_dir[-1] == '/':
+        output_dir += '/'
+
+    fname_prefix = "output_"
+    fname_suffix = ".json"
+
+    model = Model(model_path)
+    gecode = Solver.lookup("gecode")
+
+    input_num = 0
+    while not get_input(0) is None:
+        instance = Instance(gecode, model)
+        initialize(instance, input_num)
+        result = instance.solve()
+
+        output_path  = output_dir + fname_prefix
+        output_path += '{:02d}'.format(input_num)
+        output_path += fname_suffix
+
+        save_result(result, instance, model_type, output_path)
+
+        input_num += 1
 
 
 
 
-input_num = 12
 
-# Load model from file
-model = Model("./example_mat_model.mzn"); model_type = 'MAT'
-
-# Find the MiniZinc solver configuration for Gecode
-gecode = Solver.lookup("gecode")
-
-# Create an Instance of the n-Queens model for Gecode
-instance = Instance(gecode, model)
-initialize(instance, input_num)
-result = instance.solve()
-
-show_result(result, instance, model_type)
+if __name__ == '__main__':
+#### ROBE DI PROVA ####
+#run_on_all_inputs('./example_mat_model.mzn', 'MAT', './mat_outputs')
+    run_on_all_inputs('./example_arr_model.mzn', 'ARR', './arr_outputs')
 
 
-# Load model from file
-model = Model("./example_arr_model.mzn"); model_type = 'ARR'
-
-# Find the MiniZinc solver configuration for Gecode
-gecode = Solver.lookup("gecode")
-
-# Create an Instance of the n-Queens model for Gecode
-instance = Instance(gecode, model)
-initialize(instance, input_num)
-result = instance.solve()
-
-show_result(result, instance, model_type)
-
-
-
-
+##input_num = 0
+##
+### Load model from file
+##model = Model("./example_mat_model.mzn"); model_type = 'MAT'
+##
+### Find the MiniZinc solver configuration for Gecode
+##gecode = Solver.lookup("gecode")
+##
+##instance = Instance(gecode, model)
+##initialize(instance, input_num)
+##result = instance.solve()
+##
+##show_result(result, instance, model_type)
+##
+##
+### Load model from file
+##model = Model("./example_arr_model.mzn"); model_type = 'ARR'
+##
+### Find the MiniZinc solver configuration for Gecode
+##gecode = Solver.lookup("gecode")
+##
+##instance = Instance(gecode, model)
+##initialize(instance, input_num)
+##result = instance.solve()
+##
+##show_result(result, instance, model_type)
+##

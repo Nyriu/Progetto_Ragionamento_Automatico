@@ -117,49 +117,61 @@ predicate vicini2(var stanze: s1, var stanze: s2) =
 
 var int: c =
   sum(i in 1..M, j in 1..Q)
-    (if (not vicini1(malati[i], quarantena[j]) /\
-         not vicini2(malati[i], quarantena[j]))
+    (if (vicini1(malati[i], quarantena[j]) \/
+         vicini2(malati[i], quarantena[j]))
      then 1 else 0 endif)
   +
   sum(i in 1..M, j in 1..P)
-    (if (not vicini1(malati[i], positivi[j]))
+    (if (vicini1(malati[i], positivi[j]))
      then 1 else 0 endif)
 ;
 
 
 % Symmetry
-constraint (malati[1] == 0);
+
+constraint
+  (malati[1] == 0)
+  /\
+  increasing(malati)
+  /\
+  increasing(positivi)
+  /\
+  increasing(osservazione)
+  /\
+  increasing(quarantena)
+;
+  
 
 solve minimize c;
 %%solve :: int_search(d, max_regret, indomain_split, complete) minimize distance;
 
-%% output
-%%   ["{\n"] ++
-%%   [" \"c\":" ++ show(c)] ++
-%%   [",\n"] ++
-%%   [" \"K\":" ++ show(K)] ++
-%%   [",\n"] ++
-%%   [" \"H\":" ++ show(H)] ++
-%%   [",\n"] ++
-%% 
-%%   [" \"M\":["] ++
-%%   [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M] ++
-%%   ["],\n"] ++
-%% 
-%%   [" \"P\":["] ++
-%%   [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P] ++
-%%   ["],\n"] ++
-%% 
-%%   [" \"O\":["] ++
-%%   [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O] ++
-%%   ["],\n"] ++
-%% 
-%%   [" \"Q\":["] ++
-%%   [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q] ++
-%%   ["]\n"] ++
-%% 
-%%   ["}\n"]
-%% ;
+%%output
+%%  ["{\n"] ++
+%%  [" \"c\":" ++ show(c)] ++
+%%  [",\n"] ++
+%%  [" \"K\":" ++ show(K)] ++
+%%  [",\n"] ++
+%%  [" \"H\":" ++ show(H)] ++
+%%  [",\n"] ++
+%%
+%%  [" \"M\":["] ++
+%%  [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M] ++
+%%  ["],\n"] ++
+%%
+%%  [" \"P\":["] ++
+%%  [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P] ++
+%%  ["],\n"] ++
+%%
+%%  [" \"O\":["] ++
+%%  [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O] ++
+%%  ["],\n"] ++
+%%
+%%  [" \"Q\":["] ++
+%%  [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q] ++
+%%  ["]\n"] ++
+%%
+%%  ["}\n"]
+%%;
 
 %% % Circa human readable
 %% output

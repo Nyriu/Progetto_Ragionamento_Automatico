@@ -1,0 +1,12 @@
+{
+ "model_type": "ARR",
+ "obj": null,
+ "stats": {
+  "method": "satisfy",
+  "time": 0.07,
+  "solveTime": 0.0,
+  "flatTime": 0.066757,
+  "solutions": 0.0
+ },
+ "sol": null
+}

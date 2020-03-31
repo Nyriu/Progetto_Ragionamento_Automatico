@@ -1,0 +1,34 @@
+{
+ "model_type": "ARR",
+ "obj": 12,
+ "stats": {
+  "method": "minimize",
+  "time": 0.2,
+  "solveTime": 0.073716,
+  "flatTime": 0.098314,
+  "solutions": 9
+ },
+ "sol": {
+  "K": 1,
+  "H": 4,
+  "M": [
+   0,
+   0,
+   1,
+   1
+  ],
+  "P": [
+   3,
+   3
+  ],
+  "O": [],
+  "Q": [
+   2,
+   2,
+   6,
+   6,
+   7,
+   7
+  ]
+ }
+}
