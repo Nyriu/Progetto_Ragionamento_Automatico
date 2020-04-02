@@ -151,12 +151,20 @@ sum([
             malati(k1,s1,l1)
            ) /\
            (quarantena(k2,s2,l2) \/
-            quaranteni(k2,s2,l2) \/
-            positivo(k2,s2,l2)   \/
+            positivo(k2,s2,l2)
+           ) /\
+           vicini1(k1,s1,l1, k2,s2,l2)
+         ) then 1
+      elseif
+         ( (malato(k1,s1,l1) \/
+            malati(k1,s1,l1)
+           ) /\
+           (quaranteni(k2,s2,l2) \/
             positivi(k2,s2,l2)
            ) /\
            vicini1(k1,s1,l1, k2,s2,l2)
-         ) then 1 else 0
+         ) then 2
+      else 0
       endif
       | k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati,
         k2 in vicini1_k(k1), s2 in vicini1_s(s1), l2 in vicini1_l(l1)
@@ -166,11 +174,19 @@ sum([
       if ( (malato(k1,s1,l1) \/
             malati(k1,s1,l1)
            ) /\
-           (quarantena(k2,s2,l2) \/
-            quaranteni(k2,s2,l2)
-           ) /\
+           quarantena(k2,s2,l2)
+           /\
            vicini2(k1,s1,l1, k2,s2,l2)
-         ) then 1 else 0
+         ) then 1
+      elseif
+         ( (malato(k1,s1,l1) \/
+            malati(k1,s1,l1)
+           ) /\
+           quaranteni(k2,s2,l2)
+           /\
+           vicini2(k1,s1,l1, k2,s2,l2)
+         ) then 2
+      else 0
       endif
       | k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati,
         k2 in vicini2_k(k1), s2 in vicini2_s(s1), l2 in vicini2_l(l1)
