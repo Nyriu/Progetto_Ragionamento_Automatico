@@ -70,6 +70,10 @@ def get_symbol(s,sol):
 
 
 def show_solution(sol):
+    if sol == None:
+        print("No solution")
+        return None
+
     K = sol['K']
     H = sol['H']
     s = 0
