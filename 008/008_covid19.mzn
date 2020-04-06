@@ -95,13 +95,32 @@ constraint
 % Date due stanze verifico se sono in reciproco Vicinato1
 predicate vicini1(var stanze: s1, var stanze: s2) =
   % Di fronte
-  (s1 == s2+H \/ s1 == s2-H)
+  (
+    % Sono sullo stesso piano
+    (s1 div H == s2 div H + if ((s1 div H) mod 2 == 0) then -1 else 1 endif)
+    /\
+    % Sono di fronte
+    (s1 == s2+H \/ s1 == s2-H)
+  )
   \/
   % Sopra/Sotto
-  (s1 == s2+2*H \/ s1 == s2-2*H)
+  (
+    % TODO verificare che un vinocolo qua non serva
+    % cfr gli altri casi
+
+    % Sono sopra-sotto
+    (s1 == s2+2*H \/ s1 == s2-2*H)
+  )
   \/
   % Lato dx/sx
-  (s1 == s2+1 \/ s1 == s2-1);
+  (
+    % Sono sullo stesso lato dello stesso piano
+    (s1 div H == s2 div H)
+    /\
+    % Sono adiacenti
+    (s1 == s2+1 \/ s1 == s2-1)
+  )
+;
 
 % Date due stanze verifico se sono in reciproco Vicinato2
 predicate vicini2(var stanze: s1, var stanze: s2) =
@@ -111,8 +130,11 @@ predicate vicini2(var stanze: s1, var stanze: s2) =
   %% se solo si riuscisse a fare delle cacchio di funzioni che tornino set of int
   %% e non var opt set of int che poi che cavolo vuol dire?!?
    exists (s3 in stanze)
-    (vicini1(s1,s3) /\ vicini1(s3,s2)));
-
+    ( s3 != s1 /\ s3 != s2
+      /\
+      (vicini1(s1,s3) /\ vicini1(s3,s2))
+    ) 
+  );
 
 
 var int: c =
@@ -131,6 +153,24 @@ var int: c =
 
 constraint
   (malati[1] == 0)
+  %% TODO DELETE ME
+
+  %% /\
+  %% (malati[2] == 3)
+  %% /\
+  %% (malati[3] == 3)
+  %% /\
+  %% (quarantena[1] == 4)
+
+  %%(malati[1] == 4)
+  %%(malati[2] == 0)
+  %%/\
+  %%(malati[2] == 4)
+  %%/\
+  %%(positivi[1] == 2)
+
+  %% END DELETE ME
+
   /\
   increasing(malati)
   /\
@@ -171,7 +211,22 @@ output
   ["]\n"] ++
 
   ["}\n"]
+  
+
+  %%% DEBUG
+  %%% in minizinc il debug e' la morte... non puoi manco stampare quello che vuoi
+  %%++
+  %%["Vicini1\n"] ++
+  %%[ if i==h then "(" else ")" endif |
+  %%  i in 1..M, j in 1..Q
+  %%]
+  %%++
+  %%["\n"]
+
+
+
 ;
+
 
 %% % Circa human readable
 %% output

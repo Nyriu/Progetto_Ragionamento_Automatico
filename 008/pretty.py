@@ -76,6 +76,12 @@ def get_symbol(s,sol):
 
     return symb;
 
+def show_obj(sol):
+    c = sol['c']
+    if c is None:
+        print("Obj: None")
+    else:
+        print("Obj: %d" %(c))
 
 
 def show_solution(sol):
@@ -113,6 +119,7 @@ def main():
     solutions = get_solutions(args[1])
     for i,sol in enumerate(solutions):
         print(10*'-', "Solution",i, 10*'-')
+        show_obj(sol)
         show_solution(sol)
 
 
