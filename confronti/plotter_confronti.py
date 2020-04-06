@@ -36,7 +36,7 @@ print(nums[:5])
 print(solveTimes1[:5])
 print(solveTimes2[:5])
 
-x = 15
+x = 20
 plt.plot(nums[:x], solveTimes1[:x], color='red')
 plt.plot(nums[:x], solveTimes2[:x], color='blue')
 plt.show()

@@ -157,6 +157,7 @@ def to_sol(solution):
                     pass
 
                 s += 1
+
     return sol
 
 
@@ -164,32 +165,29 @@ def to_sol(solution):
 
 
 def show_statistic(statistics):
-    if not type(statistics) == dict:
-        stats = {}
-        # valore, tempo di flat, tempo di resol, tempo totale)
-        stats['method']    = statistics['method']
+    stats = {}
+    # valore, tempo di flat, tempo di resol, tempo totale)
+    stats['method']    = statistics['method']
 
-        try:
-            stats['time']      = statistics['time'].total_seconds()
-        except:
-            stats['time'] = .0
+    try:
+        stats['time']      = float(statistics['time'].total_seconds())
+    except:
+        stats['time'] = .0
 
-        try:
-            stats['solveTime'] = statistics['solveTime'].total_seconds()
-        except:
-            stats['solveTime'] = .0
+    try:
+        stats['solveTime'] = float(statistics['solveTime'].total_seconds())
+    except:
+        stats['solveTime'] = .0
 
-        try:
-            stats['flatTime']  = statistics['flatTime'].total_seconds()
-        except:
-            stats['flatTime']  = .0
+    try:
+        stats['flatTime']  = float(statistics['flatTime'].total_seconds())
+    except:
+        stats['flatTime']  = .0
 
-        try:
-            stats['solutions'] = statistics['solutions']
-        except:
-            stats['solutions'] = .0
-    else:
-        stats = statistics
+    try:
+        stats['solutions'] = statistics['solutions']
+    except:
+        stats['solutions'] = .0
 
     for k in stats.keys():
         val = stats[k]
@@ -200,7 +198,7 @@ def show_statistic(statistics):
         elif type(val) == int:
             print('{:10}:{:10d}'.format(k, stats[k]))
         else:
-            print('mandi')
+            print('Non sarei dovuto arrivare qua')
 
     return stats
 
@@ -232,6 +230,7 @@ def save_result(result, instance, model_type, fpath):
         print("ERROR! save_result() unknown model_type")
     stats = show_statistic(result.statistics)
     obj = result.objective
+
     if model_type == 'MAT':
         sol = show_arr_solution(to_sol(result.solution), instance)
     else:
@@ -261,7 +260,7 @@ def run_on_all_inputs(model_path, model_type, output_dir):
     gecode = Solver.lookup("gecode")
 
     input_num = 0
-    while not get_input(0) is None:
+    while not get_input(input_num) is None:
         instance = Instance(gecode, model)
         initialize(instance, input_num)
         result = instance.solve()
@@ -270,6 +269,7 @@ def run_on_all_inputs(model_path, model_type, output_dir):
         output_path += '{:02d}'.format(input_num)
         output_path += fname_suffix
 
+        print("Lavoro su input num %d" %(input_num))
         save_result(result, instance, model_type, output_path)
 
         input_num += 1
@@ -280,8 +280,8 @@ def run_on_all_inputs(model_path, model_type, output_dir):
 
 if __name__ == '__main__':
 #### ROBE DI PROVA ####
-#run_on_all_inputs('./example_mat_model.mzn', 'MAT', './mat_outputs')
     run_on_all_inputs('./example_arr_model.mzn', 'ARR', './arr_outputs')
+    run_on_all_inputs('./example_mat_model.mzn', 'MAT', './mat_outputs')
 
 
 ##input_num = 0

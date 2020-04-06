@@ -147,30 +147,72 @@ constraint c =
 % TODO ottimizzare
 %%forall(k2 in vicini1_k(k1), s2 in vicini1_s(s1), l2 in vicini1_l(l1))
 sum([
-      if ( (malato(k1,s1,l1) \/
-            malati(k1,s1,l1)
-           ) /\
+      if ( malato(k1,s1,l1)
+           /\
            (quarantena(k2,s2,l2) \/
-            quaranteni(k2,s2,l2) \/
-            positivo(k2,s2,l2)   \/
+            positivo(k2,s2,l2)
+           ) /\
+           vicini1(k1,s1,l1, k2,s2,l2)
+         ) then 1
+      elseif
+         ( malato(k1,s1,l1)
+           /\
+           (quaranteni(k2,s2,l2) \/
             positivi(k2,s2,l2)
            ) /\
            vicini1(k1,s1,l1, k2,s2,l2)
-         ) then 1 else 0
+         ) then 2
+      elseif
+         ( malati(k1,s1,l1)
+           /\
+           (quarantena(k2,s2,l2) \/
+            positivo(k2,s2,l2)
+           ) /\
+           vicini1(k1,s1,l1, k2,s2,l2)
+         ) then 2
+      elseif
+         ( malati(k1,s1,l1)
+           /\
+           (quaranteni(k2,s2,l2) \/
+            positivi(k2,s2,l2)
+           ) /\
+           vicini1(k1,s1,l1, k2,s2,l2)
+         ) then 4
+      else 0
       endif
       | k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati,
         k2 in vicini1_k(k1), s2 in vicini1_s(s1), l2 in vicini1_l(l1)
     ])
 +
 sum([
-      if ( (malato(k1,s1,l1) \/
-            malati(k1,s1,l1)
-           ) /\
-           (quarantena(k2,s2,l2) \/
-            quaranteni(k2,s2,l2)
-           ) /\
+      if ( malato(k1,s1,l1)
+           /\
+           quarantena(k2,s2,l2)
+           /\
            vicini2(k1,s1,l1, k2,s2,l2)
-         ) then 1 else 0
+         ) then 1
+      elseif
+         ( malati(k1,s1,l1)
+           /\
+           quarantena(k2,s2,l2)
+           /\
+           vicini2(k1,s1,l1, k2,s2,l2)
+         ) then 2
+      elseif
+         ( malato(k1,s1,l1)
+           /\
+           quaranteni(k2,s2,l2)
+           /\
+           vicini2(k1,s1,l1, k2,s2,l2)
+         ) then 2
+      elseif
+         ( malati(k1,s1,l1)
+           /\
+           quaranteni(k2,s2,l2)
+           /\
+           vicini2(k1,s1,l1, k2,s2,l2)
+         ) then 4
+      else 0
       endif
       | k1 in RangeCorridoi, s1 in RangeStanze, l1 in RangeLati,
         k2 in vicini2_k(k1), s2 in vicini2_s(s1), l2 in vicini2_l(l1)
@@ -205,46 +247,46 @@ constraint (sol[1,1,1]==1 \/ sol[1,1,1]==5);
 
 solve minimize c;
 
-%% output
-%% 
-%%   %% %% DEBUG STUFF
-%%   %% ["Considero ("++ show(kx) ++","++ show(sx)++","++ show(lx) ++")\n"]++
-%%   %% ["Vicini1\n"]++
-%%   %% [ if (vicini1(kx,sx,lx, k2,s2,l2)) then
-%%   %%   "("++ show(k2) ++","++ show(s2)++","++ show(l2) ++") " else "" endif 
-%%   %%   | k2 in vicini1_k(kx), s2 in vicini1_s(sx), l2 in vicini1_l(lx)
-%%   %% ]
-%% 
-%%   %% ++["\n"]++
-%% 
-%%   %% ["Vicini2\n"]++
-%%   %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-%%   %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-%%   %%   | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
-%%   %% ]
-%%   %% ++["\n"]++
-%% 
-%%   %% ["Vicini2 Forall\n"]++
-%%   %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-%%   %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-%%   %%   | k3 in RangeCorridoi, s3 in RangeStanze, l3 in RangeLati
-%%   %% ]
-%%   %%  ++["\n"]++
-%%   %%  ["Vicini2 True\n"]++
-%%   %%  %%[ if (vicini2(kx,sx,lx, k3,s3,l3)) then
-%%   %%  [ if (true) then
-%%   %%    "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
-%%   %%    | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
-%%   %%  ]
-%%   %% ++["\n\n"]++
-%%   %% %% END %DEBUG STUFF
-%% 
-%%   ["Valore:"++ show(c) ++"\n"]
-%%   ++
-%%   [" "++ show(sol[k1,s1,l1])++
-%%     if (s1==H) then "\n" else " " endif |
-%%         k1 in RangeCorridoi,
-%%         l1 in RangeLati,
-%%         s1 in RangeStanze
-%%   ]
-%%   ;
+%%output
+%%
+%%  %% %% DEBUG STUFF
+%%  %% ["Considero ("++ show(kx) ++","++ show(sx)++","++ show(lx) ++")\n"]++
+%%  %% ["Vicini1\n"]++
+%%  %% [ if (vicini1(kx,sx,lx, k2,s2,l2)) then
+%%  %%   "("++ show(k2) ++","++ show(s2)++","++ show(l2) ++") " else "" endif 
+%%  %%   | k2 in vicini1_k(kx), s2 in vicini1_s(sx), l2 in vicini1_l(lx)
+%%  %% ]
+%%
+%%  %% ++["\n"]++
+%%
+%%  %% ["Vicini2\n"]++
+%%  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+%%  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+%%  %%   | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
+%%  %% ]
+%%  %% ++["\n"]++
+%%
+%%  %% ["Vicini2 Forall\n"]++
+%%  %% [ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+%%  %%   "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+%%  %%   | k3 in RangeCorridoi, s3 in RangeStanze, l3 in RangeLati
+%%  %% ]
+%%  %%  ++["\n"]++
+%%  %%  ["Vicini2 True\n"]++
+%%  %%  %%[ if (vicini2(kx,sx,lx, k3,s3,l3)) then
+%%  %%  [ if (true) then
+%%  %%    "("++ show(k3) ++","++ show(s3)++","++ show(l3) ++") " else "" endif 
+%%  %%    | k3 in vicini2_k(kx), s3 in vicini2_s(sx), l3 in vicini2_l(lx)
+%%  %%  ]
+%%  %% ++["\n\n"]++
+%%  %% %% END %DEBUG STUFF
+%%
+%%  ["Valore:"++ show(c) ++"\n"]
+%%  ++
+%%  [" "++ show(sol[k1,s1,l1])++
+%%    if (s1==H) then "\n" else " " endif |
+%%        k1 in RangeCorridoi,
+%%        l1 in RangeLati,
+%%        s1 in RangeStanze
+%%  ]
+%%  ;

@@ -167,8 +167,11 @@ fname_prefix = "input_"
 fname_suffix = ".dzn"
 
 def main():
-    K_max = 4
-    H_max = 4
+
+    # TODO controllare dest_dir esista e in caso crearla
+
+    K_max = 3
+    H_max = 3
     n = 4 # istanze per ogni coppia K,H
 
     num=0 # numero istanza corrente
