@@ -7,6 +7,6 @@
 *.synctex.gz
 *.toc
 
-./confronti/inputs
-./confronti/mat_outputs
-./confronti/arr_outputs
+confronti/inputs/
+confronti/mat_outputs/
+confronti/arr_outputs/
