@@ -12,15 +12,21 @@ import random
 random.seed(datetime.now())
 
 # Per minizinc
+import json
 from minizinc import Instance, Model, Solver
 
 ##################################################
 # Globali
 ##################################################
 # Inputs
-DEST_DIR = "./inputs/"
+INPUT_DIR = "./inputs/"
+
 INPUT_PREFIX = "input_"
 INPUT_EXT = ".dzn"
+
+OUTPUT_DIR = "./outputs/"
+OUTPUT_PREFIX = "output_"
+OUTPUT_EXT = ".json"
 
 # Pretty print dell'Output
 SYMBOLS = {
@@ -40,12 +46,11 @@ SYMBOLS = {
 ##################################################
 
 # Dato un numero e suffisi e prefissi torna
-# dest_dir + fname_prefix + numero in fotmato {:02d} + fname_suffix
-def gen_input_fpath(num, dest_dir=DEST_DIR,
-        input_prefix=INPUT_PREFIX, input_suffix=INPUT_EXT):
-    fpath = dest_dir + input_prefix
+# directory + fname_prefix + numero in formato {:02d} + fname_suffix
+def gen_fpath(num, directory, prefix, suffix):
+    fpath = directory + prefix
     fpath += '{:02d}'.format(num)
-    fpath += input_suffix
+    fpath += suffix
     return fpath
 
 # Dato un dizionario di un input lo salva nel file indicato
@@ -102,11 +107,11 @@ def read_dzn(fpath):
     return values
 
 # Dato un numero ritorna il dizionario dell'input relativo
-def get_input(num, dest_dir=DEST_DIR):
+def get_input(num, dest_dir=INPUT_DIR):
     if num >  100:
         print("ERROR! get_input() num troppo grande")
         exit(2)
-    fpath = gen_input_fpath(num, dest_dir)
+    fpath = gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
     # TODO try catch
     return read_dzn(fpath)
 
@@ -201,7 +206,7 @@ def gen_istanze(n, K, H):
 # TODO Eventualemnte modificare i for perche'
 # Creare input cosi' genera istanze con difficolta' a "dente di sega"
 def gen_inputs(K_max, H_max, n,
-        dest_dir = DEST_DIR, input_prefix=INPUT_PREFIX,
+        dest_dir = INPUT_DIR, input_prefix=INPUT_PREFIX,
         input_extension=INPUT_EXT):
 
     os.makedirs(dest_dir, exist_ok=True)
@@ -213,8 +218,8 @@ def gen_inputs(K_max, H_max, n,
             for i in range(n):
                 ist = istanza_casuale(values)
 
-                fpath = gen_input_fpath(num, dest_dir, input_prefix,
-                        input_extension)
+                fpath = gen_fpath(num, dest_dir,
+                        input_prefix, input_extension)
                 write_dzn(ist,fpath)
 
                 num += 1
@@ -227,7 +232,7 @@ def gen_inputs(K_max, H_max, n,
 
 # Dati instanza e numero dell'input recupera dzn relativo
 # a num e lo carica nell'istanza
-def initialize_instance(instance, num, dest_dir=DEST_DIR):
+def initialize_instance(instance, num, dest_dir=INPUT_DIR):
     #TODO try catch
     values = get_input(num,dest_dir)
 
@@ -277,7 +282,7 @@ def get_symbol(s,sol):
 # Data una soluzione e l'istanza ritorna il dizionario sol
 # della soluzione (se solution e' None torna None)
 def get_sol(solution,instance, show_sol=False):
-    if sol == None:
+    if solution == None:
         print("No solution")
         return None
 
@@ -374,18 +379,93 @@ def show_result(result, instance):
     show_objective(result.objective)
     get_sol(result.solution, instance, show_sol=True)
 
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# Dati result, instance ed un file path salva il
+# dizionario relativo nel path
+def write_output(result, instance, fpath):
+    stats = get_stats(result.statistics)
+    obj = result.objective
+    sol = get_sol(result.solution, instance)
 
-#arrivato a 227 di launcher.py
+    data = {}
+    data['obj'] = obj
+    data['stats'] = stats
+    data['sol'] = sol
 
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+    # TODO try catch
+    json.dump(data, open(fpath, 'w+'), indent=True)
 
+# Dati il numero e la dir carica ritorna il dizionario
+# della soluzione relativa all input col numero dato
+# Se il file non esiste retun None
+def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
+    if not directory[-1] == '/':
+        directory = directory + '/'
+    fpath = gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
+    if not os.path.isfile(fpath):
+        if not suppress_error:
+            print("File does not exist!\n path: %s " %(fpath))
+        return None
+
+    return json.load(open(fpath))
+
+
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+def show_output(num, directory=OUTPUT_DIR):
+    data = read_output(num, source_dir)
+    print(data)
+    print()
+    show_statistic(data['stats'])
+    show_objective(data['obj'])
+    print()
+    show_solution(data['sol'])
+    print()
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+# Carica il modello del path dato e lo esegue su tutti gli input
+# per ciascuno salva un json nella cartella data
+def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
+    if not os.path.exists(input_dir):
+        print("ERRORE! La cartella degli input non esiste!")
+        print("input_dir=%s" %(input_dir))
+
+    if not output_dir[-1] == '/':
+        output_dir += '/'
+    os.makedirs(output_dir, exist_ok=True)
+
+    model = Model(model_path)
+    gecode = Solver.lookup("gecode")
+
+    input_num = 0
+    while not get_input(input_num) is None:
+        instance = Instance(gecode, model)
+        initialize_instance(instance, input_num)
+        result = instance.solve()
+
+        output_fpath = gen_fpath(input_num, output_dir,
+                OUTPUT_PREFIX, OUTPUT_EXT)
+
+        print("Lavoro su input num %d" %(input_num))
+        save_result(result, instance, output_fpath)
+
+        input_num += 1
+
+def run_minizinc_model():
+    model_path= './covid19.mzn'
+    out_dir='./outputs/'
+    in_dir='./inputs/'
+
+    print("Running:\nmodel_path=%s\noutput_dir=%s\ninput_dir=%s"\
+            %(model_path,out_dir,in_dir))
+
+    run_on_all_inputs(model_path, out_dir, in_dir)
 
 
 ##################################################
@@ -394,6 +474,7 @@ def show_result(result, instance):
 def main():
     print("Main non ancora implementato")
     print("Probabilmente fara' dei test")
+    #run_minizinc_model()
 
 if __name__ == "__main__":
     main()
