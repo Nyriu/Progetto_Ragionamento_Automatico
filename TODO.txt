@@ -8,3 +8,4 @@
 - alternativa a sopra è ordinare nel plotter (FORSE MEGLIO)
 
 - Scrivere appunti su 005 vs 008
+- Fare confronto su 005 vs 008 al variare dei parametri del minimize?

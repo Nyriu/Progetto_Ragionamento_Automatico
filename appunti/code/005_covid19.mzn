@@ -48,21 +48,16 @@ set of int: RangeCorridoi = 1..K;
 set of int: RangeStanze   = 1..H;
 set of int: RangeLati     = 1..2;
 
-
-% Creo la matrice dei posti letto delle stanze dei corridoi
-% Stanze con numero dispari sono a sx le altre a dx
-% Quindi 1 avra' di fronte 2, 3 avra' davanti 4, ...
-
 % ogni stanza puo' essere occupata da 
 % 0 nessuno          % 1 un malato
 % 2 un positivo      % 3 un osservazione
 % 4 un quarantena p. % 5 due malati
 % 6 due positivi     % 7 due quarantena p.
-
 set of int: tipo_ospite = 0..7;
 
 % corridoi x stanze x lati
 array[RangeCorridoi, RangeStanze, RangeLati] of var tipo_ospite: sol;
+
 
 
 % Funzioni Ausiliari

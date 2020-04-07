@@ -1,0 +1,24 @@
+%!TEX TS-program = pdflatex
+%!TEX root = main.tex
+%!TEX encoding = UTF-8 Unicode
+
+\section{Minizinc: 005 vs 008}
+\todo[inline]{
+OCCHIO!
+Questa sezione è una memo per me.
+Probabilmente NON verrà messa nella relazione finale
+}\noindent
+I due modelli sono molto diversi:
+il primo si basa su una grossa matrice 3d in cui ogni cella rappresenta una stanza e mentre l'intero salvato nella cella rappresenta il tipo di ospite per quella stanza.
+Il secondo modello sfrutta 4 array, la cui lunghezza dipende dal numero di persone che dobbiamo piazzare, e i valori assegnati alle celle degli array corrispondono al numero della stanza.
+La formalizzazione dei vincoli è abbastanza diversa per le due codifiche.
+Infatti, nella prima i vincoli di vicinanza dipendono dalle coordinate di accesso alla matrice 3d, mentre nel secondo dipendono dai valori salvati negli array.
+Nel secondo modello risulta molto più facile scrivere vincoli spezza simmetrie, ad esempio l'alldifferent o il vincolo id ordinamento crescente sugli array.
+
+Seguono una descrizione più dettagliata dei modelli ed un loro confronto.
+
+\subsection{005}
+
+\lstinputlisting[firstline=47,lastline=59]{code/005_covid19.mzn}
+
+

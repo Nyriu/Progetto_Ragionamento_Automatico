@@ -22,9 +22,20 @@ sorting=nty % name, title, year % ynt % tny
 
 % Per blocchi di codice
 \usepackage{listings}
-\lstset{ % per apici e pedici nel codice
-  mathescape
+%\lstset{ % per apici e pedici nel codice
+%  mathescape
+%}
+\lstset{  %TODO migliorare stile
+  basicstyle=\small,
+  identifierstyle=,
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  stringstyle=\ttyfamily,
+  numbers=left, numberstyle=\tiny, stepnumber=2, numbersep=5pt
+%%%   %numbers=left,
+%%%   %numberstyle=\tiny,
 }
+
 
 % Grafici direttamente in latex
 \usepackage{tikz}
@@ -45,17 +56,6 @@ sorting=nty % name, title, year % ynt % tny
 % Usato nella copertina
 \usepackage{wallpaper}
 
-
-% Esempio di impostazione per listings
-\lstset{  %TODO migliorare stile
-   language=SQL,
-   showspaces=false,
-   showstringspaces=false,
-   basicstyle=\ttfamily,
-%   %numbers=left,
-%   %numberstyle=\tiny,
-   commentstyle=\color{gray}
- }
 
 % Simboli matematici
 %\usepackage{amsthm}
@@ -166,8 +166,11 @@ sorting=nty % name, title, year % ynt % tny
 %  \lipsum[1]
 %}
 
-\input{./chapters/chap_esempio.tex}
+\input{./chapters/005_vs_008.tex}
 \cleardoublepage
+
+%\input{./chapters/chap_esempio.tex}
+%\cleardoublepage
 
 
 %\input{./chapters/conclusione}
