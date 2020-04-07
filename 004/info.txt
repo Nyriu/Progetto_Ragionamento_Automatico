@@ -1,3 +1,0 @@
-Modello con constraint ottimizzato per evitare un forall su tutte le caselle della matrice3d
-quanto si cercano vicinii1 e vicini2
-Semplificato a problema di SAT

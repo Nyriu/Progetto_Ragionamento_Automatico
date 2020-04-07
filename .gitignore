@@ -6,7 +6,3 @@
 *.synctex(busy)
 *.synctex.gz
 *.toc
-
-confronti/inputs/
-confronti/mat_outputs/
-confronti/arr_outputs/
