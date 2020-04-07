@@ -6,3 +6,5 @@
 
 - Nell'input generator devo ordinare le istanze per numero di stanze o di persone non con clicli for k for h sennò grafico viene a dente di sega
 - alternativa a sopra è ordinare nel plotter (FORSE MEGLIO)
+
+- Scrivere appunti su 005 vs 008

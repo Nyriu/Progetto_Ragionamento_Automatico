@@ -1,0 +1,13 @@
+Modello con constraint ottimizzato per evitare un forall su tutte le caselle della matrice3d
+quanto si cercano vicinii1 e vicini2
+
+Problema di MINIMIZZAZIONE
+
+
+modifcato c in modo che tenesse conto anche della differenza tra MM vicino a QQ
+e -M vicino a -Q, nel primo caso vale 4 nel secondo 1
+Quindi:
+il caso -M vicino a -Q vale 1
+il caso -M vicino a QQ vale 2
+il caso MM vicino a -Q vale 2
+il caso MM vicino a QQ vale 4

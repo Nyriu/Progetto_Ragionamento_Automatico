@@ -1,0 +1,12 @@
+{
+ "model_type": "MAT",
+ "obj": null,
+ "stats": {
+  "method": "minimize",
+  "time": 0.11,
+  "solveTime": 5.5e-05,
+  "flatTime": 0.09699,
+  "solutions": 0
+ },
+ "sol": null
+}

@@ -1,0 +1,29 @@
+% Generated FlatZinc statistics:
+%%%mzn-stat: paths=0
+%%%mzn-stat: flatBoolVars=4420
+%%%mzn-stat: flatIntVars=312
+%%%mzn-stat: flatBoolConstraints=3200
+%%%mzn-stat: flatIntConstraints=1963
+%%%mzn-stat: evaluatedReifiedConstraints=1420
+%%%mzn-stat: evaluatedHalfReifiedConstraints=580
+%%%mzn-stat: eliminatedImplications=190
+%%%mzn-stat: method="minimize"
+%%%mzn-stat: flatTime=0.334602
+%%%mzn-stat-end
+
+malati = array1d(1..10, [0, 4, 4, 3, 3, 2, 2, 1, 1, 0]);
+positivi = array1d(1..1, [14]);
+osservazione = array1d(1..1, [6]);
+quarantena = array1d(1..10, [13, 13, 12, 12, 11, 11, 10, 10, 5, 5]);
+----------
+%%%mzn-stat: initTime=0.053336
+%%%mzn-stat: solveTime=653.438
+%%%mzn-stat: solutions=19
+%%%mzn-stat: variables=4733
+%%%mzn-stat: propagators=4898
+%%%mzn-stat: propagations=5609888022
+%%%mzn-stat: nodes=35381087
+%%%mzn-stat: failures=17690516
+%%%mzn-stat: restarts=0
+%%%mzn-stat: peakDepth=42
+%%%mzn-stat-end
