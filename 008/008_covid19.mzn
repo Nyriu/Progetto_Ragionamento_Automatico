@@ -153,24 +153,6 @@ var int: c =
 
 constraint
   (malati[1] == 0)
-  %% TODO DELETE ME
-
-  %% /\
-  %% (malati[2] == 3)
-  %% /\
-  %% (malati[3] == 3)
-  %% /\
-  %% (quarantena[1] == 4)
-
-  %%(malati[1] == 4)
-  %%(malati[2] == 0)
-  %%/\
-  %%(malati[2] == 4)
-  %%/\
-  %%(positivi[1] == 2)
-
-  %% END DELETE ME
-
   /\
   increasing(malati)
   /\
