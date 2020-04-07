@@ -280,8 +280,7 @@ def run_on_all_inputs(model_path, model_type, output_dir):
 
 if __name__ == '__main__':
 #### ROBE DI PROVA ####
-    run_on_all_inputs('./example_arr_model.mzn', 'ARR', './arr_outputs')
-    run_on_all_inputs('./example_mat_model.mzn', 'MAT', './mat_outputs')
+    run_on_all_inputs('./covid19.mzn', 'MAT', './mat_outputs')
 
 
 ##input_num = 0
