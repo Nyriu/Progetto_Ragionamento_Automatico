@@ -281,7 +281,7 @@ def get_symbol(s,sol):
     return symb;
 # Data una soluzione e l'istanza ritorna il dizionario sol
 # della soluzione (se solution e' None torna None)
-def get_sol(solution,instance, show_sol=False):
+def get_sol(solution,instance, show=False):
     if solution == None:
         print("No solution")
         return None
@@ -298,8 +298,8 @@ def get_sol(solution,instance, show_sol=False):
     else:
         print("ERROR! In get_solution solution e' gia' dict")
 
-    if show_sol:
-        show_solution(sol)
+    if show:
+        show_sol(sol)
     return sol
 
 # Date le statistics torna il dizionario stats
@@ -340,7 +340,7 @@ def get_stats(statistics, show_stats=False):
     return stats
 
 def show_sol(sol):
-    if type(solution) != dict:
+    if type(sol) != dict:
         print("ERROR! In show_sol solution deve essere dict")
 
     if sol == None:
@@ -377,7 +377,8 @@ def show_statistic(statistics):
 def show_result(result, instance):
     show_statistic(result.statistics)
     show_objective(result.objective)
-    get_sol(result.solution, instance, show_sol=True)
+    print()
+    get_sol(result.solution, instance, show=True)
 
 # Dati result, instance ed un file path salva il
 # dizionario relativo nel path
@@ -409,11 +410,6 @@ def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
     return json.load(open(fpath))
 
 
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 def show_output(num, directory=OUTPUT_DIR):
     data = read_output(num, source_dir)
     print(data)
@@ -421,20 +417,37 @@ def show_output(num, directory=OUTPUT_DIR):
     show_statistic(data['stats'])
     show_objective(data['obj'])
     print()
-    show_solution(data['sol'])
+    show_sol(data['sol'])
     print()
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+def dir_exists(directory, label="dir", verbose=True):
+    b = os.path.exists(directory)
+    if ((not b) and verbose):
+        print("ERRORE! La %s %s non esiste!" %(label, input_dir))
+    return b
+
+
+# Carica il modello del path dato e lo esegue sull'input del num dato
+def run_on_input(model_path, input_num, input_dir=INPUT_DIR):
+    if not dir_exists(input_dir, label='input_dir', verbose=True):
+        return
+    # TODO try catch
+    model = Model(model_path)
+    gecode = Solver.lookup("gecode")
+
+    instance = Instance(gecode, model)
+    initialize_instance(instance, input_num)
+    result = instance.solve()
+
+    show_result(result, instance)
+
+
 
 # Carica il modello del path dato e lo esegue su tutti gli input
 # per ciascuno salva un json nella cartella data
 def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
-    if not os.path.exists(input_dir):
-        print("ERRORE! La cartella degli input non esiste!")
-        print("input_dir=%s" %(input_dir))
+    if not dir_exists(input_dir, label='input_dir', verbose=True):
+        return
 
     if not output_dir[-1] == '/':
         output_dir += '/'
@@ -457,15 +470,22 @@ def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
 
         input_num += 1
 
-def run_minizinc_model():
+
+def run_minizinc_model(num=-1, show_output=True):
     model_path= './covid19.mzn'
     out_dir='./outputs/'
     in_dir='./inputs/'
 
-    print("Running:\nmodel_path=%s\noutput_dir=%s\ninput_dir=%s"\
-            %(model_path,out_dir,in_dir))
+    if num == -1:
+        print("Running:\nmodel_path=%s\noutput_dir=%s\ninput_dir=%s"\
+                %(model_path,out_dir,in_dir))
 
-    run_on_all_inputs(model_path, out_dir, in_dir)
+        run_on_all_inputs(model_path, out_dir, in_dir)
+    else:
+        print("Running:\nmodel_path=%s\nOn input num=%d" \
+                %(model_path,num))
+        run_on_input(model_path, num, in_dir)
+
 
 
 ##################################################
