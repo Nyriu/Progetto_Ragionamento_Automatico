@@ -11,3 +11,4 @@
 - Fare confronto su 005 vs 008 al variare dei parametri del minimize?
 
 - In my_lib.py gestire anche la raccolta di soluzioni multiple
+
