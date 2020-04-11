@@ -6,3 +6,6 @@
 *.synctex(busy)
 *.synctex.gz
 *.toc
+tmp*
+
+minizinc/__pycache__/
