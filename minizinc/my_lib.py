@@ -115,6 +115,25 @@ def get_input(num, dest_dir=INPUT_DIR):
     # TODO try catch
     return read_dzn(fpath)
 
+# Dato un numero ritorna il testo dell'input relativo
+def get_input_text(num, dest_dir=INPUT_DIR):
+    if num >  100:
+        t = "ERROR! get_input() num troppo grande"
+        print(t)
+        return t
+
+    fpath = gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
+
+    if not os.path.isfile(fpath):
+        t = "ERROR! File does not exists!"
+        print(t)
+        return t
+
+    f = open(fpath)
+    t = f.read()
+    return t
+
+
 
 
 
@@ -279,6 +298,7 @@ def get_symbol(s,sol):
         symb = SYMBOLS['empty']
 
     return symb;
+
 # Data una soluzione e l'istanza ritorna il dizionario sol
 # della soluzione (se solution e' None torna None)
 def get_sol(solution,instance, show=False):
@@ -303,7 +323,7 @@ def get_sol(solution,instance, show=False):
     return sol
 
 # Date le statistics torna il dizionario stats
-def get_stats(statistics, show_stats=False):
+def get_stats(statistics):
     stats = {}
     # valore, tempo di flat, tempo di resol, tempo totale)
     stats['method']    = statistics['method']
@@ -325,27 +345,16 @@ def get_stats(statistics, show_stats=False):
     except:
         stats['solutions'] = .0
 
-    if show_stats:
-        for k in stats.keys():
-            val = stats[k]
-            if type(val) == str:
-                print("{:10}:{:>10}".format(k, stats[k]))
-            elif type(val) == float:
-                print("{:10}:{:10f}".format(k, stats[k]))
-            elif type(val) == int:
-                print("{:10}:{:10d}".format(k, stats[k]))
-            else:
-                print("ERROR! In get_stats tipo chiave imprevisto!")
-
     return stats
 
 def show_sol(sol):
-    if type(sol) != dict:
-        print("ERROR! In show_sol solution deve essere dict")
-
     if sol == None:
         print("No solution")
         return
+    if type(sol) != dict:
+        print("ERROR! In show_sol solution deve essere dict")
+        return
+
 
     K = sol['K']
     H = sol['H']
@@ -363,14 +372,86 @@ def show_sol(sol):
             s+=1
         print()
 
+def to_string_sol(sol):
+    if sol == None:
+        t = "No solution"
+        print(t)
+        return t
+    if type(sol) != dict:
+        t = "ERROR! In show_sol solution deve essere dict"
+        print(t)
+        return t
+
+
+    t = ""
+
+    K = sol['K']
+    H = sol['H']
+    s = 0
+    for k in range(K):
+        for h in range(2*H):
+            code = get_symbol(s,sol)
+            e = " "
+            if (h==H-1 or h==2*H-1 or h==2*H*K-1):
+                e = "\n"
+            if (h==H-1):
+                code += "\t" + str(k)
+
+            t += code + e
+            s+=1
+        t += '\n'
+    return t
+
 def show_objective(obj):
     if obj is None:
         print('{:10}:{:>10}'.format('objective', 'None'))
     else:
         print('{:10}:{:10d}'.format('objective',obj))
 
+def get_objective(obj):
+    if obj is None:
+        return str('{:10}:{:>10}'.format('objective', 'None'))
+    else:
+        return str('{:10}:{:10d}'.format('objective',obj))
+
 def show_statistic(statistics):
-    get_stats(statistics, show_stats=True)
+    if not type(statistics) == dict:
+        stats = get_stats(statistics)
+    else:
+        stats = statistics
+
+    for k in stats.keys():
+        val = stats[k]
+        if type(val) == str:
+            print("{:10}:{:>10}".format(k, stats[k]))
+        elif type(val) == float:
+            print("{:10}:{:10f}".format(k, stats[k]))
+        elif type(val) == int:
+            print("{:10}:{:10d}".format(k, stats[k]))
+        else:
+            print("error! in get_stats tipo chiave imprevisto!")
+
+def to_string_statistic(statistics):
+    if not type(statistics) == dict:
+        stats = get_stats(statistics)
+    else:
+        stats = statistics
+    t = ""
+    for k in stats.keys():
+        val = stats[k]
+        if type(val) == str:
+            t += str("{:10}:{:>10}".format(k, stats[k]))
+            t += '\n'
+        elif type(val) == float:
+            t += str("{:10}:{:10f}".format(k, stats[k]))
+            t += '\n'
+        elif type(val) == int:
+            t += str("{:10}:{:10d}".format(k, stats[k]))
+            t += '\n'
+        else:
+            t += str("error! in get_stats tipo chiave imprevisto!")
+            t += '\n'
+    return t
 
 
 # Dati result ed instance stampa il recap della soluzione trovata
@@ -410,8 +491,20 @@ def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
     return json.load(open(fpath))
 
 
+def get_output(num, directory=OUTPUT_DIR):
+    data = read_output(num, directory)
+    output = ""
+
+    output += str(to_string_statistic(data['stats']))
+    output += str(get_objective(data['obj']))
+    output += '\n\n'
+
+    output += str(to_string_sol(data['sol']))
+    output += '\n'
+    return output
+
 def show_output(num, directory=OUTPUT_DIR):
-    data = read_output(num, source_dir)
+    data = read_output(num, directory)
     print(data)
     print()
     show_statistic(data['stats'])

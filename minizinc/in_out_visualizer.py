@@ -39,10 +39,20 @@
 ###if __name__ == "__main__":
 ###    main()
 ###
+import my_lib
 
 import curses
 from curses import textpad, wrapper
 import lipsum
+
+
+#EXIT_KEYS = [ curses.KEY_EXIT , 'q', 'Q' ]
+#NEXT_KEYS = [ curses.KEY_RIGHT, 'l', 'L' ]
+#PREV_KEYS = [ curses.KEY_LEFT , 'h', 'H' ]
+
+EXIT_KEYS = [ curses.KEY_EXIT , ord('q'), ord('Q') ]
+NEXT_KEYS = [ curses.KEY_RIGHT, ord('l'), ord('L') ]
+PREV_KEYS = [ curses.KEY_LEFT , ord('h'), ord('H') ]
 
 def border(win, xy_offset=0, dim_offset=0):
     height,width = win.getmaxyx()
@@ -67,23 +77,29 @@ def init_wins():
     l_uly = 2
     l_ulx = 2
     lh = curses.LINES - l_uly - below_gap - bh
-    lw = curses.COLS//2 - btw_gap
+    lw = curses.COLS//2
     # right win
     r_uly = l_uly
-    r_ulx = l_ulx + lw + btw_gap
-    rw = lw - btw_gap
+    r_ulx = lw + btw_gap
+    rw = lw - btw_gap - l_ulx
     rh = lh
 
+    # DEBUG
     print("_h, _w, __uly, __ulx", file=open('tmp.txt', 'w+'))
     print(lh, lw, l_uly, l_ulx, file=open('tmp.txt', 'a+'))
     print(rh, rw, r_uly, r_ulx, file=open('tmp.txt', 'a+'))
     print(bh, bw, b_uly, b_ulx, file=open('tmp.txt', 'a+'))
-
-
+    # END # DEBUG
 
     l_win = curses.newwin(lh, lw, l_uly, l_ulx)
     r_win = curses.newwin(rh, rw, r_uly, r_ulx)
     b_win = curses.newwin(bh, bw, b_uly, b_ulx)
+
+    for w in [l_win, r_win, b_win]:
+        w.keypad(True)
+        w.clear()
+
+    l_win.border(0)
 
     # left win text
     lt_begin_y = 2
@@ -100,8 +116,8 @@ def init_wins():
     l_win.addstr(lt_begin_y, lt_begin_x, text)
     r_win.addstr(rt_begin_y, rt_begin_x, text)
     b_win.addstr(bt_begin_y, bt_begin_x, text)
-    border(l_win)
-    border(r_win)
+    #border(l_win)
+    #border(r_win)
     border(b_win)
 
     return l_win, r_win, b_win
@@ -109,6 +125,7 @@ def init_wins():
 
 def main(stdscr):
     # Init
+    curses.curs_set(False)
     curses.cbreak()
     curses.noecho()
     stdscr.keypad(True)
@@ -116,14 +133,51 @@ def main(stdscr):
 
     try:
         l_win, r_win, b_win = init_wins()
+        num = 0
 
-        #show_input(l_win, num)
-        #show_result(r_win, num)
+        #c = b_win.getkey()
+        #c = b_win.getch()
+        #c = stdscr.getch()
+        c = 'a' # uno a caso
+        input_text = ""
+        output = ""
 
-        l_win.refresh()
-        r_win.refresh()
-        b_win.refresh()
-        b_win.getkey()
+        while not c in EXIT_KEYS:
+            old_num = num
+            if c in NEXT_KEYS:
+                num +=1
+            elif c in PREV_KEYS and num > 0:
+                num -=1
+            else:
+                pass
+
+            try:
+                old_input_text = input_text
+                old_output = output
+
+                input_text = my_lib.get_input_text(num)
+                output = my_lib.get_output(num)
+            except:
+                input_text = old_input_text
+                output = old_output
+                num = old_num
+
+            l_win.clear()
+            l_win.addstr(0,0, output)
+            r_win.clear()
+            r_win.addstr(0,0, input_text)
+            b_win.clear()
+            b_win.addstr(0,0, "Input num={:02d}".format(num))
+
+            #show_input(l_win, num)
+            #show_result(r_win, num)
+
+            l_win.refresh()
+            r_win.refresh()
+            b_win.refresh()
+            #c = b_win.getkey()
+            #c = b_win.getch()
+            c = stdscr.getch()
 
     #except:
     #    curses.nocbreak()
@@ -140,7 +194,5 @@ def main(stdscr):
 
 
 
-
-wrapper(main)
-
-
+if __name__ == '__main__':
+    wrapper(main)
