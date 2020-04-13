@@ -181,6 +181,10 @@ def satura_stanze(values):
         if values[k]%2 == 1:
             values[k] += 1
 
+    if values['M'] < 1:
+        values['M'] = 1
+
+
     if stanze_necessarie(values) > numero_stanze(values):
         print("DEBUG: qualcosa non va...")
         print(values)
@@ -415,6 +419,7 @@ def get_objective(obj):
         return str('{:10}:{:10d}'.format('objective',obj))
 
 def show_statistic(statistics):
+    # TODO fix se statistics non e stats
     if not type(statistics) == dict:
         stats = get_stats(statistics)
     else:
@@ -428,10 +433,13 @@ def show_statistic(statistics):
             print("{:10}:{:10f}".format(k, stats[k]))
         elif type(val) == int:
             print("{:10}:{:10d}".format(k, stats[k]))
+        elif type(val) == None:
+            print("None")
         else:
-            print("error! in get_stats tipo chiave imprevisto!")
+            print("ERROR! in show_statistic %s tipo chiave imprevisto!" %(str(type(val))))
 
 def to_string_statistic(statistics):
+    # TODO fix se statistics non e stats
     if not type(statistics) == dict:
         stats = get_stats(statistics)
     else:
@@ -449,7 +457,7 @@ def to_string_statistic(statistics):
             t += str("{:10}:{:10d}".format(k, stats[k]))
             t += '\n'
         else:
-            t += str("error! in get_stats tipo chiave imprevisto!")
+            t += str("error! in to_string_statistic tipo chiave imprevisto!")
             t += '\n'
     return t
 

@@ -12,8 +12,7 @@
 % Possono stare assieme nella stessa stanza:
 %   - malati
 %   - positivi sani
-%   - precauzionali
-% Devono stare in isolamento da soli: quelli in osservazione
+%   - precauzionali % Devono stare in isolamento da soli: quelli in osservazione
 %
 % Definizione di Vicinanaza tra stanze
 % Vicinato 1

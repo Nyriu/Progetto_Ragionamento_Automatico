@@ -84,13 +84,6 @@ def init_wins():
     rw = lw - btw_gap - l_ulx
     rh = lh
 
-    # DEBUG
-    print("_h, _w, __uly, __ulx", file=open('tmp.txt', 'w+'))
-    print(lh, lw, l_uly, l_ulx, file=open('tmp.txt', 'a+'))
-    print(rh, rw, r_uly, r_ulx, file=open('tmp.txt', 'a+'))
-    print(bh, bw, b_uly, b_ulx, file=open('tmp.txt', 'a+'))
-    # END # DEBUG
-
     l_win = curses.newwin(lh, lw, l_uly, l_ulx)
     r_win = curses.newwin(rh, rw, r_uly, r_ulx)
     b_win = curses.newwin(bh, bw, b_uly, b_ulx)
@@ -130,26 +123,34 @@ def main(stdscr):
     curses.noecho()
     stdscr.keypad(True)
     stdscr.clear()
+    print("DEBUG", file=open('tmp.txt', 'w+')) #DEBUG
 
     try:
         l_win, r_win, b_win = init_wins()
+        #for w in [l_win, r_win, b_win]:
+        #    text = "Press a button"
+        #    w.clear()
+        #    w.addstr(0,0, text)
+        #    w.refresh()
+
         num = 0
 
         #c = b_win.getkey()
         #c = b_win.getch()
         #c = stdscr.getch()
         c = 'a' # uno a caso
-        input_text = ""
-        output = ""
+        input_text = "Press a button"
+        output = "Press a button"
+
+        print("c=a", file=open('tmp.txt', 'a+'))
+
 
         while not c in EXIT_KEYS:
             old_num = num
             if c in NEXT_KEYS:
                 num +=1
-            elif c in PREV_KEYS and num > 0:
+            if c in PREV_KEYS and num > 0:
                 num -=1
-            else:
-                pass
 
             try:
                 old_input_text = input_text
@@ -157,10 +158,15 @@ def main(stdscr):
 
                 input_text = my_lib.get_input_text(num)
                 output = my_lib.get_output(num)
+                print("in fondo al try", file=open('tmp.txt', 'a+'))
             except:
                 input_text = old_input_text
                 output = old_output
                 num = old_num
+                print("in fondo al except", file=open('tmp.txt', 'a+'))
+
+            print(input_text, file=open('tmp.txt', 'a+'))
+            print(output, file=open('tmp.txt', 'a+'))
 
             l_win.clear()
             l_win.addstr(0,0, output)
@@ -175,9 +181,10 @@ def main(stdscr):
             l_win.refresh()
             r_win.refresh()
             b_win.refresh()
-            #c = b_win.getkey()
-            #c = b_win.getch()
-            c = stdscr.getch()
+            print("mostro testo", file=open('tmp.txt', 'a+'))
+            print("attendo", file=open('tmp.txt', 'a+'))
+            c = b_win.getch()
+            print("ho atteso", file=open('tmp.txt', 'a+'))
 
     #except:
     #    curses.nocbreak()
