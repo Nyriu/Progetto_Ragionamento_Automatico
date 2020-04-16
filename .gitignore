@@ -9,3 +9,6 @@
 tmp*
 
 minizinc/__pycache__/
+
+*.json
+*.dzn
