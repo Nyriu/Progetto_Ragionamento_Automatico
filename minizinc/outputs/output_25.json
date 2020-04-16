@@ -1,0 +1,27 @@
+{
+ "obj": 0,
+ "stats": {
+  "method": "minimize",
+  "time": 0.18,
+  "solveTime": 0.000759,
+  "flatTime": 0.16679,
+  "solutions": 4
+ },
+ "sol": {
+  "K": 1,
+  "H": 3,
+  "M": [
+   0
+  ],
+  "P": [
+   2,
+   2,
+   4
+  ],
+  "O": [],
+  "Q": [
+   5,
+   5
+  ]
+ }
+}

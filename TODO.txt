@@ -1,5 +1,5 @@
 - Si suppone che ci sia almeno un malato
-- fix generatore input per generare anche istanze con 0 di qualsiasi tipo (tranne M)
+- va bene che il generatore input crei istante unsat?
 
 - 008 su input sopra preferisce mettere 4 Q vicino a degli M piuttosto che mettere vicino 2 P,
   forse non è una cosa bellissima...

@@ -1,5 +1,6 @@
 # Esegue il modello MiniZinc su input di num dato
 # Usage:
+# python run.py -1 #to run on all inputs
 # python run.py 0
 # python run.py 1
 # python run.py 02
@@ -14,6 +15,7 @@ def get_args():
     if len(args) < 2:
         print("Put pone arguments!! For example")
         print("python run.py 10")
+        print("python run.py -1 #to run on all inputs")
         exit(1)
 
     try:

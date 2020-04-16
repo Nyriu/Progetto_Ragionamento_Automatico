@@ -2,7 +2,7 @@
 # Import
 ##################################################
 # Varie
-import os
+import os, shutil
 from math import ceil
 
 # Per Random
@@ -108,19 +108,19 @@ def read_dzn(fpath):
 
 # Dato un numero ritorna il dizionario dell'input relativo
 def get_input(num, dest_dir=INPUT_DIR):
-    if num >  100:
-        print("ERROR! get_input() num troppo grande")
-        exit(2)
+    #if num >  100:
+    #    print("ERROR! get_input() num troppo grande")
+    #    exit(2)
     fpath = gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
     # TODO try catch
     return read_dzn(fpath)
 
 # Dato un numero ritorna il testo dell'input relativo
 def get_input_text(num, dest_dir=INPUT_DIR):
-    if num >  100:
-        t = "ERROR! get_input() num troppo grande"
-        print(t)
-        return t
+    #if num >  100:
+    #    t = "ERROR! get_input() num troppo grande"
+    #    print(t)
+    #    return t
 
     fpath = gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
 
@@ -181,14 +181,9 @@ def satura_stanze(values):
         if values[k]%2 == 1:
             values[k] += 1
 
-    if values['M'] < 1:
-        values['M'] = 1
-
-
     if stanze_necessarie(values) > numero_stanze(values):
         print("DEBUG: qualcosa non va...")
         print(values)
-
 
     return values
 
@@ -205,13 +200,29 @@ def istanza_casuale(values):
             if values[key] >= da_rimuovere:
                 values[key] -= da_rimuovere
                 rimosse += da_rimuovere
-
     else:
         # dimezzo Malati, Positivi o Quarantena
         keys = ['M','P','Q']
         key = keys[randint(0,len(keys)-1)]
         values[key] = values[key]//2 + values[key]%2 #mantengo dispari se era disp
 
+
+    # Se nessun valore e' > 0 ... qualcosa non va
+    qulcs_non_va = True
+    for key in keys:
+        qulcs_non_va = qulcs_non_va and (values[key] == 0)
+    if qulcs_non_va:
+        print("ERROR! Qualcosa non va... Values tutti == 0")
+
+    # Verifico che ci sia almeno un malato
+    # Se non c'e' allora converto uno degli altri in malato
+    if values['M'] == 0:
+        key = keys[randint(0,len(keys)-1)]
+        while not values[key] > 0:
+            key = keys[randint(0,len(keys)-1)]
+        if values[key] > 0:
+            values[key] -=1
+            values['M'] +=1
     return values
 
 
@@ -247,6 +258,16 @@ def gen_inputs(K_max, H_max, n,
 
                 num += 1
     print("Generati %d input nella cartella %s" %(num, dest_dir))
+
+# Elimina la cartella degli input
+def del_inputs(input_dir = INPUT_DIR):
+    #TODO try catch?
+    shutil.rmtree(input_dir, ignore_errors=True)
+
+# Elimina la cartella degli outpus
+def del_outputs(output_dir = OUTPUT_DIR):
+    #TODO try catch?
+    shutil.rmtree(output_dir, ignore_errors=True)
 
 
 ##################################################
@@ -559,15 +580,19 @@ def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
 
     input_num = 0
     while not get_input(input_num) is None:
-        instance = Instance(gecode, model)
-        initialize_instance(instance, input_num)
-        result = instance.solve()
+        # Se l'output e' gia' stato calcolato non ricalcolo
+        if read_output(input_num,suppress_error=True) == None:
+            instance = Instance(gecode, model)
+            initialize_instance(instance, input_num)
+            result = instance.solve()
 
-        output_fpath = gen_fpath(input_num, output_dir,
-                OUTPUT_PREFIX, OUTPUT_EXT)
+            output_fpath = gen_fpath(input_num, output_dir,
+                    OUTPUT_PREFIX, OUTPUT_EXT)
 
-        print("Lavoro su input num %d" %(input_num))
-        save_result(result, instance, output_fpath)
+            print("Lavoro su input num %d" %(input_num))
+            write_output(result, instance, output_fpath)
+        else:
+            print("Trovato output per input num %d. Skip" %(input_num))
 
         input_num += 1
 
@@ -577,7 +602,7 @@ def run_minizinc_model(num=-1, show_output=True):
     out_dir='./outputs/'
     in_dir='./inputs/'
 
-    if num == -1:
+    if num <= -1:
         print("Running:\nmodel_path=%s\noutput_dir=%s\ninput_dir=%s"\
                 %(model_path,out_dir,in_dir))
 
