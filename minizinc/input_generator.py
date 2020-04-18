@@ -31,11 +31,15 @@ def main():
     my_lib.del_outputs()
 
     #K_max, H_max, n = get_args()
-    K_max = 3
-    H_max = 3
     n = 20
 
-    my_lib.gen_inputs(K_max, H_max, n)
+    K_max = 3
+    H_max = 4
+
+    K_min = 3
+    H_min = 2
+
+    my_lib.gen_inputs(K_max, H_max, n, K_min=K_min,H_min=H_min)
 
 
 if __name__ == "__main__":

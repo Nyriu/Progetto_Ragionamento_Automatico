@@ -18,7 +18,7 @@ plt.style.use('seaborn-deep')
 
 keys = ['M','P','O','Q']
 
-K = 2
+K = 3
 H = 3
 
 def get_all_data():

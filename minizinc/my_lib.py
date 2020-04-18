@@ -240,14 +240,15 @@ def gen_istanze(n, K, H):
 # TODO Eventualemnte modificare i for perche'
 # Creare input cosi' genera istanze con difficolta' a "dente di sega"
 def gen_inputs(K_max, H_max, n,
+        K_min=1,H_min=2,
         dest_dir = INPUT_DIR, input_prefix=INPUT_PREFIX,
         input_extension=INPUT_EXT):
 
     os.makedirs(dest_dir, exist_ok=True)
 
     num=0 # numero istanza corrente
-    for k in range(1,K_max+1):
-        for h in range(2, H_max+1):
+    for k in range(K_max,K_max+1):
+        for h in range(H_min, H_max+1):
             values = {'K':k,'H':h,'M':0,'P':0,'O':0,'Q':0}
             for i in range(n):
                 ist = istanza_casuale(values)
@@ -582,6 +583,7 @@ def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
     while not get_input(input_num) is None:
         # Se l'output e' gia' stato calcolato non ricalcolo
         if read_output(input_num,suppress_error=True) == None:
+            print("Lavoro su input num %d" %(input_num))
             instance = Instance(gecode, model)
             initialize_instance(instance, input_num)
             result = instance.solve()
@@ -589,7 +591,6 @@ def run_on_all_inputs(model_path, output_dir, input_dir=INPUT_DIR):
             output_fpath = gen_fpath(input_num, output_dir,
                     OUTPUT_PREFIX, OUTPUT_EXT)
 
-            print("Lavoro su input num %d" %(input_num))
             write_output(result, instance, output_fpath)
         else:
             print("Trovato output per input num %d. Skip" %(input_num))
