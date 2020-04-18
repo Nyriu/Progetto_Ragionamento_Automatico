@@ -1,10 +1,10 @@
 {
- "obj": 4,
+ "obj": 0,
  "stats": {
   "method": "minimize",
-  "time": 0.14,
-  "solveTime": 0.000694,
-  "flatTime": 0.130755,
+  "time": 0.08,
+  "solveTime": 0.000241,
+  "flatTime": 0.077571,
   "solutions": 3
  },
  "sol": {
@@ -18,10 +18,9 @@
    3,
    3
   ],
-  "O": [],
-  "Q": [
-   1,
+  "O": [
    1
-  ]
+  ],
+  "Q": []
  }
 }

@@ -2,10 +2,10 @@
  "obj": 0,
  "stats": {
   "method": "minimize",
-  "time": 0.18,
-  "solveTime": 0.001544,
-  "flatTime": 0.1668,
-  "solutions": 3
+  "time": 0.09,
+  "solveTime": 0.000907,
+  "flatTime": 0.080905,
+  "solutions": 4
  },
  "sol": {
   "K": 1,
@@ -16,7 +16,6 @@
   "P": [
    2,
    2,
-   4,
    4
   ],
   "O": [

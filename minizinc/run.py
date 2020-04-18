@@ -13,7 +13,7 @@ import my_lib
 def get_args():
     args = sys.argv
     if len(args) < 2:
-        print("Put pone arguments!! For example")
+        print("Put one arguments!! For example")
         print("python run.py 10")
         print("python run.py -1 #to run on all inputs")
         exit(1)

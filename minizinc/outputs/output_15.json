@@ -2,9 +2,9 @@
  "obj": null,
  "stats": {
   "method": "minimize",
-  "time": 0.21,
-  "solveTime": 0.000129,
-  "flatTime": 0.203809,
+  "time": 0.09,
+  "solveTime": 0.00018,
+  "flatTime": 0.080988,
   "solutions": 0
  },
  "sol": null

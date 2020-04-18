@@ -1,32 +1,30 @@
 {
- "obj": 8,
+ "obj": 2,
  "stats": {
   "method": "minimize",
-  "time": 0.62,
-  "solveTime": 0.314626,
-  "flatTime": 0.258767,
-  "solutions": 7
+  "time": 0.1,
+  "solveTime": 0.002102,
+  "flatTime": 0.089521,
+  "solutions": 3
  },
  "sol": {
   "K": 2,
   "H": 2,
   "M": [
-   0,
-   0,
-   3,
-   3
+   0
   ],
   "P": [
    5,
    5
   ],
   "O": [
-   1,
-   2
+   2,
+   3,
+   4
   ],
   "Q": [
-   4,
-   4,
+   1,
+   1,
    7,
    7
   ]
