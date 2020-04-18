@@ -1,0 +1,988 @@
+DEBUG
+c=a
+in fondo al try
+K=3;
+H=2;
+M=2;
+P=6;
+O=3;
+Q=8;
+
+method    :  minimize
+time      :  0.720000
+solveTime :  0.498740
+flatTime  :  0.190494
+solutions :         9
+objective :         0
+
+MM -O	0
+-O -O
+
+-- PP	1
+PP QQ
+
+PP QQ	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=5;
+P=3;
+O=5;
+Q=4;
+
+method    :  minimize
+time      :  4.040000
+solveTime :  3.810670
+flatTime  :  0.195297
+solutions :        10
+objective :         2
+
+MM MM	0
+-M -O
+
+-O -O	1
+-O -O
+
+PP -P	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=5;
+P=2;
+O=1;
+Q=10;
+
+method    :  minimize
+time      : 12.720000
+solveTime : 12.391200
+flatTime  :  0.264795
+solutions :        25
+objective :        16
+
+MM MM	0
+-M -O
+
+-- --	1
+QQ PP
+
+QQ QQ	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=0;
+O=4;
+Q=6;
+
+method    :  minimize
+time      :  5.480000
+solveTime :  5.277840
+flatTime  :  0.174883
+solutions :        11
+objective :         4
+
+MM MM	0
+-O -O
+
+-O -O	1
+QQ --
+
+-- --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=6;
+P=5;
+O=4;
+Q=4;
+
+method    :  minimize
+time      :  7.000000
+solveTime :  6.723000
+flatTime  :  0.232908
+solutions :         9
+objective :         4
+
+MM MM	0
+MM -O
+
+-O -O	1
+-O PP
+
+QQ PP	2
+-P QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=8;
+P=8;
+O=2;
+Q=2;
+
+method    :  minimize
+time      : 10.890000
+solveTime : 10.585000
+flatTime  :  0.255106
+solutions :        11
+objective :         4
+
+MM MM	0
+MM -O
+
+MM -O	1
+-- PP
+
+PP PP	2
+PP QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=4;
+O=6;
+Q=2;
+
+method    :  minimize
+time      :  0.190000
+solveTime :  0.003709
+flatTime  :  0.166410
+solutions :         6
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+-O -O
+
+PP PP	2
+QQ --
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=3;
+O=5;
+Q=4;
+
+method    :  minimize
+time      :  0.210000
+solveTime :  0.007713
+flatTime  :  0.170977
+solutions :        10
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+-O PP
+
+-P --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+method    :  minimize
+time      :  0.250000
+solveTime :  0.012742
+flatTime  :  0.201422
+solutions :        15
+objective :         0
+
+MM -M	0
+-O -O
+
+-O -O	1
+PP PP
+
+PP --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=8;
+P=5;
+O=4;
+Q=0;
+
+method    :  minimize
+time      :  0.320000
+solveTime :  0.160416
+flatTime  :  0.139576
+solutions :        12
+objective :         0
+
+MM -O	0
+MM MM
+
+-O -O	1
+-O MM
+
+PP PP	2
+-P --
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=4;
+O=4;
+Q=4;
+
+method    :  minimize
+time      :  0.230000
+solveTime :  0.009136
+flatTime  :  0.187738
+solutions :        12
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+PP PP
+
+-- --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=3;
+P=8;
+O=3;
+Q=4;
+
+method    :  minimize
+time      :  0.240000
+solveTime :  0.028118
+flatTime  :  0.185751
+solutions :        19
+objective :         0
+
+MM -M	0
+-O -O
+
+-O --	1
+PP PP
+
+PP PP	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=7;
+O=2;
+Q=4;
+
+method    :  minimize
+time      :  0.390000
+solveTime :  0.152721
+flatTime  :  0.206588
+solutions :        13
+objective :         0
+
+MM MM	0
+-O -O
+
+-- --	1
+PP PP
+
+PP -P	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=0;
+O=7;
+Q=1;
+
+method    :  minimize
+time      :  0.260000
+solveTime :  0.010376
+flatTime  :  0.225792
+solutions :         5
+objective :         0
+
+MM -O	0
+-O -O
+
+-O -O	1
+MM -O
+
+-O -Q	2
+-- --
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=2;
+P=6;
+O=3;
+Q=6;
+
+method    :  minimize
+time      :  0.360000
+solveTime :  0.101745
+flatTime  :  0.227307
+solutions :         9
+objective :         0
+
+MM -O	0
+-O -O
+
+-- PP	1
+PP QQ
+
+PP QQ	2
+QQ --
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=2;
+O=6;
+Q=2;
+
+method    :  minimize
+time      :  0.170000
+solveTime :  0.003332
+flatTime  :  0.146636
+solutions :         6
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+-O -O
+
+PP --	2
+QQ --
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=8;
+P=2;
+O=5;
+Q=1;
+
+method    :  minimize
+time      :  0.480000
+solveTime :  0.218291
+flatTime  :  0.224716
+solutions :        12
+objective :         0
+
+MM -O	0
+MM MM
+
+-O -O	1
+MM -O
+
+-O -Q	2
+-- PP
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=0;
+O=6;
+Q=4;
+
+method    :  minimize
+time      :  0.230000
+solveTime :  0.006711
+flatTime  :  0.194131
+solutions :         9
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+-O -O
+
+-- --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=4;
+P=4;
+O=4;
+Q=4;
+
+method    :  minimize
+time      :  0.210000
+solveTime :  0.009793
+flatTime  :  0.173106
+solutions :        12
+objective :         0
+
+MM MM	0
+-O -O
+
+-O -O	1
+PP PP
+
+-- --	2
+QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=6;
+P=4;
+O=2;
+Q=4;
+
+method    :  minimize
+time      :  1.600000
+solveTime :  1.353720
+flatTime  :  0.206118
+solutions :        15
+objective :         4
+
+MM MM	0
+MM -O
+
+-O --	1
+-- PP
+
+QQ PP	2
+-- QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al except
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=2;
+M=6;
+P=4;
+O=2;
+Q=4;
+
+method    :  minimize
+time      :  1.600000
+solveTime :  1.353720
+flatTime  :  0.206118
+solutions :        15
+objective :         4
+
+MM MM	0
+MM -O
+
+-O --	1
+-- PP
+
+QQ PP	2
+-- QQ
+
+
+
+mostro testo
+attendo
+ho atteso
+in fondo al try
+K=3;
+H=3;
+M=5;
+P=10;
+O=5;
+Q=6;
+
+method    :  minimize
+time      :  0.550000
+solveTime :  0.133909
+flatTime  :  0.322329
+solutions :        23
+objective :         0
+
+MM MM -M	0
+-O -O -O
+
+-O -O --	1
+PP PP PP
+
+PP PP --	2
+QQ QQ QQ
+
+
+
+mostro testo
+attendo
+ho atteso

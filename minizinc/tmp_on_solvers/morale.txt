@@ -1,0 +1,2 @@
+Da una prima analisi abbastanza superificiale sembra che gecode sia uguale a chuffed -f 
+In alcuni casi fortunati chuffed -f è molto più rapido
