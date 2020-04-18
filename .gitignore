@@ -10,9 +10,9 @@ tmp*
 
 minizinc/__pycache__/
 
-minizinc/batches/
-minizinc/inputs/
-minizinc/outputs/
+minizinc/batches
+minizinc/inputs
+minizinc/outputs
 
 *.json
 *.dzn
