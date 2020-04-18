@@ -4,7 +4,7 @@
 # - con minor numero di persone
 # - con maggior numero di persone
 # Se un istanza è candidata per più tipologie viene mostrata una sola volta
-# TODO Le istanze sono ordinate da sinistra a destra per solveTime crescente
+# Le istanze sono ordinate da sinistra a destra per solveTime crescente
 
 import my_lib
 import os
@@ -40,16 +40,6 @@ while not (out == None):
     inp = my_lib.get_input(num)
     out = my_lib.read_output(num, my_lib.OUTPUT_DIR, suppress_error=True)
 
-
-## DEBUG STUFF
-#cut_l = 5
-#nums = nums[:cut_l]
-#solveTimes = solveTimes[:cut_l]
-#inputs = inputs[:cut_l]
-#
-#for i in inputs:
-#    print(i)
-##END DEBUG STUFF
 
 # Selezioni le istanze che poi plottero'
 # Mantengo gli indici relativi
@@ -87,6 +77,13 @@ s_inputs     = [inputs[i] for i in selected]
 s_solveTimes = [solveTimes[i] for i in selected]
 s_nums       = [nums[i] for i in selected]
 
+# Ordino per solveTime crescente
+s_inputs = [y for x,y in sorted(zip(s_solveTimes, s_inputs))]
+s_nums   = [y for x,y in sorted(zip(s_solveTimes, s_nums))]
+s_solveTimes = list(sorted(s_solveTimes))
+
+
+
 
 m = [i['M'] for i in s_inputs]
 p = [i['P'] for i in s_inputs]
@@ -98,20 +95,32 @@ labels = [str(n) for n in s_nums]
 x = np.arange(len(labels))  # the label locations
 width = 0.1  # the width of the bars
 
-fig, ax = plt.subplots()
+fig, ax1 = plt.subplots()
+#times = ax1.plot(x, s_solveTimes, color='crimson')
+times = ax1.plot(x, s_solveTimes, color='black')
+#ax1.legend(title='solveTimes')
+
+ax = ax1.twinx() # instantiate a second axes that shares the same x-axis
+
 rects_m = ax.bar(x - 3*width/2, m, width, label='M')
 rects_p = ax.bar(x - width/2, p, width, label='P')
 rects_o = ax.bar(x + width/2, o, width, label='O')
 rects_q = ax.bar(x + 3*width/2, q, width, label='Q')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('Values')
-ax.set_xlabel('Inputs')
-#ax.set_title('Scores by group and gender')
-ax.set_yticks(range(max(m+p+o+q)+1))
+#ax.set_ylabel('Values')
+ax.set_xlabel('Input Num')
+ax.set_title('K={} H={}'.format(K,H))
+#ax.set_yticks(range(max(m+p+o+q)+1))
+ax.set_yticks([])
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
-ax.legend()
+
+# added these three lines
+lns = [rects_m, rects_p, rects_o, rects_q, times[0]]
+labs = [l.get_label() for l in lns]
+labs = labs[:-1] + ['solveTimes']
+ax.legend(lns, labs)
 
 
 def autolabel(rects):
@@ -124,13 +133,6 @@ def autolabel(rects):
                     textcoords="offset points",
                     ha='center', va='bottom')
 
-# Annoto i tempi
-plt.annotate('{}'.format("solveTimes"), TODO
-            xy=(-1, 0),
-            xytext=(0, 3),  # 3 points vertical offset
-            textcoords="offset points",
-            #TODO background color?
-            ha='center', va='bottom')
 for pos in x:
     ax.annotate('{}'.format(s_solveTimes[pos]),
                 xy=(pos, 0),
