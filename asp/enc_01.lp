@@ -71,6 +71,11 @@ vicini2(S,S1) :-
 
 % Symmetry
 malato(1,0).
+% Ai primi malati assegno prime stanze (idem per gli altri)
+:- malato(M,S),       malato(M1,S1),       M<M1, S>S1.
+:- positivo(P,S),     positivo(P1,S1),     P<P1, S>S1.
+:- osservazione(O,S), osservazione(O1,S1), O<O1, S>S1.
+:- quarantena(Q,S),   quarantena(Q1,S1),   Q<Q1, S>S1.
   
 
 
@@ -88,6 +93,7 @@ malato(1,0).
 %#show debug2/2.
 
 %#show stanza/1.
+%#show scomodo/4.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1), vicini1(S,S1).
@@ -97,17 +103,27 @@ scomodo(M,P,S,S1) :- malato(M,S), positivo(P,S1)  , vicini1(S,S1).
 cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 #minimize {C : cost(C)}.
 
-#show scomodo/4.
 #show malato/2.
 #show positivo/2.
 #show osservazione/2.
 #show quarantena/2.
 
-% Instance
-corridoi(1).
-stanze_per_lato(2).
+%Optimum=2
 
-malato(1..2).
-positivo(1).
-osservazione(1).
-quarantena(1..2).
+% Instance
+%%corridoi(          3).
+%%stanze_per_lato(   2).
+%%
+%%malato(1..         5).
+%%positivo(1..       3).
+%%osservazione(1..   5).
+%%quarantena(1..     4).
+
+%corridoi(          1).
+%stanze_per_lato(   2).
+%
+%malato(1..         3).
+%%positivo(1..       3).
+%%osservazione(1..   1).
+%quarantena(1..     2).
+
