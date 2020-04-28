@@ -18,7 +18,7 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 :- positivo(P,S), positivo(P1,S), positivo(P2,S),       % Al piu' 2 positivi
    P!=P1, P!=P2, P1!=P2.
 :- osservazione(O,S), osservazione(O1,S), O!=O1.        % Al piu' 1 osservazione
-:- quarantena(Q,S), quarantena(Q1,S), quarantena(Q2,S), % Al piu' 2 positivi
+:- quarantena(Q,S), quarantena(Q1,S), quarantena(Q2,S), % Al piu' 2 quarantena
    Q!=Q1, Q!=Q2, Q1!=Q2.
 
 % No misti % TODO migliorabile?
@@ -103,10 +103,10 @@ scomodo(M,P,S,S1) :- malato(M,S), positivo(P,S1)  , vicini1(S,S1).
 cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 #minimize {C : cost(C)}.
 
-#show malato/2.
-#show positivo/2.
-#show osservazione/2.
-#show quarantena/2.
+%#show malato/2.
+%#show positivo/2.
+%#show osservazione/2.
+%#show quarantena/2.
 
 %Optimum=2
 
@@ -127,3 +127,76 @@ cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 %%osservazione(1..   1).
 %quarantena(1..     2).
 
+#script (python)
+
+import clingo
+import json
+
+def main(ctl):
+    #print ("Mandi!")
+    ctl.ground([("base", [])])
+
+    models = []
+    with ctl.solve(yield_=True) as handle:
+      for model in handle:
+        models.append(model.symbols(atoms=True))
+    #for model in models:
+      #print(model)
+
+    #s = ctl.solve(yield_=True)
+    #print("Solution Type", type(s))
+    #print("Solution:\n", s)
+
+    model = models[-1]
+    print("Model Type", type(model))
+    print("Model\n",model)
+
+    # Lista di coppie (nome, len(args)) dei predicati e
+    # del loro numero di argomenti da usare per la soluzione
+    to_consider = [
+      ("malato",       2),
+      ("positivo",     2),
+      ("osservazione", 2),
+      ("quarantena",   2)
+    ]
+
+    sol = {
+      "M":[],
+      "P":[],
+      "O":[],
+      "Q":[]
+    }
+
+    #print("="*20)
+    for symb in model:
+      name = symb.name
+      args = symb.arguments
+
+      if (name, len(args)) in to_consider:
+        # TODO fare qualche controllo... fidarsi e' bene ma...
+        sol[name[0].upper()].append(args[1].number)
+
+    print(sol)
+    #print("="*20)
+
+    statistics =ctl.statistics
+    #print("Stats\n",statistics)
+    #json.dump(statistics, open("statistics.json","w+"), indent=True)
+
+    stats = {
+      "type" : "ASP",
+      "obj" : int(statistics["summary"]["costs"][0]),
+
+      "stats" : {
+        "time" : statistics["summary"]["times"]["total"],
+        "solveTime" : statistics["summary"]["times"]["solve"],
+        #"solutions" : statistics["models"]["enumerated"],
+      },
+
+      "sol" : sol
+    }
+
+    json.dump(stats, open("stats.json","w+"), indent=True)
+
+
+#end.
