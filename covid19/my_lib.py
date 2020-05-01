@@ -56,7 +56,7 @@ class IOHelper:
 
 class MyInstance:
 
-    def __init__(self, k=None,h=None, m=None,p=None,o=None,q=None):
+    def __init__(self, k,h, m=0,p=0,o=0,q=0):
         #self.values = {'K':None,'H':None,'M':None,'P':None,'O':None,'Q':None}
         self.values = { 'K':k,'H':h,'M':m,'P':p,'O':o,'Q':q }
 
@@ -154,7 +154,7 @@ class MyInstance:
         f = IOHelper.open_file(fpath, 'r')
 
         comment_char = '%'
-        values = {'K':None,'H':None,'M':None,'P':None,'O':None,'Q':None}
+        values = {'K':0,'H':0,'M':0,'P':0,'O':0,'Q':0}
 
         lines = f.readlines()
         for l in lines:
@@ -255,7 +255,7 @@ class InputGenerator:
                 ]
         while ins.stanze_necessarie() <= ins.numero_stanze():
             num = randint(0,len(getters)-1)
-            g,s = zip(getters,setters)[num]
+            g,s = list(zip(getters,setters))[num]
             val = g()
             s(val+1)
             last_num = num
@@ -266,7 +266,7 @@ class InputGenerator:
         # dove potrebbero essercene due (da escludere quelli in osservazione)
         getters.remove(ins.get_osservazione)
         setters.remove(ins.set_osservazione)
-        for g,s in zip(getters,setters):
+        for g,s in list(zip(getters,setters)):
             val = g()
             if val%2 == 1:
                 s(val+1)
@@ -274,9 +274,11 @@ class InputGenerator:
         assert(ins.stanze_necessarie() <= ins.numero_stanze())
 
 
-    def istanza_casuale(k,h):
+    def gen_istanza_casuale(k,h):
         """ Torna un'istanza casuale per k e h dati """
-        ins = MyInstance(k,h).satura_stanze()
+        ins = MyInstance(k,h)
+        InputGenerator.satura_stanze(ins)
+
         getters = [
                 ins.get_malati,
                 ins.get_positivi,
@@ -291,67 +293,105 @@ class InputGenerator:
                 ]
 
         if randint(0,2) != 2: # due volte su tre
-            # rimuovo un po' di persone a caso
-            n_rimuovere = randint(1, capienza_max(values)//4)
+            # rimuovo al piu' 1/4 di persone a caso
+            n_rimuovere = randint(1, ins.capienza_max()//4)
             rimosse=0
             while rimosse != n_rimuovere:
                 num = randint(0,len(getters)-1)
                 da_rimuovere = randint(1,n_rimuovere-rimosse)
-                g,s = zip(getters,setters)[num]
+                g,s = list(zip(getters,setters))[num]
                 val = g()
                 if val >= da_rimuovere:
                     s(val-da_rimuovere)
                     rimosse += da_rimuovere
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-        else:
-            ## dimezzo Malati, Positivi o Quarantena
-            #getters.remove(ins.get_osservazione)
-            #setters.remove(ins.set_osservazione)
-            #keys = ['M','P','Q']
-            #key = keys[randint(0,len(keys)-1)]
-            #values[key] = values[key]//2 + values[key]%2 #mantengo dispari se era disp
-            print("else")
+        else: # TODO verificare se possibile fare altre modifiche
+            # dimezzo Malati, Positivi o Quarantena
+            getters.remove(ins.get_osservazione)
+            setters.remove(ins.set_osservazione)
+
+            num = randint(0,len(getters)-1)
+            g,s = list(zip(getters,setters))[num]
+            val = g()
+
+            s(val//2 + val%2) #mantengo dispari se era disp
 
 
-        ## Se nessun valore e' > 0 ... qualcosa non va
-        #qulcs_non_va = True
-        #for key in keys:
-        #    qulcs_non_va = qulcs_non_va and (values[key] == 0)
-        #if qulcs_non_va:
-        #    print("ERROR! Qualcosa non va... Values tutti == 0")
+        # Verifico che ci sia almeno un malato
+        getters.append(ins.get_osservazione)
+        setters.append(ins.set_osservazione)
+        getters.remove(ins.get_malati)
+        setters.remove(ins.set_malati)
+        if ins.get_malati() == 0:
+            # Converto un ospite in malato
+            while not ins.get_malati() > 0:
+                num = randint(0,len(getters)-1)
+                g,s = list(zip(getters,setters))[num]
+                val = g()
+                if val > 0:
+                    s(val-1)
+                    ins.set_malati(ins.get_malati()+1)
+            # Se ora le stanze non sono sufficienti, continuo a convertire
+            while not (ins.stanze_necessarie() <= ins.numero_stanze()):
+                num = randint(0,len(getters)-1)
+                g,s = list(zip(getters,setters))[num]
+                val = g()
+                if val > 0:
+                    s(val-1)
+                    ins.set_malati(ins.get_malati()+1)
 
-        ## Verifico che ci sia almeno un malato
-        ## Se non c'e' allora converto uno degli altri in malato
-        #if values['M'] == 0:
-        #    key = keys[randint(0,len(keys)-1)]
-        #    while not values[key] > 0:
-        #        key = keys[randint(0,len(keys)-1)]
-        #    if values[key] > 0:
-        #        values[key] -=1
-        #        values['M'] +=1
-        #return values
 
-    def write_istanze(n, k_min,h_min, k_max,h_max,
-            order=None, delete_old=True):
-        """ Genera n istanze causali con k e h nei range dati poi
-            le salva nei formati .dzn e .lp nelle cartelle
+        assert(ins.get_malati() > 0)
+        assert(ins.stanze_necessarie() <= ins.numero_stanze())
+        return ins
+
+
+    def gen_istanze(n, k_min,h_min, k_max,h_max,
+            order=None, delete_old=False, write=False):
+
+        """ Ritorna n istanze causali con k e h nei range(*_min,*_max)
+            se write=True le salva nei formati .dzn e .lp nelle cartelle
             INPUT_MZN_DIR INPUT_LP_DIR rispettivamente
             Se delete_old=True allora svuota le cartelle prima di generare
             """
+        # Dente di sega
+        inss = InputGenerator._gen_istanze(n, k_min,h_min, k_max,h_max)
+        # TODO order
+
+        if delete_old:
+            IOHelper.del_dir(INPUT_MZN_DIR)
+            IOHelper.del_dir(INPUT_LP_DIR)
+
+        if write:
+            IOHelper.create_dir(INPUT_MZN_DIR)
+            IOHelper.create_dir(INPUT_LP_DIR) # TODO
+            for i,ins in enumerate(inss):
+                fpath = IOHelper.gen_fpath(i,
+                        INPUT_MZN_DIR, INPUT_MZN_PREFIX, INPUT_MZN_EXT)
+                ins.write_dzn(fpath)
+
+                # TODO
+                #fpath = IOHelper.gen_fpath(i,
+                #        INPUT_LP_DIR, INPUT_LP_PREFIX, INPUT_LP_EXT)
+                #ins.write_lp(fpath)
+
+        return inss
+
+
 
     def _gen_istanze(n, k_min,h_min, k_max,h_max):
         """ Torna una lista di n istanze casuali con
             k in range(k_min,k_max) e h in range(h_min,h_max) """
+        inss = []
+        for i in range(n):
+            for k in range(k_min,k_max):
+                for h in range(h_min,h_max):
+                    inss.append(InputGenerator.gen_istanza_casuale(k,h))
+        return inss
 
 
 
 
-class BatchCoordinator:
+class BatchCoordinator: # TODO
     """ Un Batch e' l'insieme:
         - dei modelli mzn e lp
         - delle cartelle di input e output sia mzn che lp
@@ -381,31 +421,108 @@ class AbstractRunner:
         su un'istanza specifica
         Si puo' specificare se mostrare la soluzione, salvarla o entrambi """
 
-    #@abstractmethod
-    def run(self, instance_num=None, show=False, save=True):
-        """ Esegue il modello su tutte le istanze oppure solo quella del numero
-            corrispondente
-            Se il numero non viene specificato il modello viene eseguito su tutte
-            le istanze """
-    #    # Devo verificare che sia inizzializzato
-    #    if not (got_model() and got_instance()):
-    #        #TODO
-    #        print("ERRORE")
+    def __init__(self, model_path):
+        self.model_path=model_path
+        self.model=None
+        self.load_model(model_path)
 
-    #def got_model(self):
-    #    """ Return True se il modello e' stato inizializzato correttamente """
-    #def got_instance(self):
-    #    """ Return True se l'istanza e' stato inizializzato correttamente """
+
+    def load_model(self, model_path=None):
+        """ Carica modello del path indicato, se non viene specificato
+            usa il campo self.model_path """
+
+    #@abstractmethod
+    def run(self, instance_num, show=True, save=False):
+        """ Esegue il modello sull'istanza corrispondente al numero dato """
+        if not self.runnable():
+            raise "Model unrunnable!"
+
+        fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
+                                   self.input_prefix, self.input_ext)
+        # TODO
+        # TODO
+        # TODO
+        # TODO
+        instance = Instance(gecode, model)
+        initialize_instance(instance, input_num)
+            result = instance.solve()
+
+            output_fpath = gen_fpath(input_num, output_dir,
+                    OUTPUT_PREFIX, OUTPUT_EXT)
+
+            write_output(result, instance, output_fpath)
+        # TODO
+        # TODO
+        # TODO
+        # TODO
+
+
+    #@abstractmethod
+    def runs(self, instance, show=True, save=False):
+        """ Esegue il modello sull'istanza data """
+        if not self.runnable():
+            raise "Model unrunnable!"
+
+    #@abstractmethod
+    def runnable(self):
+        """ Ritorna True se il modello puo' essere eseguito """
 
 
 class RunnerMzn(AbstractRunner):
-    """ Permette di eseguire un modello mzn su tutte le istanze oppure su un'istanza specificata dal numero """
-    def run(self, instance_num=None, show=False, save=True):
-        #TODO
-        pass
+    """ Permette di eseguire un modello mzn su tutte le istanze oppure
+        su un'istanza specificata dal numero """
+    def __init__(self, model_path, solver_name="gecode"):
+        self.model_path=model_path
+        self.solver_name=solver_name
+        self.model=None
+        self.solver=None
+
+        self.load_model(model_path)
+        self.load_solver(solver_name)
+
+
+    def load_model(self, model_path=None):
+        """ Carica modello del path indicato, se non viene specificato
+            usa il campo self.model_path """
+        if self.solver_name is None:
+            self.model = Model(self.model_path)
+        else:
+            self.model = Model(model_path)
+            self.model_path = model_path
+
+    def load_solver(self, solver_name=None):
+        """ Carica il solver indicato, se non viene specificato
+            usa il campo self.solver_name """
+        if solver_name is None:
+            self.solver = Solver.lookup(self.solver_name)
+        else:
+            self.solver = Solver.lookup(solver_name)
+            self.solver_name = solver_name
+
+    def run(self, instance_num, show=True, save=False):
+        """ Esegue il modello sull'istanza corrispondente al numero dato """
+        super().run(instance_num,show,save)
+        # devo caricare il modello giusto
+        ins = MyInstance(1,2,1,1,1,1) # TODO REMOVE
+        self.runs(ins,show,save)
+
+    def runs(self, instance, show=True, save=False):
+        """ Esegue il modello sull'istanza data """
+        super().runs(instance,show,save)
+
+
+    def runnable(self):
+        return (not self.model is None and
+                not self.solver is None)
+
+
 
 class RunnerLp(AbstractRunner):
-    """ Permette di eseguire un modello lp su tutte le istanze oppure su un'istanza specificata dal numero """
+    """ Permette di eseguire un modello lp su tutte le istanze oppure
+        su un'istanza specificata dal numero """
+    def load_model(self, model_path=None):
+        self.model="lp"
+
     def run(self, instance_num=None, show=False, save=True):
         #TODO
         pass
