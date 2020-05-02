@@ -11,9 +11,10 @@ from random import randint
 import random
 random.seed(datetime.now())
 
-# Per minizinc
-import json
 from minizinc import Instance, Model, Solver
+import clingo
+import json
+
 
 # Le mie globali
 from my_globals import *
@@ -105,7 +106,29 @@ class MyInstance:
 
     def write_lp(self, fpath):
         """ Scrive l'istanza in formato lp nel path dato """
-        raise Exception("Not implemented")
+        assert(self.values['K']>0  and self.values['H']>0  and
+               self.values['M']>=0 and self.values['P']>=0 and
+               self.values['O']>=0 and self.values['Q']>=0)
+        self.fpath=fpath
+        dzn_ids_to_lp = {
+                "K":"corridoi(       ",
+                "H":"stanze_per_lato(",
+                "M":"malato(1..      ",
+                "P":"positivo(1..    ",
+                "O":"osservazione(1..",
+                "Q":"quarantena(1..  "
+                }
+
+        f = IOHelper.open_file(fpath, 'w+')
+
+        lp_enc = ""
+        for k in self.values.keys():
+            if self.values[k] != 0:
+                lp_enc += dzn_ids_to_lp[k]
+                lp_enc += str(self.values[k])
+                lp_enc += ").\n"
+
+        f.write(lp_enc)
 
 
     # Getter e Setter ####################
@@ -160,6 +183,18 @@ class MyInstance:
 
         f = IOHelper.open_file(fpath, 'r')
 
+        if INPUT_MZN_EXT in fpath:
+            values = MyInstance._read_mzn(f)
+        elif INPUT_LP_EXT in fpath:
+            values = MyInstance._read_lp(f)  # TODO
+        else:
+            raise Exception("File neither .mzn or .lp!")
+        ins = MyInstance( k=values['K'], h=values['H'], m=values['M'],
+                          p=values['P'], o=values['O'], q=values['Q'])
+        ins.fpath=fpath
+        return ins
+
+    def _read_mzn(f):
         comment_char = '%'
         values = {'K':0,'H':0,'M':0,'P':0,'O':0,'Q':0}
 
@@ -178,11 +213,11 @@ class MyInstance:
                 if k in values.keys():
                     # TODO try catch su int
                     values[k] = int(v)
+        return values
 
-        ins = MyInstance( k=values['K'], h=values['H'], m=values['M'],
-                          p=values['P'], o=values['O'], q=values['Q'])
-        ins.fpath=fpath
-        return ins
+    def _read_lp(f):
+        raise Exception("_rea_lp not implemented!") # TODO
+
 
 
 class MySolution():
@@ -280,14 +315,13 @@ class MySolution():
         """ Presa una soluzione e relativa istanza di un modello mzn ritorna
             la MySolution equivalente """
         msol = MySolution()
+        msol.model_type = "MZN"
         sol = res.solution
         if sol is None: # TODO check if UNSAT
-            msol.model_type = "MZN"
             msol.sat = False
             msol.solution = None
             return msol
         # else
-        msol.model_type = "MZN"
         msol.sat = True
         msol.obj = int(res.objective)
         msol.time = float(res.statistics['time'].total_seconds())
@@ -303,6 +337,68 @@ class MySolution():
         msol.solution['Q'] = sol.quarantena
         return msol
 
+    def from_lp(res_model,ctl):
+        """ Preso un modello soluzione e il controller di istanza
+            di un modello lp ritorna la MySolution equivalente """
+        msol = MySolution()
+        msol.model_type = "LP"
+
+        # Lista di coppie (nome, len(args)) dei predicati e
+        # del loro numero di argomenti da usare per la soluzione
+        to_consider = [
+          ("corridoi",1),
+          ("stanze_per_lato",1),
+
+          ("malato",       2),
+          ("positivo",     2),
+          ("osservazione", 2),
+          ("quarantena",   2)
+        ]
+
+        sol = {
+          "K":0,
+          "H":0,
+
+          "M":[],
+          "P":[],
+          "O":[],
+          "Q":[]
+        }
+
+        #if sol is None: # TODO check if UNSAT
+        #    msol.sat = False
+        #    msol.solution = None
+        #    return msol
+        # else
+        for symb in res_model:
+            name = symb.name
+            args = symb.arguments
+            if (name, len(args)) in to_consider:
+                # TODO fare qualche controllo... fidarsi e' bene ma...
+                if name == "corridoi":
+                    sol["K"]=args[0].number
+                elif name == "stanze_per_lato":
+                    sol["H"]=args[0].number
+                else:
+                    sol[name[0].upper()].append(args[1].number)
+
+        statistics=ctl.statistics
+
+        msol.sat = True
+        msol.obj = int(statistics["summary"]["costs"][0])
+
+        msol.time = statistics["summary"]["times"]["total"]
+        msol.solveTime = statistics["summary"]["times"]["solve"]
+        #msol.sols_num = int(res.statistics['solutions'])
+
+        msol.solution['K'] = sol['K']
+        msol.solution['H'] = sol['H']
+
+        msol.solution['M'] = sol['M']
+        msol.solution['P'] = sol['P']
+        msol.solution['O'] = sol['O']
+        msol.solution['Q'] = sol['Q']
+        return msol
 
 
 class InputGenerator:
@@ -418,7 +514,6 @@ class InputGenerator:
 
     def gen_istanze(n, k_min,h_min, k_max,h_max,
             order=None, delete_old=False, write=False):
-
         """ Ritorna n istanze causali con k e h nei range(*_min,*_max)
             se write=True le salva nei formati .dzn e .lp nelle cartelle
             INPUT_MZN_DIR INPUT_LP_DIR rispettivamente
@@ -440,10 +535,9 @@ class InputGenerator:
                         INPUT_MZN_DIR, INPUT_MZN_PREFIX, INPUT_MZN_EXT)
                 ins.write_dzn(fpath)
 
-                # TODO
-                #fpath = IOHelper.gen_fpath(i,
-                #        INPUT_LP_DIR, INPUT_LP_PREFIX, INPUT_LP_EXT)
-                #ins.write_lp(fpath)
+                fpath = IOHelper.gen_fpath(i,
+                        INPUT_LP_DIR, INPUT_LP_PREFIX, INPUT_LP_EXT)
+                ins.write_lp(fpath)
 
         return inss
 
@@ -547,8 +641,6 @@ class RunnerMzn(AbstractRunner):
     def __init__(self, model_path, solver_name="gecode"):
         self.model_path=model_path
         self.solver_name=solver_name
-        self.model=None
-        self.solver=None
 
         self.load_model(model_path)
         self.load_solver(solver_name)
@@ -560,7 +652,6 @@ class RunnerMzn(AbstractRunner):
         self.output_dir    = OUTPUT_MZN_DIR
         self.output_prefix = OUTPUT_MZN_PREFIX
         self.output_ext    = OUTPUT_MZN_EXT
-
 
     def load_model(self, model_path=None):
         """ Carica modello del path indicato, se non viene specificato
@@ -580,7 +671,6 @@ class RunnerMzn(AbstractRunner):
             self.solver = Solver.lookup(solver_name)
             self.solver_name = solver_name
 
-
     def run(self, instance_num, show=True, save=False):
         """ Esegue il modello sull'istanza corrispondente al numero dato """
         assert(type(instance_num) == int)
@@ -588,12 +678,19 @@ class RunnerMzn(AbstractRunner):
         fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
                                    self.input_prefix, self.input_ext)
         myIns = MyInstance.read(fpath)
-        return self.runs(myIns,show)
+        msol = self.runs(myIns,show)
+        if save:
+            IOHelper.create_dir(self.output_dir)
+            fpath = IOHelper.gen_fpath(instance_num, self.output_dir,
+                                   self.output_prefix, self.output_ext)
+            msol.write(fpath)
+
+        return msol
 
     def runs(self, myIns, show=True):
         """ Esegue il modello sulla MyInstance data """
         assert(type(myIns) == MyInstance)
-        super().runs(myIns,show,save)
+        super().runs(myIns,show)
         fpath = myIns.get_path()
         instance = self.initialize_instance(myIns)
         result = instance.solve()
@@ -631,9 +728,73 @@ class RunnerMzn(AbstractRunner):
 class RunnerLp(AbstractRunner):
     """ Permette di eseguire un modello lp su tutte le istanze oppure
         su un'istanza specificata dal numero """
-    def load_model(self, model_path=None):
-        self.model="lp"
+    def __init__(self, model_path, solver_name="gecode"):
+        self.model_path=model_path
 
-    def run(self, instance_num=None, show=False, save=True):
+        self.load_model(model_path)
+
+        self.input_dir    = INPUT_LP_DIR
+        self.input_prefix = INPUT_LP_PREFIX
+        self.input_ext    = INPUT_LP_EXT
+
+        self.output_dir    = OUTPUT_LP_DIR
+        self.output_prefix = OUTPUT_LP_PREFIX
+        self.output_ext    = OUTPUT_LP_EXT
+
+    def load_model(self, model_path=None):
+        ctl = clingo.Control()
+        ctl.load("./covid19_mod.lp")
+        self.model=ctl
+
+
+    def run(self, instance_num, show=True, save=False):
+        """ Esegue il modello sull'istanza corrispondente al numero dato """
+        assert(type(instance_num) == int)
+        super().run(instance_num,show,save)
+        fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
+                                   self.input_prefix, self.input_ext)
+
+        ctl=self.model
+        ctl.load(fpath)
+        ctl.ground([("base", [])])
+
+        res_model = None
+        with ctl.solve(on_model=lambda m: print(end=""), yield_=True) as handle:
+          for m in handle:
+              res_model = m.symbols(atoms=True)
+
+        msol = MySolution.from_lp(res_model,ctl)
+        if show:
+            print(fpath)
+            print(msol)
+        if save:
+            IOHelper.create_dir(self.output_dir)
+            fpath = IOHelper.gen_fpath(instance_num, self.output_dir,
+                                   self.output_prefix, self.output_ext)
+            msol.write(fpath)
+
+
+        # Devo ricaricarlo ogni volta perche' l'ho sporcato con
+        # l'istanza in input. ctl non si pu' copiare/clonare...
+        self.load_model(self.model_path)
+        return msol
+
+
+    def runs(self, myIns, show=True):
+        """ Esegue il modello sulla MyInstance data """
+        assert(type(myIns) == MyInstance)
+        super().runs(myIns,show)
+
+        raise Exception("runs not implemented!")
         #TODO
-        pass
+
+        # Devo ricaricarlo ogni volta perche' l'ho sporcato con
+        # l'istanza in input. ctl non si pu' copiare/clonare...
+        self.load_model(self.model_path)
+        return msol
+
+
+
+    def runnable(self):
+        return( super().runnable() )
+
