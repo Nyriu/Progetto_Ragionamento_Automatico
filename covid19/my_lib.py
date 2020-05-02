@@ -34,6 +34,8 @@ class IOHelper:
     def gen_fpath(num, dir_path, prefix, suffix):
         """ Dato numero, suffiso e prefisso torna la stringa del path formato da
             dir_path + prefix + numero con due cifre + suffix """
+        #num = int(num)
+
         dir_path = IOHelper.correct_dir_path(dir_path)
         fpath = dir_path + prefix
         fpath += '{:02d}'.format(num)
@@ -59,6 +61,7 @@ class MyInstance:
     def __init__(self, k,h, m=0,p=0,o=0,q=0):
         #self.values = {'K':None,'H':None,'M':None,'P':None,'O':None,'Q':None}
         self.values = { 'K':k,'H':h,'M':m,'P':p,'O':o,'Q':q }
+        self.fpath = None
 
     """
     #def __init__(self, values):
@@ -93,6 +96,7 @@ class MyInstance:
         assert(self.values['K']>0  and self.values['H']>0  and
                self.values['M']>=0 and self.values['P']>=0 and
                self.values['O']>=0 and self.values['Q']>=0)
+        self.fpath=fpath
 
         f = IOHelper.open_file(fpath, 'w+')
         for k in self.values.keys():
@@ -101,7 +105,7 @@ class MyInstance:
 
     def write_lp(self, fpath):
         """ Scrive l'istanza in formato lp nel path dato """
-        raise "Not implemented"
+        raise Exception("Not implemented")
 
 
     # Getter e Setter ####################
@@ -123,6 +127,8 @@ class MyInstance:
     def get_quarantena(self):
         assert(self.values['Q']>=0)
         return self.values['Q']
+    def get_path(self):
+        return self.fpath
 
     def set_corridoi(self,k):
         assert(k>0); self.values['K'] = k
@@ -149,6 +155,7 @@ class MyInstance:
         #TODO qua gestire in automatico i due formati
         #TODO warning se e' mal formato
         if not os.path.isfile(fpath):
+            raise Exception("File does not exist!")
             return None
 
         f = IOHelper.open_file(fpath, 'r')
@@ -174,6 +181,7 @@ class MyInstance:
 
         ins = MyInstance( k=values['K'], h=values['H'], m=values['M'],
                           p=values['P'], o=values['O'], q=values['Q'])
+        ins.fpath=fpath
         return ins
 
 
@@ -183,54 +191,117 @@ class MySolution():
         Un campo apposito permette di capire se la soluzione e' stata
         ottenuta con modello mzn o lp """
 
-    def __init__(model_output):
-        """ Inizializza MySolution a partire dall'output
-            di un modello mzn o lp """
-        # TODO if da mzn fai una roba
-        # TODO elif da lp fanne un'altra
-        # TODO else esplodi
+    # TODO gestire il timeout
+
+    #def __init__(model_output):
+    #    """ Inizializza MySolution a partire dall'output
+    #        di un modello mzn o lp """
+    #    # TODO if da mzn fai una roba
+    #    # TODO elif da lp fanne un'altra
+    #    # TODO else esplodi
+    def __init__(self):
+        """ Inizializza una MySolution vuota """
+        self.model_type = "" # can be "MZN" or "LP"
+        self.sat        = False
+        self.obj        = -1
+        self.solveTime  = -1.0
+        self.time       = -1.0
+        #self.sols_num   = 0
+        self.solution   = {"K":0,"H":0, "M":[],"P":[],"O":[],"Q":[]}
+
 
     def write(self, fpath):
         """ Scrive la soluzione in formato json nel path dato """
+        data = {}
+        data["model_type"] =self.model_type
+        data["sat"]        =self.sat
+        data["obj"]        =self.obj
+        data["solveTime"]  =self.solveTime
+        data["time"]       =self.time
+        data["sol"]        = self.solution
+
+        # TODO try catch
+        json.dump(data, open(fpath, 'w+'), indent=True)
+
+
+    def _get_symbol(self, s):
+        """ Dato un numero di una stanza ritorna il simbolo corretto """
+        if (self.solution['M'].count(s) == 1):
+            symb = SYMBOLS['malato']
+        elif (self.solution['M'].count(s) == 2):
+            symb = SYMBOLS['malati']
+
+        elif (self.solution['P'].count(s) == 1):
+            symb = SYMBOLS['positivo']
+        elif (self.solution['P'].count(s) == 2):
+            symb = SYMBOLS['positivi']
+
+        elif (self.solution['O'].count(s) == 1):
+            symb = SYMBOLS['osservazione']
+
+        elif (self.solution['Q'].count(s) == 1):
+            symb = SYMBOLS['quarantena']
+        elif (self.solution['Q'].count(s) == 2):
+            symb = SYMBOLS['quaranteni']
+        else:
+            symb = SYMBOLS['empty']
+        return symb;
+
+    def __repr__(self):
+        return self.__str__()
+    def __str__(self):
+        if self.sat == False:
+            t = "No solution"
+            return t
+        t = ""
+
+        K = self.solution['K']
+        H = self.solution['H']
+        s = 0
+        for k in range(K):
+            for h in range(2*H):
+                code = self._get_symbol(s)
+                e = " "
+                if (h==H-1 or h==2*H-1 or h==2*H*K-1):
+                    e = "\n"
+                if (h==H-1):
+                    code += "\t" + str(k)
+
+                t += code + e
+                s+=1
+            t += '\n'
+        return t
 
     # Metodi statici ####################
     def read(fpath):
         """ Ritorna MySolution del path indicato """
 
+    def from_mzn(res,ins):
+        """ Presa una soluzione e relativa istanza di un modello mzn ritorna
+            la MySolution equivalente """
+        msol = MySolution()
+        sol = res.solution
+        if sol is None: # TODO check if UNSAT
+            msol.model_type = "MZN"
+            msol.sat = False
+            msol.solution = None
+            return msol
+        # else
+        msol.model_type = "MZN"
+        msol.sat = True
+        msol.obj = int(res.objective)
+        msol.time = float(res.statistics['time'].total_seconds())
+        msol.solveTime = float(res.statistics['solveTime'].total_seconds())
+        #msol.sols_num = int(res.statistics['solutions'])
 
-    class AbstractConverter():
-        """ Usando metodo convert permette di ottenere la codifica univoca
-            di una soluzione """
-        #@abstractmethod
-        def convert(self, model_output):
-            pass
-        def check(self):
-            """ Verifica che la conversione sia stata
-                effettuata correttamente """
+        msol.solution['K'] = ins['K']
+        msol.solution['H'] = ins['H']
 
-    class ConverterMzn(AbstractConverter):
-        """ Permette di ottenere la codifica univoca di una soluzione di
-            un modello mzn """
-        def convert(model_output):
-            converted = _from_mzn(model_output)
-            if check(converted):
-                return converted
-
-        def _from_mzn(model_output):
-            """ Converte l'output di un modello mzn in quello univoco """
-
-    class ConverterLp(AbstractConverter):
-        """ Permette di ottenere la codifica univoca di una soluzione di
-            un modello lp """
-        def convert(model_output):
-            converted = _from_lp(model_output)
-            if check(converted):
-                return converted
-
-        def _from_lp(model_output):
-            """ Converte l'output di un modello lp in quello univoco """
-
-
+        msol.solution['M'] = sol.malati
+        msol.solution['P'] = sol.positivi
+        msol.solution['O'] = sol.osservazione
+        msol.solution['Q'] = sol.quarantena
+        return msol
 
 
 
@@ -426,46 +497,48 @@ class AbstractRunner:
         self.model=None
         self.load_model(model_path)
 
+        self.input_dir    = None
+        self.input_prefix = None
+        self.input_ext    = None
+
+        self.output_dir    = None
+        self.output_prefix = None
+        self.output_ext    = None
+
+
 
     def load_model(self, model_path=None):
         """ Carica modello del path indicato, se non viene specificato
             usa il campo self.model_path """
 
     #@abstractmethod
-    def run(self, instance_num, show=True, save=False):
-        """ Esegue il modello sull'istanza corrispondente al numero dato """
-        if not self.runnable():
-            raise "Model unrunnable!"
+    def add_instance(self, fpath):
+        """ Aggiunge l'istanza al modello """
 
-        fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
-                                   self.input_prefix, self.input_ext)
-        # TODO
-        # TODO
-        # TODO
-        # TODO
-        instance = Instance(gecode, model)
-        initialize_instance(instance, input_num)
-            result = instance.solve()
-
-            output_fpath = gen_fpath(input_num, output_dir,
-                    OUTPUT_PREFIX, OUTPUT_EXT)
-
-            write_output(result, instance, output_fpath)
-        # TODO
-        # TODO
-        # TODO
-        # TODO
 
 
     #@abstractmethod
-    def runs(self, instance, show=True, save=False):
-        """ Esegue il modello sull'istanza data """
+    def run(self, instance_num, show=True, save=False):
+        """ Esegue il modello sull'istanza corrispondente al numero dato """
         if not self.runnable():
-            raise "Model unrunnable!"
+            raise Exception("Model unrunnable!")
+
+    #@abstractmethod
+    def runs(self, myIns, show=True):
+        """ Esegue il modello sulla MyInstance data """
+        if not self.runnable():
+            raise Exception("Model unrunnable!")
 
     #@abstractmethod
     def runnable(self):
         """ Ritorna True se il modello puo' essere eseguito """
+        return(not self.model         is None and
+               not self.input_dir     is None and
+               not self.input_prefix  is None and
+               not self.input_ext     is None and
+               not self.output_dir    is None and
+               not self.output_prefix is None and
+               not self.output_ext    is None)
 
 
 class RunnerMzn(AbstractRunner):
@@ -479,6 +552,14 @@ class RunnerMzn(AbstractRunner):
 
         self.load_model(model_path)
         self.load_solver(solver_name)
+
+        self.input_dir    = INPUT_MZN_DIR
+        self.input_prefix = INPUT_MZN_PREFIX
+        self.input_ext    = INPUT_MZN_EXT
+
+        self.output_dir    = OUTPUT_MZN_DIR
+        self.output_prefix = OUTPUT_MZN_PREFIX
+        self.output_ext    = OUTPUT_MZN_EXT
 
 
     def load_model(self, model_path=None):
@@ -499,22 +580,52 @@ class RunnerMzn(AbstractRunner):
             self.solver = Solver.lookup(solver_name)
             self.solver_name = solver_name
 
+
     def run(self, instance_num, show=True, save=False):
         """ Esegue il modello sull'istanza corrispondente al numero dato """
+        assert(type(instance_num) == int)
         super().run(instance_num,show,save)
-        # devo caricare il modello giusto
-        ins = MyInstance(1,2,1,1,1,1) # TODO REMOVE
-        self.runs(ins,show,save)
+        fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
+                                   self.input_prefix, self.input_ext)
+        myIns = MyInstance.read(fpath)
+        return self.runs(myIns,show)
 
-    def runs(self, instance, show=True, save=False):
-        """ Esegue il modello sull'istanza data """
-        super().runs(instance,show,save)
+    def runs(self, myIns, show=True):
+        """ Esegue il modello sulla MyInstance data """
+        assert(type(myIns) == MyInstance)
+        super().runs(myIns,show,save)
+        fpath = myIns.get_path()
+        instance = self.initialize_instance(myIns)
+        result = instance.solve()
+
+        msol = MySolution.from_mzn(result,instance)
+        if show:
+            print(fpath)
+            print(msol)
+        return msol
 
 
     def runnable(self):
-        return (not self.model is None and
-                not self.solver is None)
+        return( super().runnable()         and
+                not self.solver    is None)
 
+    def initialize_instance(self, myIns):
+        """ Data una MyInstance ritorna una Instance equivalente """
+        assert(not self.model is None)
+        assert(not self.solver is None)
+
+        if myIns is None:
+            raise Exception("myIns is None")
+
+        instance = Instance(self.solver, self.model)
+        instance["K"]= myIns.get_corridoi()
+        instance["H"]= myIns.get_stanze_per_lato()
+
+        instance["M"]= myIns.get_malati()
+        instance["P"]= myIns.get_positivi()
+        instance["O"]= myIns.get_osservazione()
+        instance["Q"]= myIns.get_quarantena()
+        return instance
 
 
 class RunnerLp(AbstractRunner):

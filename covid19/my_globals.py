@@ -48,7 +48,7 @@ BATCH_COMPONENTS = [
 
 
 # Pretty print dell'Output
-PRETTY_SYMBOLS = {
+SYMBOLS = {
         "empty"        : "--",
         "malato"       : "-M",
         "malati"       : "MM",
