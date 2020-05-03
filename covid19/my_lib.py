@@ -3,6 +3,8 @@
 ##################################################
 # Varie
 import os, shutil
+import re
+import json
 from math import ceil
 
 # Per Random
@@ -11,9 +13,9 @@ from random import randint
 import random
 random.seed(datetime.now())
 
+# Modelli
 from minizinc import Instance, Model, Solver
 import clingo
-import json
 
 
 # Le mie globali
@@ -310,6 +312,7 @@ class MySolution():
     # Metodi statici ####################
     def read(fpath):
         """ Ritorna MySolution del path indicato """
+        # TODO gestire sat:False
 
     def from_mzn(res,ins):
         """ Presa una soluzione e relativa istanza di un modello mzn ritorna
@@ -342,6 +345,11 @@ class MySolution():
             di un modello lp ritorna la MySolution equivalente """
         msol = MySolution()
         msol.model_type = "LP"
+
+        if res_model is None: # Il modello e' UNSAT
+            msol.sat = False
+            msol.solution = None
+            return msol
 
         # Lista di coppie (nome, len(args)) dei predicati e
         # del loro numero di argomenti da usare per la soluzione
@@ -557,28 +565,61 @@ class InputGenerator:
 
 
 class BatchCoordinator: # TODO
-    """ Un Batch e' l'insieme:
-        - dei modelli mzn e lp
-        - delle cartelle di input e output sia mzn che lp
-        - di grafici relativi a modelli e input/output
-
-        BatchCoordinator si preoccupa di generare e salvare
-        un Batch correttamente
+    """ Un batch e' l'insieme degli elementi che matchano le regex
+        contenute in BATCH_COMPONENTS.
+        BatchCoordinator si preoccupa salvare un batch correttamente
         """
-    class Batch:
-        def __init__(self):
-            self.num =None
-            self.path=None
-
 
     def _biggest_batch_num():
         """ Verifica quali batch sono gia' stati creati e ritorna quello
             con il numero piu' grande """
 
-    def save_as_batch(dir_to_save):
+        IOHelper.create_dir(BATCH_ROOT_DIR)
+        batches_names = os.listdir(BATCH_ROOT_DIR)
+
+        max_num=0
+        for bat in batches_names:
+            num = int(bat.replace(BATCH_DIR_PREFIX, "")) # TODO try catch
+            if num > max_num:
+                max_num = num
+
+        return max_num
+
+    def save_as_batch(dir_to_save="./"):
         """ Raccoglie tutte le informazioni relative ad un
-            Batch all'interno della cartella data e le salva
-            come Batch in una sottocartella di BATCH_ROOT_DIR """
+            batch all'interno della cartella data e le salva
+            come batch in una sottocartella di BATCH_ROOT_DIR """
+        dir_to_save=IOHelper.correct_dir_path(dir_to_save)
+        IOHelper.create_dir(BATCH_ROOT_DIR)
+
+        batchnum = BatchCoordinator._biggest_batch_num() + 1
+
+        batch_path = BATCH_ROOT_DIR + BATCH_DIR_PREFIX + str(batchnum)
+        batch_path = IOHelper.correct_dir_path(batch_path)
+
+        IOHelper.create_dir(batch_path)
+
+        listdir = os.listdir(dir_to_save)
+
+        for name in listdir:
+            isdir = os.path.isdir(dir_to_save+name)
+            if isdir:
+                name = IOHelper.correct_dir_path(name)
+            move = False
+            for reg in BATCH_COMPONENTS:
+                x = re.search(reg, name)
+                move = move or (not x is None)
+            if move:
+                src_path = dir_to_save+name
+                dst_path = batch_path+name
+                if isdir:
+                    shutil.copytree(src_path,dst_path)
+                else:
+                    shutil.copy(src_path,dst_path)
+
+
+
+
 
 
 class AbstractRunner:

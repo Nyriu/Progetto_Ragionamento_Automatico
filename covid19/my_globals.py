@@ -1,6 +1,8 @@
 ##################################################
 # Globali
 ##################################################
+#MAIN_DIR="./" # TODO mettere in testa ad altri path
+
 # Inputs ####################
 INPUT_DIR    = "inputs/"
 INPUT_PREFIX = "input_"
@@ -32,17 +34,17 @@ BATCH_ROOT_DIR   = "batches/"
 BATCH_DIR_PREFIX = "batch_"
 
 BATCH_COMPONENTS = [
-        "*.mzn",
-        "*.lp",
-        INPUT_DIR,
+        ".*[.]mzn",
+        ".*[.]lp",
+        #INPUT_DIR,
         INPUT_MZN_DIR,
         INPUT_LP_DIR,
 
-        OUTPUT_DIR,
+        #OUTPUT_DIR,
         OUTPUT_MZN_DIR,
         OUTPUT_LP_DIR,
 
-        "*.png", "*.jpg", "*.jpeg"
+        ".*[.]png", ".*[.]jpg", ".*[.]jpeg"
         ]
 
 
