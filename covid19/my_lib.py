@@ -94,24 +94,21 @@ class MyInstance:
                self.values['O']         +\
                ceil(self.values['Q']/2)
 
-    def write_dzn(self, fpath):
-        """ Scrive l'istanza in formato dzn nel path dato """
+    def to_str_dzn(self):
+        """ Ritorna la stringa dell'istanza in formato dzn """
         assert(self.values['K']>0  and self.values['H']>0  and
                self.values['M']>=0 and self.values['P']>=0 and
                self.values['O']>=0 and self.values['Q']>=0)
-        self.fpath=fpath
-
-        f = IOHelper.open_file(fpath, 'w+')
+        text = ""
         for k in self.values.keys():
-            text = str(k) +  "=" + str(self.values[k]) + ";\n"
-            f.write(text)
+            text += str(k) +  "=" + str(self.values[k]) + ";\n"
+        return text
 
-    def write_lp(self, fpath):
-        """ Scrive l'istanza in formato lp nel path dato """
+    def to_str_lp(self):
+        """ Ritorna la strina dell'istanza in formato lp """
         assert(self.values['K']>0  and self.values['H']>0  and
                self.values['M']>=0 and self.values['P']>=0 and
                self.values['O']>=0 and self.values['Q']>=0)
-        self.fpath=fpath
         dzn_ids_to_lp = {
                 "K":"corridoi(       ",
                 "H":"stanze_per_lato(",
@@ -121,15 +118,32 @@ class MyInstance:
                 "Q":"quarantena(1..  "
                 }
 
-        f = IOHelper.open_file(fpath, 'w+')
-
         lp_enc = ""
         for k in self.values.keys():
             if self.values[k] != 0:
                 lp_enc += dzn_ids_to_lp[k]
                 lp_enc += str(self.values[k])
                 lp_enc += ").\n"
+        return lp_enc
 
+    def write_dzn(self, fpath):
+        """ Scrive l'istanza in formato dzn nel path dato """
+        assert(self.values['K']>0  and self.values['H']>0  and
+               self.values['M']>=0 and self.values['P']>=0 and
+               self.values['O']>=0 and self.values['Q']>=0)
+        self.fpath=fpath
+        f = IOHelper.open_file(fpath, 'w+')
+        dzn_enc = self.to_str_dzn()
+        f.write(dzn_enc)
+
+    def write_lp(self, fpath):
+        """ Scrive l'istanza in formato lp nel path dato """
+        assert(self.values['K']>0  and self.values['H']>0  and
+               self.values['M']>=0 and self.values['P']>=0 and
+               self.values['O']>=0 and self.values['Q']>=0)
+        self.fpath=fpath
+        f = IOHelper.open_file(fpath, 'w+')
+        lp_enc = self.to_str_lp()
         f.write(lp_enc)
 
 
@@ -804,7 +818,7 @@ class RunnerLp(AbstractRunner):
 
     def load_model(self, model_path=None):
         ctl = clingo.Control()
-        ctl.load("./covid19_mod.lp")
+        ctl.load(model_path)
         self.model=ctl
 
 
@@ -846,8 +860,20 @@ class RunnerLp(AbstractRunner):
         assert(type(myIns) == MyInstance)
         super().runs(myIns,show)
 
-        raise Exception("runs not implemented!")
-        #TODO
+        myIns.write_lp("tmp.lp")
+
+        ctl=self.model
+        ctl.load("tmp.lp")
+        ctl.ground([("base", [])])
+
+        res_model = None
+        with ctl.solve(on_model=lambda m: print(end=""), yield_=True) as handle:
+          for m in handle:
+              res_model = m.symbols(atoms=True)
+
+        msol = MySolution.from_lp(res_model,ctl)
+        if show:
+            print(msol)
 
         # Devo ricaricarlo ogni volta perche' l'ho sporcato con
         # l'istanza in input. ctl non si pu' copiare/clonare...

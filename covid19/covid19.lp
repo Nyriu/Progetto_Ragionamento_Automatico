@@ -424,10 +424,10 @@ cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 #minimize {C : cost(C)}.
 
 
-#show malato/2.
-#show positivo/2.
-#show osservazione/2.
-#show quarantena/2.
+%#show malato/2.
+%#show positivo/2.
+%#show osservazione/2.
+%#show quarantena/2.
 
 % #show scomodo/4.
 %#show vicini1/2.
