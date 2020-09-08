@@ -60,21 +60,21 @@ array[1..Q] of var stanze: quarantena;
 constraint
   % Al piu' due Malati nella stessa stanza
   forall(i in 1..M)
-    (sum(j in i+1..M)
-      (if (malati[i]==malati[j]) then 1 else 0 endif) <= 1)
+    (sum(j in 1..M)
+      (if (malati[i]==malati[j]) then 1 else 0 endif) <= 2)
   /\
   % Al piu' due Positivi nella stessa stanza
   forall(i in 1..P)
-    (sum(j in i+1..P)
-      (if (positivi[i]==positivi[j]) then 1 else 0 endif) <= 1)
+    (sum(j in 1..P)
+      (if (positivi[i]==positivi[j]) then 1 else 0 endif) <= 2)
   /\
   % In Osservazione isolati uno per stanza
   alldifferent(osservazione)
   /\
   % Al piu' due Quarantena nella stessa stanza
   forall(i in 1..Q)
-    (sum(j in i+1..Q)
-      (if (quarantena[i]==quarantena[j]) then 1 else 0 endif) <= 1)
+    (sum(j in 1..Q)
+      (if (quarantena[i]==quarantena[j]) then 1 else 0 endif) <= 2)
   /\
   % No stanze miste
   % TODO esiste un modo migliore?
@@ -180,25 +180,20 @@ constraint
 %solve :: restart_ann
 %      minimize c;
 
-%% ann: search_ann;
-%% ann: restart_ann;
-%% solve :: search_ann
-%%       %:: restart_ann
-%%       minimize c;
-%% 
-%% search_ann = seq_search([
-%%   int_search(malati,       smallest, indomain_min),
-%%   int_search(osservazione, smallest, indomain_min),
-%%   int_search(positivi,     smallest, indomain_random),
-%%   int_search(quarantena,   smallest, indomain_random),
-%% 
-%%   int_search([c], input_order, indomain_min)
-%% ]);
+ann: search_ann;
+ann: restart_ann;
+solve :: search_ann
+      %:: restart_ann
+      minimize c;
 
+search_ann = seq_search([
+  int_search(malati,       smallest, indomain_min),
+  int_search(osservazione, smallest, indomain_min),
+  int_search(positivi,     smallest, indomain_random),
+  int_search(quarantena,   smallest, indomain_random),
 
-%% solve minimize c;
-%% solve :: int_search(d, max_regret, indomain_split, complete) minimize distance;
-%% solve :: int_search(d, max_regret, indomain_min, complete) minimize distance;
+  int_search([c], input_order, indomain_min)
+]);
 
 %restart_ann = restart_linear(100000);
 %restart_ann = restart_geometric(10,1);

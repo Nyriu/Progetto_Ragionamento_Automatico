@@ -40,12 +40,13 @@ def main():
     #verbose = True
     verbose = False
 
+
     #mzn_path="./covid19.mzn"
-    mzn_path="./covid19_mod.mzn"
+    mzn_path="./covid19_mod.mzn" # TODO differenza tra mod e non mod?
     mzn = RunnerMzn(mzn_path)
 
-    #lp_path = "./covid19.lp"
-    lp_path = "./covid19_mod.lp"
+    lp_path = "./covid19.lp"
+    #lp_path = "./covid19_mod.lp" # TODO differenza tra mod e non mod?
     lp = RunnerLp(lp_path)
 
     mzn_inputs = os.listdir(my_globals.INPUT_MZN_DIR)

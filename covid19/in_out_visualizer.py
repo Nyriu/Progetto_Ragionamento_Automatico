@@ -39,6 +39,7 @@
 ###if __name__ == "__main__":
 ###    main()
 ###
+from my_globals import *
 import my_lib
 
 import curses
@@ -156,9 +157,10 @@ def main(stdscr):
                 old_input_text = input_text
                 old_output = output
 
-                input_text = my_lib.get_input_text(num)
+                input_text = my_lib.get_input_text(num,INPUT_MZN_DIR)
                 print("input_text " + input_text, file=open('tmp.txt', 'a+'))
-                output = my_lib.get_output(num)
+                mzn_output = my_lib.get_output(num,OUTPUT_MZN_DIR)
+                lp_output  = my_lib.get_output(num,OUTPUT_LP_DIR)
                 print("in fondo al try", file=open('tmp.txt', 'a+'))
 
             except Exception as inst:
@@ -176,11 +178,18 @@ def main(stdscr):
             print(output, file=open('tmp.txt', 'a+'))
 
             l_win.clear()
-            l_win.addstr(0,0, output)
+            l_win.addstr(0,0, mzn_output)
             r_win.clear()
-            r_win.addstr(0,0, input_text)
+            #r_win.addstr(0,0, input_text)
+            r_win.addstr(0,0, lp_output)
             b_win.clear()
             b_win.addstr(0,0, "Input num={:02d}".format(num))
+            inline_input_text = input_text
+            inline_input_text = inline_input_text.replace("\n", " ")
+            inline_input_text = inline_input_text.replace(";", " ")
+            inline_input_text = inline_input_text.replace("M", "\tM")
+            b_win.addstr(0,40, "{:s}".format(inline_input_text))
+
 
             #show_input(l_win, num)
             #show_result(r_win, num)

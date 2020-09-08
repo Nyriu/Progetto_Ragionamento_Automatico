@@ -291,6 +291,12 @@ class MySolution():
             t = "No solution"
             return t
         t = ""
+        t += "model_type" + "=" + str(self.model_type) + "\n"
+        t += "sat"        + "=" + str(self.sat       ) + "\n"
+        t += "obj"        + "=" + str(self.obj       ) + "\n"
+        t += "solveTime"  + "=" + str(self.solveTime ) + "\n"
+        t += "time"       + "=" + str(self.time      ) + "\n"
+        t += 2*"\n"
 
         K = self.solution['K']
         H = self.solution['H']
@@ -313,10 +319,24 @@ class MySolution():
     def read(fpath):
         """ Ritorna MySolution del path indicato """
         # TODO gestire sat:False
+        msol = MySolution()
+        data = json.load(open(fpath))
+
+        msol.model_type = data["model_type"]
+        msol.sat        = data["sat"]
+        msol.obj        = data["obj"]
+        msol.solveTime  = data["solveTime"]
+        msol.time       = data["time"]
+        #msol.sols_num   = 0
+        msol.solution   = data["sol"]
+        return msol
 
     def from_mzn(res,ins):
         """ Presa una soluzione e relativa istanza di un modello mzn ritorna
             la MySolution equivalente """
+
+        # print("DEBUG:: res= " + str(res))
+
         msol = MySolution()
         msol.model_type = "MZN"
         sol = res.solution
@@ -846,31 +866,34 @@ class RunnerLp(AbstractRunner):
 ### TODO refactor in MySolution ##########################################################
 ### TODO refactor in MySolution ##########################################################
 
-# Dati il numero e la dir carica ritorna il dizionario
-# della soluzione relativa all input col numero dato
-# Se il file non esiste retun None
-def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
-    if not directory[-1] == '/':
-        directory = directory + '/'
+## # Dati il numero e la dir carica ritorna il dizionario
+## # della soluzione relativa all input col numero dato
+## # Se il file non esiste retun None
+## def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
+##     if not directory[-1] == '/':
+##         directory = directory + '/'
+##     fpath = IOHelper.gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
+##     if not os.path.isfile(fpath):
+##         if not suppress_error:
+##             print("File does not exist!\n path: %s " %(fpath))
+##         return None
+##
+##     return json.load(open(fpath))
+
+
+def get_output(num, directory=OUTPUT_MZN_DIR):
     fpath = IOHelper.gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
-    if not os.path.isfile(fpath):
-        if not suppress_error:
-            print("File does not exist!\n path: %s " %(fpath))
-        return None
+    data = MySolution.read(fpath)
+    # output = ""
 
-    return json.load(open(fpath))
+    # output += str(to_string_statistic(data['stat']))
+    # output += str(get_objective(data['obj']))
+    # output += '\n\n'
 
+    # output += str(to_string_sol(data['sol']))
+    # output += '\n'
 
-def get_output(num, directory=OUTPUT_DIR):
-    data = read_output(num, directory)
-    output = ""
-
-    output += str(to_string_statistic(data['stats']))
-    output += str(get_objective(data['obj']))
-    output += '\n\n'
-
-    output += str(to_string_sol(data['sol']))
-    output += '\n'
+    output = str(data)
     return output
 
 
@@ -891,7 +914,8 @@ def get_input_text(num, dest_dir=INPUT_DIR):
     #    print(t)
     #    return t
 
-    fpath = IOHelper.gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
+    fpath = IOHelper.gen_fpath(num, dest_dir, INPUT_MZN_PREFIX, INPUT_MZN_EXT)
+    print("fpath " + fpath, file=open('tmp.txt', 'a+'))
 
     if not os.path.isfile(fpath):
         t = "ERROR! File does not exists!"
