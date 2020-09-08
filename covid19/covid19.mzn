@@ -48,6 +48,7 @@ int: Q; % quarantena precauzionale
 % da H..2*H-1 sono del primo corridio lato sx
 % da 2*H..3*H-1 sono del secondo corridio lato dx
 % ecc...
+
 set of int: stanze = 0..2*H*K-1;
 
 % 
@@ -62,6 +63,11 @@ constraint
   forall(i in 1..M)
     (sum(j in i+1..M)
       (if (malati[i]==malati[j]) then 1 else 0 endif) <= 1)
+
+  %at_most1(malati)
+  %TODO
+  %among(2, malati, stanze)
+
   /\
   % Al piu' due Positivi nella stessa stanza
   forall(i in 1..P)
@@ -171,44 +177,44 @@ constraint
   /\
   increasing(quarantena)
 ;
+  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ANNOTATIONS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%solve minimize c;
+% solve minimize c;
 
-%solve :: restart_ann
-%      minimize c;
+% solve :: int_search(malati,
+%                     dom_w_deg, 
+%                     indomain_min,          % best
+%                     complete) minimize c;
 
-%% ann: search_ann;
-%% ann: restart_ann;
-%% solve :: search_ann
-%%       %:: restart_ann
-%%       minimize c;
-%% 
-%% search_ann = seq_search([
-%%   int_search(malati,       smallest, indomain_min),
-%%   int_search(osservazione, smallest, indomain_min),
-%%   int_search(positivi,     smallest, indomain_random),
-%%   int_search(quarantena,   smallest, indomain_random),
-%% 
-%%   int_search([c], input_order, indomain_min)
-%% ]);
+% solve :: int_search(malati,
+%                     dom_w_deg, 
+%                     indomain_max,           % poco furbo
+%                     complete) minimize c;
+
+% solve :: int_search(malati,
+%                     dom_w_deg, 
+%                     indomain_split,           % peggio di min
+%                     complete) minimize c;
+
+solve :: int_search(malati,
+                    input_order, 
+                    indomain_min,           % uguale al best
+                    complete) minimize c;
+
+%solve :: int_search(quarantena,               % ci mette una vita
+%                    input_order, 
+%                    indomain_min,
+%                    complete) minimize c;
+
+% solve :: int_search(malati,
+%                     smallest, 
+%                     indomain_min,             % quasi uguale al best
+%                     complete) minimize c;
 
 
-%% solve minimize c;
+
 %% solve :: int_search(d, max_regret, indomain_split, complete) minimize distance;
-%% solve :: int_search(d, max_regret, indomain_min, complete) minimize distance;
 
-%restart_ann = restart_linear(100000);
-%restart_ann = restart_geometric(10,1);
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% OUTPUT
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 output
   ["{\n"] ++
   [" \"c\":" ++ show(c)] ++
@@ -235,4 +241,38 @@ output
   ["]\n"] ++
 
   ["}\n"]
+  
+
+  %%% DEBUG
+  %%% in minizinc il debug e' la morte... non puoi manco stampare quello che vuoi
+  %%++
+  %%["Vicini1\n"] ++
+  %%[ if i==h then "(" else ")" endif |
+  %%  i in 1..M, j in 1..Q
+  %%]
+  %%++
+  %%["\n"]
+
+
+
 ;
+
+
+%% % Circa human readable
+%% output
+%%   ["Malati:\t\t["] ++
+%%   [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Positivi:\t["] ++
+%%   [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Osservazione:\t["] ++
+%%   [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O]
+%%   ++ ["]\n"] ++
+%% 
+%%   ["Quarantena:\t["] ++
+%%   [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q]
+%%   ++ ["]\n"]
+%% ;

@@ -839,3 +839,102 @@ class RunnerLp(AbstractRunner):
     def runnable(self):
         return( super().runnable() )
 
+
+
+
+### TODO refactor in MySolution ##########################################################
+### TODO refactor in MySolution ##########################################################
+### TODO refactor in MySolution ##########################################################
+
+# Dati il numero e la dir carica ritorna il dizionario
+# della soluzione relativa all input col numero dato
+# Se il file non esiste retun None
+def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
+    if not directory[-1] == '/':
+        directory = directory + '/'
+    fpath = IOHelper.gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
+    if not os.path.isfile(fpath):
+        if not suppress_error:
+            print("File does not exist!\n path: %s " %(fpath))
+        return None
+
+    return json.load(open(fpath))
+
+
+def get_output(num, directory=OUTPUT_DIR):
+    data = read_output(num, directory)
+    output = ""
+
+    output += str(to_string_statistic(data['stats']))
+    output += str(get_objective(data['obj']))
+    output += '\n\n'
+
+    output += str(to_string_sol(data['sol']))
+    output += '\n'
+    return output
+
+
+
+# Dato un numero ritorna il dizionario dell'input relativo
+def get_input(num, dest_dir=INPUT_DIR):
+    #if num >  100:
+    #    print("ERROR! get_input() num troppo grande")
+    #    exit(2)
+    fpath = IOHelper.gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
+    # TODO try catch
+    return read_dzn(fpath)
+
+# Dato un numero ritorna il testo dell'input relativo
+def get_input_text(num, dest_dir=INPUT_DIR):
+    #if num >  100:
+    #    t = "ERROR! get_input() num troppo grande"
+    #    print(t)
+    #    return t
+
+    fpath = IOHelper.gen_fpath(num, dest_dir, INPUT_PREFIX, INPUT_EXT)
+
+    if not os.path.isfile(fpath):
+        t = "ERROR! File does not exists!"
+        print(t)
+        return t
+
+    f = open(fpath)
+    t = f.read()
+    return t
+
+
+
+# Dato un file path ritorna il dizionario dell'input
+def read_dzn(fpath):
+    # TODO try catch
+    if not os.path.isfile(fpath):
+        return None
+
+    f = open(fpath)
+
+    comment_char = '%'
+    values = {'K':-1,'H':-1,'M':-1,'P':-1,'O':-1,'Q':-1}
+
+    lines = f.readlines()
+    for l in lines:
+        if comment_char in l:
+            index = l.find(comment_char)
+            l = l[0:index]
+
+        l = l.replace(" ","")
+        l = l.replace("\t","")
+        l = l.replace("\n","")
+        if not l=='' and '=' in l and ';' in l:
+            l = l.replace(";","")
+            k,v = l.split('=')
+            if k in values.keys():
+                # TODO try catch su int
+                values[k] = int(v)
+
+    for k in values.keys():
+        if values[k] == -1:
+            print("Not well formatted input")
+            exit(2)
+
+    return values
+
