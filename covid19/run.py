@@ -60,7 +60,8 @@ def main():
     for num in range(len(mzn_inputs)):
 
         ms = mzn.run(num, show=False, save=True)
-        ls = lp.run(num, show=False, save=True)
+        #ls = lp.run(num, show=False, save=True)
+        ls = ms # TODO remove
 
         if verbose:
             print("Obj:", ms.obj)
@@ -71,7 +72,7 @@ def main():
         else:
             sys.stdout.write('\r')
             j=(num+1)/len(mzn_inputs)
-            sys.stdout.write("[%-20s] %d%%" % ('='*int(20*j), 100*j))
+            sys.stdout.write("[%-20s] %d%%\t%d" % ('='*int(20*j), 100*j, num))
             sys.stdout.flush()
 
         if ms.obj != ls.obj:

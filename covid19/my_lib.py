@@ -146,6 +146,9 @@ class MyInstance:
         lp_enc = self.to_str_lp()
         f.write(lp_enc)
 
+    def calc_complexity(self):
+        return self.numero_stanze()
+
 
     # Getter e Setter ####################
     def get_corridoi(self):
@@ -194,7 +197,7 @@ class MyInstance:
         #TODO qua gestire in automatico i due formati
         #TODO warning se e' mal formato
         if not os.path.isfile(fpath):
-            raise Exception("File does not exist!")
+            raise Exception("File "+ fpath +" does not exist!")
             return None
 
         f = IOHelper.open_file(fpath, 'r')
@@ -589,9 +592,9 @@ class InputGenerator:
         """ Torna una lista di n istanze casuali con
             k in range(k_min,k_max) e h in range(h_min,h_max) """
         inss = []
-        for i in range(n):
-            for k in range(k_min,k_max):
-                for h in range(h_min,h_max):
+        for k in range(k_min,k_max):
+            for h in range(h_min,h_max):
+                for i in range(n):
                     inss.append(InputGenerator.gen_istanza_casuale(k,h))
         return inss
 
@@ -768,7 +771,7 @@ class RunnerMzn(AbstractRunner):
         super().runs(myIns,show)
         fpath = myIns.get_path()
         instance = self.initialize_instance(myIns)
-        result = instance.solve()
+        result = instance.solve(TIMEOUT)
 
         msol = MySolution.from_mzn(result,instance)
         if show:

@@ -28,12 +28,12 @@ def main():
     print("Genero inputs")
 
     # TOD gestire come Batch
-    n = 1
+    n = 5
     k_min=1
     h_min=2
 
-    k_max=4
-    h_max=4
+    k_max=5
+    h_max=5
 
     delete_old=True
     write=True

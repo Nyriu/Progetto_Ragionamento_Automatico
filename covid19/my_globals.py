@@ -1,6 +1,7 @@
 ##################################################
 # Globali
 ##################################################
+from datetime import timedelta
 #MAIN_DIR="./" # TODO mettere in testa ad altri path
 
 # Inputs ####################
@@ -28,6 +29,11 @@ OUTPUT_MZN_EXT    = OUTPUT_EXT
 OUTPUT_LP_DIR    = "outputs_lp/"
 OUTPUT_LP_PREFIX = OUTPUT_PREFIX
 OUTPUT_LP_EXT    = OUTPUT_EXT
+
+
+
+TIMEOUT = timedelta(minutes=5)
+
 
 # Batches ####################
 BATCH_ROOT_DIR   = "batches/"
