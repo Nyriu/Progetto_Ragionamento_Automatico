@@ -226,4 +226,5 @@ if __name__ == '__main__':
         print(inst.args  , file=open('tmp.txt', 'a+'))
         print(inst       , file=open('tmp.txt', 'a+'))
 
+        print("Guada il file di log oppure")
         print("Prova ad ingrandire il terminale...")

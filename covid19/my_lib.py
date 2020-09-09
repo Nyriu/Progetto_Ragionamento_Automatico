@@ -329,12 +329,14 @@ class MySolution():
             t = "No solution"
             return t
         t = ""
-        t += "model_type" + "=" + str(self.model_type) + "\n"
-        t += "sat"        + "=" + str(self.sat       ) + "\n"
-        t += "obj"        + "=" + str(self.obj       ) + "\n"
-        t += "solveTime"  + "=" + str(self.solveTime ) + "\n"
-        t += "time"       + "=" + str(self.time      ) + "\n"
+        t += "model_type " + "=" + "{:>10s}".format(self.model_type) + "\n"
+        t += "sat        " + "=" + "{:10d}".format(self.sat) + "\n"
+        t += "obj        " + "=" + "{:10d}".format(self.obj) + "\n"
+
+        t += "solveTime  " + "=" + "{:10f}".format(self.solveTime) + "\n"
+        t += "time       " + "=" + "{:10f}".format(self.time) + "\n"
         t += 2*"\n"
+
 
         K = self.solution['K']
         H = self.solution['H']
@@ -841,7 +843,7 @@ class RunnerLp(AbstractRunner):
         self.output_ext    = OUTPUT_LP_EXT
 
     def load_model(self, model_path=None):
-        ctl = clingo.Control()
+        ctl = clingo.Control(message_limit=0)
         ctl.load(model_path)
         self.model=ctl
 

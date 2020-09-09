@@ -38,10 +38,9 @@ def main():
 
     lp_inputs  = os.listdir(my_globals.INPUT_LP_DIR)
 
-
     if type(val) == int:
         t0 = time.time()
-        ls = lp.run(num, show=True, save=False)
+        ls = lp.run(val, show=True, save=False)
         t1 = time.time()
     else:
         print(val)
@@ -49,9 +48,6 @@ def main():
         t0 = time.time()
         ls = lp.runs(myIns, show=True)
         t1 = time.time()
-
-    print("\nDone")
-    print("Total Time:", t1-t0)
 
 
 if __name__ == "__main__":

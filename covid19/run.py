@@ -40,13 +40,21 @@ def main():
     #verbose = True
     verbose = False
 
+    run_mzn = False
+    run_lp  = True
+
+    if not run_mzn:
+        print("\tNOT EXECUTING MZN")
+    if not run_lp:
+        print("\tNOT EXECUTING ASP")
+
+    print("\n")
 
     #mzn_path="./covid19.mzn"
     mzn_path="./covid19_mod.mzn" # TODO differenza tra mod e non mod?
     mzn = RunnerMzn(mzn_path)
 
     lp_path = "./covid19.lp"
-    #lp_path = "./covid19_mod.lp" # TODO differenza tra mod e non mod?
     lp = RunnerLp(lp_path)
 
     mzn_inputs = os.listdir(my_globals.INPUT_MZN_DIR)
@@ -56,32 +64,37 @@ def main():
         raise Exception("Le cartelle degli input hanno un \
                 numero differente di files...")
 
+    ms = None
+    ls = None
+
     t0 = time.time()
     for num in range(len(mzn_inputs)):
-
-        ms = mzn.run(num, show=False, save=True)
-        #ls = lp.run(num, show=False, save=True)
-        ls = ms # TODO remove
+        if run_mzn:
+            ms = mzn.run(num, show=False, save=True)
+        if run_lp:
+            ls = lp.run(num, show=False, save=True)
 
         if verbose:
-            print("Obj:", ms.obj)
-            print(ms)
-            print(10*"-")
-            print(ls)
-            print(30*"=")
+            raise Exception("Verbose not implemented!")
+            # print("Obj:", ms.obj)
+            # print(ms)
+            # print(10*"-")
+            # print(ls)
+            # print(30*"=")
         else:
-            sys.stdout.write('\r')
+            sys.stdout.write("\r")
             j=(num+1)/len(mzn_inputs)
             sys.stdout.write("[%-20s] %d%%\t%d" % ('='*int(20*j), 100*j, num))
-            sys.stdout.flush()
+            #sys.stdout.flush()
 
-        if ms.obj != ls.obj:
+
+        if  run_mzn and run_lp and ms.obj != ls.obj:
             raise Exception("Obj differenti!")
 
     t1 = time.time()
 
     print("\nDone")
-    print("Total Time:", t1-t0)
+    print("Total Time:", t1-t0, "s")
 
 
 if __name__ == "__main__":

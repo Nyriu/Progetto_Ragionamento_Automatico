@@ -50,9 +50,6 @@ def main():
         ms = mzn.runs(myIns, show=True)
         t1 = time.time()
 
-    print("\nDone")
-    print("Total Time:", t1-t0)
-
 
 if __name__ == "__main__":
     main()
