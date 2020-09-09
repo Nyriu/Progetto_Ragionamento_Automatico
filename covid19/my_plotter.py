@@ -6,16 +6,6 @@ from my_lib import IOHelper, MyInstance, MySolution
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-deep')
 
-### TODO
-### ##################################################
-### # Main
-### ##################################################
-### def main():
-###
-###
-### if __name__ == "__main__":
-###     main()
-
 def in_out(num):
     try:
         i = MyInstance.read(
@@ -40,37 +30,52 @@ def normalize(x, a,b):
     # normalize x into [a,b]
     m = min(x)
     M = max(x)
-    return [(b-a)*(y-m)/(M-m)+a for y in x]
+    res = [(b-a)*(y-m)/(M-m)+a for y in x]
+    return res
 
 
-inputs  = []
-outputs = []
-nums    = []
+### ##################################################
+### # Main
+### ##################################################
+def main():
+    inputs  = []
+    outputs = []
+    nums    = []
 
-num = 0
-i,o = in_out(num)
-
-while not (o == None):
-    inputs.append(i)
-    outputs.append(o)
-    nums.append(num)
-
-    num+=1
+    num = 0
     i,o = in_out(num)
 
-print(inputs)
-print(outputs)
+    while not (o == None):
+        inputs.append(i)
+        outputs.append(o)
+        nums.append(num)
+
+        num+=1
+        i,o = in_out(num)
+
+    # print(inputs)
+    # print(outputs)
+
+    solveTimes = [y.solveTime for y in outputs]
+    input_complexities = [y.calc_complexity(alpha=.2) for y in inputs]
+    input_complexities = normalize(input_complexities, min(solveTimes),max(solveTimes))
+
+    #n = len(nums)
+    #n = 20
+    #n_delta = 4
+    #plt.plot(range(n,n+n_delta), solveTimes[n:n+n_delta])
+    #plt.plot(range(n,n+n_delta), input_complexities[n:n+n_delta])
+
+    n = len(nums)
+    plt.plot(range(n), solveTimes)
+    plt.plot(range(n), input_complexities)
 
 
-solveTimes = [y.solveTime for y in outputs]
-input_complexities = [y.calc_complexity() for y in inputs]
-input_complexities = normalize(input_complexities, min(solveTimes),max(solveTimes))
+    plt.legend(["solveTimes","Complexities"])
+    #plt.xticks(ticks=nums[:x], rotation=70)
+    plt.show()
+    return
 
 
-
-x = len(nums)
-plt.plot(range(x), solveTimes)
-plt.plot(range(x), input_complexities)
-plt.legend(["solveTimes","Complexities"])
-#plt.xticks(ticks=nums[:x], rotation=70)
-plt.show()
+if __name__ == "__main__":
+    main()

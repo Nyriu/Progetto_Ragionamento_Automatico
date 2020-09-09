@@ -146,8 +146,29 @@ class MyInstance:
         lp_enc = self.to_str_lp()
         f.write(lp_enc)
 
-    def calc_complexity(self):
-        return self.numero_stanze()
+    def calc_complexity(self, alpha=.5):
+        K = self.values['K']
+        H = self.values['H']
+        M = self.values['M']
+        P = self.values['P']
+        O = self.values['O']
+        Q = self.values['Q']
+        pers = M+P+O+Q
+        pers_mezzi = M/2+P/2+O+Q/2
+        stanze = 2*K*H
+
+        if stanze < 12:
+            return 0
+        #if pers_mezzi/stanze < 1/3:
+        #    return 0
+
+        #return alpha*pers/(2*stanze) + (1-alpha)*(M+Q)/pers
+
+        #return alpha*pers/2 + (1-alpha)*(M+Q)/pers
+
+        #return alpha*pers/(2*stanze) + (1-alpha)*(M+P+Q)/pers
+
+        return alpha*pers_mezzi/stanze + (1-alpha)*(M+P+Q)/pers
 
 
     # Getter e Setter ####################
