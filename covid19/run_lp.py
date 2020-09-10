@@ -23,6 +23,7 @@ def get_args():
 
 
 
+ls = None
 
 ##################################################
 # Main
@@ -40,6 +41,7 @@ def main():
 
     if type(val) == int:
         t0 = time.time()
+        global ls
         ls = lp.run(val, show=True, save=False)
         t1 = time.time()
     else:

@@ -40,7 +40,7 @@ def main():
     #verbose = True
     verbose = False
 
-    run_mzn = False
+    run_mzn = True
     run_lp  = True
 
     if not run_mzn:
@@ -50,8 +50,7 @@ def main():
 
     print("\n")
 
-    #mzn_path="./covid19.mzn"
-    mzn_path="./covid19_mod.mzn" # TODO differenza tra mod e non mod?
+    mzn_path="./covid19.mzn"
     mzn = RunnerMzn(mzn_path)
 
     lp_path = "./covid19.lp"
@@ -88,8 +87,16 @@ def main():
             #sys.stdout.flush()
 
 
-        if  run_mzn and run_lp and ms.obj != ls.obj:
-            raise Exception("Obj differenti!")
+        # if  run_mzn and run_lp and ms.obj != ls.obj:
+        #     #raise Exception("Obj differenti!")
+        #     s = "Obj differenti per input:  "
+        #     s += str(num)
+        #     s += "\n"
+        #     s += str(mzn_o.obj)
+        #     s += "\n"
+        #     s += str(lp_o.obj)
+        #     s += "\n"
+        #     s += "\n"
 
     t1 = time.time()
 

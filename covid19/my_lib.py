@@ -147,6 +147,7 @@ class MyInstance:
         f.write(lp_enc)
 
     def calc_complexity(self, alpha=.5):
+        # TODO migliorare
         K = self.values['K']
         H = self.values['H']
         M = self.values['M']
@@ -421,6 +422,11 @@ class MySolution():
           ("positivo",     2),
           ("osservazione", 2),
           ("quarantena",   2)
+
+          ## BEGIN DEBUG # TODO togliere debug
+          ,("vicini1",   2)
+          ,("vicini2",   2)
+          ## END DEBUG
         ]
 
         sol = {
@@ -431,6 +437,10 @@ class MySolution():
           "P":[],
           "O":[],
           "Q":[]
+          ## BEGIN DEBUG # TODO togliere debug
+          ,"vicini1":[]
+          ,"vicini2":[]
+          ## END DEBUG
         }
 
         #if sol is None: # TODO check if UNSAT
@@ -447,6 +457,12 @@ class MySolution():
                     sol["K"]=args[0].number
                 elif name == "stanze_per_lato":
                     sol["H"]=args[0].number
+                ## BEGIN DEBUG
+                elif "vicini" in name:
+                    s1 = args[0].number
+                    s2 = args[1].number
+                    sol[name].append((s1,s2))
+                ## END DEBUG
                 else:
                     sol[name[0].upper()].append(args[1].number)
 
@@ -466,7 +482,59 @@ class MySolution():
         msol.solution['P'] = sol['P']
         msol.solution['O'] = sol['O']
         msol.solution['Q'] = sol['Q']
+        ## BEGIN DEBUG
+        msol.solution['vicini1'] = sol['vicini1']
+        msol.solution['vicini2'] = sol['vicini2']
+        ## END DEBUG
         return msol
+
+    # Metodi debug ####################
+    def _debug_vicini1(self):
+        v1 = self.solution['vicini1']
+        v1.sort()
+        old_s1 = v1[0][0]
+        for s in v1:
+            s1 = s[0]
+            if s1 != old_s1:
+                print(5*"-")
+                old_s1 = s1
+            print(s)
+
+    def _debug_vicini2(self):
+        v2 = self.solution['vicini2']
+        v2.sort()
+        old_s1 = v2[0][0]
+        for s in v2:
+            s1 = s[0]
+            if s1 != old_s1:
+                print(5*"-")
+                old_s1 = s1
+            print(s)
+
+    def _debug_s_num(self):
+        if self.sat == False:
+            t = "No solution"
+            return t
+        t=""
+        K = self.solution['K']
+        H = self.solution['H']
+        s = 0
+        for k in range(K):
+            for h in range(2*H):
+                #code = self._get_symbol(s)
+                code = '{:02d}'.format(s)
+                e = " "
+                if (h==H-1 or h==2*H-1 or h==2*H*K-1):
+                    e = "\n"
+                if (h==H-1):
+                    code += "\t" + str(k)
+
+                t += code + e
+                s+=1
+            t += '\n'
+        print(t)
+
+
 
 
 class InputGenerator:

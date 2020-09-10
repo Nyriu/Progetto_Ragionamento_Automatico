@@ -32,7 +32,8 @@ OUTPUT_LP_EXT    = OUTPUT_EXT
 
 
 
-TIMEOUT = timedelta(minutes=5)
+# TIMEOUT = timedelta(minutes=5) # TODO
+TIMEOUT = timedelta(minutes=2)
 
 
 # Batches ####################

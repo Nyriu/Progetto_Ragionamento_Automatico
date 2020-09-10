@@ -33,7 +33,7 @@ def main():
     #verbose = True
     verbose = False
 
-    mzn_path = "./covid19_mod.mzn" # occhio che e' mod # TODO
+    mzn_path = "./covid19.mzn"
     mzn = RunnerMzn(mzn_path)
 
     mzn_inputs  = os.listdir(my_globals.INPUT_MZN_DIR)
@@ -41,7 +41,7 @@ def main():
 
     if type(val) == int:
         t0 = time.time()
-        ms = mzn.run(num, show=True, save=False)
+        ms = mzn.run(val, show=True, save=False)
         t1 = time.time()
     else:
         print(val)
