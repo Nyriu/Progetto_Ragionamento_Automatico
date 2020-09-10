@@ -844,6 +844,7 @@ class RunnerLp(AbstractRunner):
 
     def load_model(self, model_path=None):
         ctl = clingo.Control(message_limit=0)
+        ctl.configuration.configuration = 'tweety'
         ctl.load(model_path)
         self.model=ctl
 
@@ -858,12 +859,35 @@ class RunnerLp(AbstractRunner):
         ctl=self.model
         ctl.load(fpath)
         ctl.ground([("base", [])])
+        #ctl.configuration.solve.models="0"
 
+        global cc
+        cc = 0
+        global res_model
         res_model = None
-        with ctl.solve(on_model=lambda m: print(end=""), yield_=True) as handle:
-          for m in handle:
-              res_model = m.symbols(atoms=True)
 
+        def on_model(m):
+            global res_model
+            res_model = m.symbols(atoms=True)
+            global cc
+            #print("before cc = ", cc)
+            cc += 1
+            #print("after cc = ", cc)
+
+        #with ctl.solve(on_model=on_model, yield_=True, async_=True) as handle:
+        with ctl.solve(on_model=on_model, async_=True) as handle:
+            found_within_time = handle.wait(TIMEOUT.total_seconds())
+            #print("found_within_time = ", found_within_time)
+            if not found_within_time:
+                #print("interrompo")
+                ctl.interrupt()
+                #print("interrotto")
+            #for model_i, model in enumerate(handle):
+            #    print(model_i)
+            #    #models.append(model.symbols(atoms=True))
+
+        #print("here res_model = ", res_model)
+        #print("here cc = ", cc)
         msol = MySolution.from_lp(res_model,ctl)
         if show:
             print(fpath)
