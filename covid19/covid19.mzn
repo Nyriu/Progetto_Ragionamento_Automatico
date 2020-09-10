@@ -196,10 +196,10 @@ constraint
 %                     indomain_split,           % peggio di min
 %                     complete) minimize c;
 
-solve :: int_search(malati,
-                    input_order, 
-                    indomain_min,           % uguale al best
-                    complete) minimize c;
+% solve :: int_search(malati,
+%                     input_order, 
+%                     indomain_min,           % uguale al best
+%                     complete) minimize c;
 
 %solve :: int_search(quarantena,               % ci mette una vita
 %                    input_order, 
@@ -212,6 +212,18 @@ solve :: int_search(malati,
 %                     complete) minimize c;
 
 
+%% MODO alternativo per search
+ann: search_ann;
+solve :: search_ann
+      minimize c;
+
+search_ann = seq_search([
+  int_search(malati,       input_order, indomain_min,    complete),
+  int_search(osservazione, input_order, indomain_min ,   complete),
+  int_search(positivi,     input_order, indomain_max, complete),
+  int_search(quarantena,   input_order, indomain_max,    complete)
+]);
+%% FINE %% MODO alternativo per search
 
 %% solve :: int_search(d, max_regret, indomain_split, complete) minimize distance;
 
