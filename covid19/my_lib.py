@@ -7,6 +7,8 @@ import re
 import json
 
 #import asyncio ## Sperando funzioni per il timeout di clingo... NOPE!
+#import threading ## Sperando funzioni per il timeout di clingo... NOPE!
+import multiprocessing ## Sperando funzioni per il timeout di clingo...
 
 import time
 from math import ceil
@@ -932,24 +934,58 @@ class RunnerLp(AbstractRunner):
         ctl=self.model
         ctl.load(fpath)
 
-        async def async_ground(ctl):
-            print("faccio ground")
-            await ctl.ground([("base", [])])
-            #time.sleep(30);
-            print("fatto ground")
-
-        async def timeouted_ground(ctl):
-            # Wait for at most 1 second
-            try:
-                await asyncio.wait_for(async_ground(ctl), timeout=1.0)
-            except asyncio.TimeoutError:
-                print('timeout!')
-                exit(2)
-
         print("ctl prima")
         print(ctl)
-        asyncio.run(timeouted_ground(ctl))
+
+        def killable_ground(ctl,return_dict):
+            print("inside")
+            return_dict[0] = False
+            ctl.ground([("base", [])])
+            #time.sleep(10.0)
+            return_dict[0] = True
+            return_dict[1] = ctl
+            print("thread groundEnded:", groundEnded.value)
+            print("end")
+
+
+
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+
+        print(return_dict.values())
+
+
+        ##return_dict["groundEnded"] = False
+        ##print("first:", return_dict["groundEnded"])
+        print("first:", return_dict.values())
+        process = multiprocessing.Process(target=killable_ground, args=(ctl,return_dict))
+        process.start()
+        print("after start", return_dict.values())
+        #timeout = 3
+
+        time.sleep(1)
+
+        kill_t0 = time.time()
+        kill_t1 = time.time()
+        #while (not groundEnded.value) and (kill_t1 - kill_t0 < timeout):
+        while (not return_dict[0]) and (timedelta(seconds=kill_t1 - kill_t0) < TIMEOUT):
+            #print("groundEnded:", groundEnded.value)
+            time.sleep(1)
+            kill_t1 = time.time()
+
+        print("finito il while", return_dict.values())
+
+        if (not return_dict[0]):
+            process.terminate()
+            print("killed!!!")
+            exit(2)
+        else:
+            process.join()
+            ctl = return_dict[1]
+
         print("ctl dopo")
+        print(ctl)
+        exit(2)
 
 
         # print("faccio ground")
