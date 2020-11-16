@@ -5,6 +5,9 @@
 import os, shutil
 import re
 import json
+
+#import asyncio ## Sperando funzioni per il timeout di clingo... NOPE!
+
 import time
 from math import ceil
 
@@ -925,12 +928,34 @@ class RunnerLp(AbstractRunner):
         fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
                                    self.input_prefix, self.input_ext)
 
+        print("dentro run di lp")
         ctl=self.model
         ctl.load(fpath)
-        print("faccio ground")
-        ctl.ground([("base", [])])
-        print("fatto ground")
-        #ctl.configuration.solve.models="0"
+
+        async def async_ground(ctl):
+            print("faccio ground")
+            await ctl.ground([("base", [])])
+            #time.sleep(30);
+            print("fatto ground")
+
+        async def timeouted_ground(ctl):
+            # Wait for at most 1 second
+            try:
+                await asyncio.wait_for(async_ground(ctl), timeout=1.0)
+            except asyncio.TimeoutError:
+                print('timeout!')
+                exit(2)
+
+        print("ctl prima")
+        print(ctl)
+        asyncio.run(timeouted_ground(ctl))
+        print("ctl dopo")
+
+
+        # print("faccio ground")
+        # ctl.ground([("base", [])])
+        # print("fatto ground")
+        # #ctl.configuration.solve.models="0"
 
         global cc
         cc = 0
