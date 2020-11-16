@@ -1,4 +1,4 @@
-## Esegue il modello MiniZinc su input di num dato
+## Esegue i modelli su input di num dato
 ## Usage:
 ## python run.py #to run on all inputs
 ## python run.py 0
@@ -41,7 +41,7 @@ def main():
     verbose = False
 
     run_mzn = True
-    run_lp  = True
+    run_lp  = False
 
     if not run_mzn:
         print("\tNOT EXECUTING MZN")

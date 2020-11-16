@@ -108,6 +108,8 @@ cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 %#show osservazione/2.
 %#show quarantena/2.
 
+#show vicini1/2.
+
 %Optimum=2
 
 % Instance

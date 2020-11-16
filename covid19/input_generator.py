@@ -27,13 +27,13 @@ def get_args():
 def main():
     print("Genero inputs")
 
-    # TOD gestire come Batch
-    n = 5
+    # TODO gestire come Batch
+    n = 3
     k_min=1
     h_min=2
 
-    k_max=5
-    h_max=5
+    k_max=7
+    h_max=7
 
     delete_old=True
     write=True

@@ -116,6 +116,7 @@ def init_wins():
 
     return l_win, r_win, b_win
 
+error_log_filename = 'in_out_log.txt'
 
 def main(stdscr):
     # Init
@@ -124,7 +125,7 @@ def main(stdscr):
     curses.noecho()
     stdscr.keypad(True)
     stdscr.clear()
-    print("DEBUG", file=open('tmp.txt', 'w+')) #DEBUG
+    print("DEBUG", file=open(error_log_filename, 'w+')) #DEBUG
 
     try:
         l_win, r_win, b_win = init_wins()
@@ -143,7 +144,7 @@ def main(stdscr):
         input_text = "Press a button"
         output = "Press a button"
 
-        print("c=a", file=open('tmp.txt', 'a+'))
+        print("c=a", file=open(error_log_filename, 'a+'))
 
 
         while not c in EXIT_KEYS:
@@ -158,24 +159,24 @@ def main(stdscr):
                 old_output = output
 
                 input_text = my_lib.get_input_text(num,INPUT_MZN_DIR)
-                print("input_text " + input_text, file=open('tmp.txt', 'a+'))
+                print("input_text " + input_text, file=open(error_log_filename, 'a+'))
                 mzn_output = my_lib.get_output(num,OUTPUT_MZN_DIR)
                 lp_output  = my_lib.get_output(num,OUTPUT_LP_DIR)
-                print("in fondo al try", file=open('tmp.txt', 'a+'))
+                print("in fondo al try", file=open(error_log_filename, 'a+'))
 
             except Exception as inst:
                 input_text = old_input_text
                 output = old_output
                 num = old_num
-                print("Quasi in fondo al except", file=open('tmp.txt', 'a+'))
-                print("Exception", file=open('tmp.txt', 'a+'))
-                print(type(inst) , file=open('tmp.txt', 'a+'))
-                print(inst.args  , file=open('tmp.txt', 'a+'))
-                print(inst       , file=open('tmp.txt', 'a+'))
-                print("in fondo al except", file=open('tmp.txt', 'a+'))
+                print("Quasi in fondo al except", file=open(error_log_filename, 'a+'))
+                print("Exception", file=open(error_log_filename, 'a+'))
+                print(type(inst) , file=open(error_log_filename, 'a+'))
+                print(inst.args  , file=open(error_log_filename, 'a+'))
+                print(inst       , file=open(error_log_filename, 'a+'))
+                print("in fondo al except", file=open(error_log_filename, 'a+'))
 
-            print(input_text, file=open('tmp.txt', 'a+'))
-            print(output, file=open('tmp.txt', 'a+'))
+            print(input_text, file=open(error_log_filename, 'a+'))
+            print(output, file=open(error_log_filename, 'a+'))
 
             l_win.clear()
             l_win.addstr(0,0, mzn_output)
@@ -197,10 +198,10 @@ def main(stdscr):
             l_win.refresh()
             r_win.refresh()
             b_win.refresh()
-            print("mostro testo", file=open('tmp.txt', 'a+'))
-            print("attendo", file=open('tmp.txt', 'a+'))
+            print("mostro testo", file=open(error_log_filename, 'a+'))
+            print("attendo", file=open(error_log_filename, 'a+'))
             c = b_win.getch()
-            print("ho atteso", file=open('tmp.txt', 'a+'))
+            print("ho atteso", file=open(error_log_filename, 'a+'))
 
     #except:
     #    curses.nocbreak()
@@ -221,10 +222,10 @@ if __name__ == '__main__':
     try:
         wrapper(main)
     except Exception as inst:
-        print("Exception", file=open('tmp.txt', 'a+'))
-        print(type(inst) , file=open('tmp.txt', 'a+'))
-        print(inst.args  , file=open('tmp.txt', 'a+'))
-        print(inst       , file=open('tmp.txt', 'a+'))
+        print("Exception", file=open(error_log_filename, 'a+'))
+        print(type(inst) , file=open(error_log_filename, 'a+'))
+        print(inst.args  , file=open(error_log_filename, 'a+'))
+        print(inst       , file=open(error_log_filename, 'a+'))
 
         print("Guada il file di log oppure")
         print("Prova ad ingrandire il terminale...")

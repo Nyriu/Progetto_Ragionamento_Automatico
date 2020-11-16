@@ -5,6 +5,7 @@
 import os, shutil
 import re
 import json
+import time
 from math import ceil
 
 # Per Random
@@ -780,7 +781,7 @@ class AbstractRunner:
 
 
 
-    #@abstractmethod
+    #@absttractmethod
     def run(self, instance_num, show=True, save=False):
         """ Esegue il modello sull'istanza corrispondente al numero dato """
         if not self.runnable():
@@ -926,33 +927,57 @@ class RunnerLp(AbstractRunner):
 
         ctl=self.model
         ctl.load(fpath)
+        print("faccio ground")
         ctl.ground([("base", [])])
+        print("fatto ground")
         #ctl.configuration.solve.models="0"
 
         global cc
         cc = 0
         global res_model
         res_model = None
+        global t0
+        t0 = time.time()
 
         def on_model(m):
+            print("on_model")
             global res_model
             res_model = m.symbols(atoms=True)
             global cc
             #print("before cc = ", cc)
             cc += 1
             #print("after cc = ", cc)
+            t1 = time.time()
+            delt = t1 - t0
+            return delt < TIMEOUT.total_seconds()
 
-        #with ctl.solve(on_model=on_model, yield_=True, async_=True) as handle:
-        with ctl.solve(on_model=on_model, async_=True) as handle:
-            found_within_time = handle.wait(TIMEOUT.total_seconds())
-            #print("found_within_time = ", found_within_time)
-            if not found_within_time:
-                #print("interrompo")
-                ctl.interrupt()
-                #print("interrotto")
-            #for model_i, model in enumerate(handle):
-            #    print(model_i)
-            #    #models.append(model.symbols(atoms=True))
+        ## #with ctl.solve(on_model=on_model, yield_=True, async_=True) as handle:
+        ## #with ctl.solve(on_model=on_model, async_=True) as handle:
+        ## print("pre solve")
+        ## with ctl.solve(on_model=on_model, yield_=True) as handle:
+        ##     #found_within_time = handle.wait(TIMEOUT.total_seconds())
+        ##     print("pre cancel")
+        ##     handle.cancel()
+        ##     #found_within_time = handle.wait(120)
+        ##     print("found_within_time = ", found_within_time)
+        ##     if not found_within_time:
+        ##         #print("interrompo")
+        ##         handle.cancel()
+        ##         ctl.interrupt()
+        ##         #print("interrotto")
+        ##     #for model_i, model in enumerate(handle):
+        ##     #    print(model_i)
+        ##     #    #models.append(model.symbols(atoms=True))
+
+        ### with ctl.solve(on_model=on_model, async_=True) as handle:
+        ###     print("dentro")
+        ###     #handle.wait(60)
+        ###     handle.wait(1)
+        ###     handle.cancel()
+        ###     #print (handle.get())
+
+        ctl.solve(on_model=on_model)
+
 
         #print("here res_model = ", res_model)
         #print("here cc = ", cc)
