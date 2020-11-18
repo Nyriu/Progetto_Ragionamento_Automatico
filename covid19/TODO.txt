@@ -1,9 +1,0 @@
-aggiornare
-
-covid19_mod.lp
-covid19_mod.mzn
-
-con le modifiche fatte a
-
-covid19.lp
-covid19.mzn

@@ -40,8 +40,8 @@ def main():
     #verbose = True
     verbose = False
 
-    run_mzn = False # True
-    run_lp  = True # False
+    run_mzn = True # False # True
+    run_lp  = True # True  # False
 
     if not run_mzn:
         print("\tNOT EXECUTING MZN")

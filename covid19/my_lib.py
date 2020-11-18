@@ -9,6 +9,7 @@ import json
 #import asyncio ## Sperando funzioni per il timeout di clingo... NOPE!
 #import threading ## Sperando funzioni per il timeout di clingo... NOPE!
 import multiprocessing ## Sperando funzioni per il timeout di clingo...
+#import pdb # TODO remove
 
 import time
 from math import ceil
@@ -27,6 +28,8 @@ import clingo
 # Le mie globali
 from my_globals import *
 
+#DEBUG = True
+DEBUG = False
 
 class IOHelper:
     """ Classe statica ausiliaria per gestire meglio la generazione/distruzione
@@ -285,6 +288,7 @@ class MySolution():
         """ Inizializza una MySolution vuota """
         self.model_type = "" # can be "MZN" or "LP"
         self.sat        = False
+        self.timeouted  = False
         self.obj        = -1
         self.solveTime  = -1.0
         self.time       = -1.0
@@ -295,11 +299,12 @@ class MySolution():
     def write(self, fpath):
         """ Scrive la soluzione in formato json nel path dato """
         data = {}
-        data["model_type"] =self.model_type
-        data["sat"]        =self.sat
-        data["obj"]        =self.obj
-        data["solveTime"]  =self.solveTime
-        data["time"]       =self.time
+        data["model_type"] = self.model_type
+        data["sat"]        = self.sat
+        data["timeouted"]  = self.timeouted
+        data["obj"]        = self.obj
+        data["solveTime"]  = self.solveTime
+        data["time"]       = self.time
         data["sol"]        = self.solution
 
         # TODO try catch
@@ -331,13 +336,25 @@ class MySolution():
 
     def __repr__(self):
         return self.__str__()
+
     def __str__(self):
         if self.sat == False:
-            t = "No solution"
+            t = ""
+            t += "model_type " + "= " + str(self.model_type) + "\n"
+            t += "No solution"
+            if (self.timeouted):
+                t += " (TIMEOUT)" + "\n"
+            else:
+                t += " (UNSAT)" + "\n"
+            #t += "solveTime  " + "=" + "{:10f}".format(self.solveTime) + "\n"
+            #t += "time       " + "=" + "{:10f}".format(self.time) + "\n"
+            t += 2*"\n"
             return t
+
         t = ""
         t += "model_type " + "=" + "{:>10s}".format(self.model_type) + "\n"
         t += "sat        " + "=" + "{:10d}".format(self.sat) + "\n"
+        t += "timeouted  " + "=" + "{:10d}".format(self.timeouted) + "\n"
         t += "obj        " + "=" + "{:10d}".format(self.obj) + "\n"
 
         t += "solveTime  " + "=" + "{:10f}".format(self.solveTime) + "\n"
@@ -371,6 +388,7 @@ class MySolution():
 
         msol.model_type = data["model_type"]
         msol.sat        = data["sat"]
+        msol.timeouted  = data["timeouted"]
         msol.obj        = data["obj"]
         msol.solveTime  = data["solveTime"]
         msol.time       = data["time"]
@@ -388,8 +406,14 @@ class MySolution():
         msol.model_type = "MZN"
         sol = res.solution
         if sol is None: # TODO check if UNSAT
+
+            #result.status.has_solution()
+
             msol.sat = False
             msol.solution = None
+            msol.timeouted = False
+            if ("UNKNOWN" == res.status.name):
+                msol.timeouted = True
             return msol
         # else
         msol.sat = True
@@ -868,7 +892,8 @@ class RunnerMzn(AbstractRunner):
         super().runs(myIns,show)
         fpath = myIns.get_path()
         instance = self.initialize_instance(myIns)
-        result = instance.solve(TIMEOUT)
+
+        result = instance.solve(timeout=TIMEOUT)
 
         msol = MySolution.from_mzn(result,instance)
         if show:
@@ -929,120 +954,86 @@ class RunnerLp(AbstractRunner):
         super().run(instance_num,show,save)
         fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
                                    self.input_prefix, self.input_ext)
+        ################################################################################
+        # LAVORO SU TIMEOUT DEL GROUDING
+        ################################################################################
+        # Workaround per il timeout
+        # + lancio il grounding in un processo secondario
+        # + nel processo principale verifico se il secondario ha finito il grounding e
+        #   tengo conto del tempo che passa
+        # + se il grounding finisce entro il TIMEOUT allora lancio il grounding in locale (nel processo principale)
+        # + se ho TIMEOUT allora devo gestire la creazione di una soluzione particolare # TODO
 
-        print("dentro run di lp")
+        # Pro: funziona, dato che nessuno degli altri metodi funziona
+        #      (Control non e' serializzabile quindi niente passaggio tra thread/processi)
+
+        # Cons: alla peggio si rischia di aspettare 2*(TIMEOUT-e) con e piccolo a piacere
+
         ctl=self.model
         ctl.load(fpath)
-
-        print("ctl prima")
-        print(ctl)
-
-        def killable_ground(ctl,return_dict):
-            print("inside")
-            return_dict[0] = False
-            ctl.ground([("base", [])])
-            #time.sleep(10.0)
-            return_dict[0] = True
-            return_dict[1] = ctl
-            print("thread groundEnded:", groundEnded.value)
-            print("end")
-
-
 
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
 
-        print(return_dict.values())
+        def killable_ground(ctl,return_dict):
+            return_dict[0] = False
+            ctl.ground([("base", [])])
+            #time.sleep(10.0)
+            return_dict[0] = True
 
-
-        ##return_dict["groundEnded"] = False
-        ##print("first:", return_dict["groundEnded"])
-        print("first:", return_dict.values())
         process = multiprocessing.Process(target=killable_ground, args=(ctl,return_dict))
         process.start()
-        print("after start", return_dict.values())
-        #timeout = 3
 
         time.sleep(1)
 
         kill_t0 = time.time()
         kill_t1 = time.time()
-        #while (not groundEnded.value) and (kill_t1 - kill_t0 < timeout):
-        while (not return_dict[0]) and (timedelta(seconds=kill_t1 - kill_t0) < TIMEOUT):
-            #print("groundEnded:", groundEnded.value)
+        grounded = return_dict[0]
+        while (not grounded) and (timedelta(seconds=kill_t1 - kill_t0) < TIMEOUT):
             time.sleep(1)
             kill_t1 = time.time()
+            grounded = return_dict[0]
+        ################################################################################
+        # FINE # LAVORO SU TIMEOUT DEL GROUDING
+        ################################################################################
 
-        print("finito il while", return_dict.values())
+        msol = MySolution()
 
-        if (not return_dict[0]):
+        grounded = return_dict[0]
+        if (not grounded):
             process.terminate()
-            print("killed!!!")
-            exit(2)
+            msol.model_type = "LP"
+            msol.sat        = False
+            msol.timeouted  = True
+            msol.solution   = None
         else:
             process.join()
-            ctl = return_dict[1]
+            ctl.ground([("base", [])]) # TODO remove
 
-        print("ctl dopo")
-        print(ctl)
-        exit(2)
-
-
-        # print("faccio ground")
-        # ctl.ground([("base", [])])
-        # print("fatto ground")
-        # #ctl.configuration.solve.models="0"
-
-        global cc
-        cc = 0
-        global res_model
-        res_model = None
-        global t0
-        t0 = time.time()
-
-        def on_model(m):
-            print("on_model")
-            global res_model
-            res_model = m.symbols(atoms=True)
             global cc
-            #print("before cc = ", cc)
-            cc += 1
-            #print("after cc = ", cc)
-            t1 = time.time()
-            delt = t1 - t0
-            return delt < TIMEOUT.total_seconds()
+            cc = 0
+            global res_model
+            res_model = None
+            global t0
+            t0 = time.time()
 
-        ## #with ctl.solve(on_model=on_model, yield_=True, async_=True) as handle:
-        ## #with ctl.solve(on_model=on_model, async_=True) as handle:
-        ## print("pre solve")
-        ## with ctl.solve(on_model=on_model, yield_=True) as handle:
-        ##     #found_within_time = handle.wait(TIMEOUT.total_seconds())
-        ##     print("pre cancel")
-        ##     handle.cancel()
-        ##     #found_within_time = handle.wait(120)
-        ##     print("found_within_time = ", found_within_time)
-        ##     if not found_within_time:
-        ##         #print("interrompo")
-        ##         handle.cancel()
-        ##         ctl.interrupt()
-        ##         #print("interrotto")
-        ##     #for model_i, model in enumerate(handle):
-        ##     #    print(model_i)
-        ##     #    #models.append(model.symbols(atoms=True))
+            def on_model(m): # TODO TIMEOUT come per il grounding
+                global res_model
+                res_model = m.symbols(atoms=True)
+                global cc
+                #print("before cc = ", cc)
+                cc += 1
+                #print("after cc = ", cc)
+                t1 = time.time()
+                delt = t1 - t0
+                return delt < TIMEOUT.total_seconds()
 
-        ### with ctl.solve(on_model=on_model, async_=True) as handle:
-        ###     print("dentro")
-        ###     #handle.wait(60)
-        ###     handle.wait(1)
-        ###     handle.cancel()
-        ###     #print (handle.get())
+            #if (DEBUG): breakpoint() # TODO Timeout
 
-        ctl.solve(on_model=on_model)
+            ctl.solve(on_model=on_model)
 
+            msol = MySolution.from_lp(res_model,ctl)
 
-        #print("here res_model = ", res_model)
-        #print("here cc = ", cc)
-        msol = MySolution.from_lp(res_model,ctl)
         if show:
             print(fpath)
             print(msol)
@@ -1054,7 +1045,7 @@ class RunnerLp(AbstractRunner):
 
 
         # Devo ricaricarlo ogni volta perche' l'ho sporcato con
-        # l'istanza in input. ctl non si pu' copiare/clonare...
+        # l'istanza in input. ctl non si puo' copiare/clonare...
         self.load_model(self.model_path)
         return msol
 
