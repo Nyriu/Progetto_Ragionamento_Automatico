@@ -1,0 +1,661 @@
+DEBUG
+c=a
+fpath inputs_mzn/input_00.dzn
+input_text K=1;
+H=2;
+M=2;
+P=2;
+O=1;
+Q=1;
+
+in fondo al try
+K=1;
+H=2;
+M=2;
+P=2;
+O=1;
+Q=1;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_01.dzn
+input_text K=1;
+H=2;
+M=2;
+P=1;
+O=2;
+Q=0;
+
+in fondo al try
+K=1;
+H=2;
+M=2;
+P=1;
+O=2;
+Q=0;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_02.dzn
+input_text K=1;
+H=2;
+M=2;
+P=2;
+O=0;
+Q=2;
+
+in fondo al try
+K=1;
+H=2;
+M=2;
+P=2;
+O=0;
+Q=2;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_03.dzn
+input_text K=1;
+H=2;
+M=1;
+P=0;
+O=0;
+Q=5;
+
+in fondo al try
+K=1;
+H=2;
+M=1;
+P=0;
+O=0;
+Q=5;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_04.dzn
+input_text K=1;
+H=2;
+M=2;
+P=0;
+O=2;
+Q=2;
+
+in fondo al try
+K=1;
+H=2;
+M=2;
+P=0;
+O=2;
+Q=2;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_05.dzn
+input_text K=1;
+H=3;
+M=1;
+P=3;
+O=2;
+Q=0;
+
+in fondo al try
+K=1;
+H=3;
+M=1;
+P=3;
+O=2;
+Q=0;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_06.dzn
+input_text K=1;
+H=3;
+M=2;
+P=2;
+O=1;
+Q=4;
+
+in fondo al try
+K=1;
+H=3;
+M=2;
+P=2;
+O=1;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_07.dzn
+input_text K=1;
+H=3;
+M=1;
+P=4;
+O=1;
+Q=0;
+
+in fondo al try
+K=1;
+H=3;
+M=1;
+P=4;
+O=1;
+Q=0;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_08.dzn
+input_text K=1;
+H=3;
+M=2;
+P=2;
+O=2;
+Q=2;
+
+in fondo al try
+K=1;
+H=3;
+M=2;
+P=2;
+O=2;
+Q=2;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_09.dzn
+input_text K=1;
+H=3;
+M=2;
+P=1;
+O=2;
+Q=4;
+
+in fondo al try
+K=1;
+H=3;
+M=2;
+P=1;
+O=2;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_10.dzn
+input_text K=1;
+H=4;
+M=4;
+P=1;
+O=3;
+Q=4;
+
+in fondo al try
+K=1;
+H=4;
+M=4;
+P=1;
+O=3;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_11.dzn
+input_text K=1;
+H=4;
+M=2;
+P=2;
+O=1;
+Q=4;
+
+in fondo al try
+K=1;
+H=4;
+M=2;
+P=2;
+O=1;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_12.dzn
+input_text K=1;
+H=4;
+M=3;
+P=3;
+O=3;
+Q=0;
+
+in fondo al try
+K=1;
+H=4;
+M=3;
+P=3;
+O=3;
+Q=0;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_13.dzn
+input_text K=1;
+H=4;
+M=4;
+P=4;
+O=3;
+Q=1;
+
+in fondo al try
+K=1;
+H=4;
+M=4;
+P=4;
+O=3;
+Q=1;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_14.dzn
+input_text K=1;
+H=4;
+M=4;
+P=1;
+O=2;
+Q=6;
+
+in fondo al try
+K=1;
+H=4;
+M=4;
+P=1;
+O=2;
+Q=6;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_15.dzn
+input_text K=2;
+H=2;
+M=2;
+P=0;
+O=1;
+Q=10;
+
+in fondo al try
+K=2;
+H=2;
+M=2;
+P=0;
+O=1;
+Q=10;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_16.dzn
+input_text K=2;
+H=2;
+M=1;
+P=2;
+O=2;
+Q=4;
+
+in fondo al try
+K=2;
+H=2;
+M=1;
+P=2;
+O=2;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_17.dzn
+input_text K=2;
+H=2;
+M=1;
+P=2;
+O=2;
+Q=2;
+
+in fondo al try
+K=2;
+H=2;
+M=1;
+P=2;
+O=2;
+Q=2;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_18.dzn
+input_text K=2;
+H=2;
+M=1;
+P=1;
+O=2;
+Q=8;
+
+in fondo al try
+K=2;
+H=2;
+M=1;
+P=1;
+O=2;
+Q=8;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_19.dzn
+input_text K=2;
+H=2;
+M=1;
+P=2;
+O=3;
+Q=5;
+
+in fondo al try
+K=2;
+H=2;
+M=1;
+P=2;
+O=3;
+Q=5;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_20.dzn
+input_text K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+in fondo al try
+K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_20.dzn
+input_text K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+in fondo al try
+K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_19.dzn
+input_text K=2;
+H=2;
+M=1;
+P=2;
+O=3;
+Q=5;
+
+in fondo al try
+K=2;
+H=2;
+M=1;
+P=2;
+O=3;
+Q=5;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_20.dzn
+input_text K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+in fondo al try
+K=2;
+H=3;
+M=8;
+P=2;
+O=3;
+Q=3;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_21.dzn
+input_text K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=3;
+P=6;
+O=4;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_22.dzn
+input_text K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_22.dzn
+input_text K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+Press a button
+mostro testo
+attendo
+ho atteso
+fpath inputs_mzn/input_22.dzn
+input_text K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+in fondo al try
+K=2;
+H=3;
+M=1;
+P=8;
+O=5;
+Q=4;
+
+Press a button
+mostro testo
+attendo
