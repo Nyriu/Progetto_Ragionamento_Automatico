@@ -9,7 +9,6 @@ import json
 #import asyncio ## Sperando funzioni per il timeout di clingo... NOPE!
 #import threading ## Sperando funzioni per il timeout di clingo... NOPE!
 import multiprocessing ## Sperando funzioni per il timeout di clingo... # Workaround ma YES
-#import pdb # TODO remove
 
 import time
 from math import ceil
@@ -29,7 +28,7 @@ import clingo
 from my_globals import *
 
 #DEBUG = True
-DEBUG = False
+#DEBUG = False
 
 class IOHelper:
     """ Classe statica ausiliaria per gestire meglio la generazione/distruzione
@@ -57,7 +56,6 @@ class IOHelper:
 
     # On files ####################
     def open_file(fpath, mode='r'):
-        # TODO try catch
         f = open(fpath, mode)
         return f
 
@@ -156,7 +154,6 @@ class MyInstance:
         f.write(lp_enc)
 
     def calc_complexity(self, alpha=.5):
-        # TODO migliorare
         K = self.values['K']
         H = self.values['H']
         M = self.values['M']
@@ -169,14 +166,6 @@ class MyInstance:
 
         if stanze < 12:
             return 0
-        #if pers_mezzi/stanze < 1/3:
-        #    return 0
-
-        #return alpha*pers/(2*stanze) + (1-alpha)*(M+Q)/pers
-
-        #return alpha*pers/2 + (1-alpha)*(M+Q)/pers
-
-        #return alpha*pers/(2*stanze) + (1-alpha)*(M+P+Q)/pers
 
         return alpha*pers_mezzi/stanze + (1-alpha)*(M+P+Q)/pers
 
@@ -225,8 +214,6 @@ class MyInstance:
     # Metodi statici ####################
     def read(fpath):
         """ Ritorna MyIstance leggendo il file al path indicato """
-        #TODO qua gestire in automatico i due formati
-        #TODO warning se e' mal formato
         if not os.path.isfile(fpath):
             raise Exception("File "+ fpath +" does not exist!")
             return None
@@ -236,7 +223,7 @@ class MyInstance:
         if INPUT_MZN_EXT in fpath:
             values = MyInstance._read_mzn(f)
         elif INPUT_LP_EXT in fpath:
-            values = MyInstance._read_lp(f)  # TODO
+            values = MyInstance._read_lp(f)
         else:
             raise Exception("File neither .mzn or .lp!")
         ins = MyInstance( k=values['K'], h=values['H'], m=values['M'],
@@ -261,12 +248,15 @@ class MyInstance:
                 l = l.replace(";","")
                 k,v = l.split('=')
                 if k in values.keys():
-                    # TODO try catch su int
                     values[k] = int(v)
         return values
 
     def _read_lp(f):
-        raise Exception("_rea_lp not implemented!") # TODO
+        # Not implemented
+        # Al momento leggo mzn e lo passo al RunnerLp come MyInstance
+        # quindi non serve leggere direttamente i .lp
+        raise Exception("_rea_lp not implemented!")
+
 
 
 
@@ -276,14 +266,6 @@ class MySolution():
         Un campo apposito permette di capire se la soluzione e' stata
         ottenuta con modello mzn o lp """
 
-    # TODO gestire il timeout
-
-    #def __init__(model_output):
-    #    """ Inizializza MySolution a partire dall'output
-    #        di un modello mzn o lp """
-    #    # TODO if da mzn fai una roba
-    #    # TODO elif da lp fanne un'altra
-    #    # TODO else esplodi
     def __init__(self):
         """ Inizializza una MySolution vuota """
         self.model_type = "" # can be "MZN" or "LP"
@@ -307,7 +289,6 @@ class MySolution():
         data["time"]       = self.time
         data["sol"]        = self.solution
 
-        # TODO try catch
         json.dump(data, open(fpath, 'w+'), indent=True)
 
 
@@ -382,7 +363,6 @@ class MySolution():
     # Metodi statici ####################
     def read(fpath):
         """ Ritorna MySolution del path indicato """
-        # TODO gestire sat:False
         msol = MySolution()
         data = json.load(open(fpath))
 
@@ -400,15 +380,10 @@ class MySolution():
         """ Presa una soluzione e relativa istanza di un modello mzn ritorna
             la MySolution equivalente """
 
-        # print("DEBUG:: res= " + str(res))
-
         msol = MySolution()
         msol.model_type = "MZN"
         sol = res.solution
-        if sol is None: # TODO check if UNSAT
-
-            #result.status.has_solution()
-
+        if sol is None:
             msol.sat = False
             msol.solution = None
             msol.timeouted = False
@@ -453,7 +428,7 @@ class MySolution():
           ("osservazione", 2),
           ("quarantena",   2)
 
-          ## BEGIN DEBUG # TODO togliere debug
+          ## BEGIN DEBUG #
           ,("vicini1",   2)
           ,("vicini2",   2)
           ## END DEBUG
@@ -467,22 +442,16 @@ class MySolution():
           "P":[],
           "O":[],
           "Q":[]
-          ## BEGIN DEBUG # TODO togliere debug
+          ## BEGIN DEBUG #
           ,"vicini1":[]
           ,"vicini2":[]
           ## END DEBUG
         }
 
-        #if sol is None: # TODO check if UNSAT
-        #    msol.sat = False
-        #    msol.solution = None
-        #    return msol
-        # else
         for symb in res_model:
             name = symb.name
             args = symb.arguments
             if (name, len(args)) in to_consider:
-                # TODO fare qualche controllo... fidarsi e' bene ma...
                 if name == "corridoi":
                     sol["K"]=args[0].number
                 elif name == "stanze_per_lato":
@@ -637,7 +606,7 @@ class InputGenerator:
                 if val >= da_rimuovere:
                     s(val-da_rimuovere)
                     rimosse += da_rimuovere
-        else: # TODO verificare se possibile fare altre modifiche
+        else:
             # dimezzo Malati, Positivi o Quarantena
             getters.remove(ins.get_osservazione)
             setters.remove(ins.set_osservazione)
@@ -687,7 +656,6 @@ class InputGenerator:
             """
         # Dente di sega
         inss = InputGenerator._gen_istanze(n, k_min,h_min, k_max,h_max)
-        # TODO order
 
         if delete_old:
             IOHelper.del_dir(INPUT_MZN_DIR)
@@ -695,7 +663,7 @@ class InputGenerator:
 
         if write:
             IOHelper.create_dir(INPUT_MZN_DIR)
-            IOHelper.create_dir(INPUT_LP_DIR) # TODO
+            IOHelper.create_dir(INPUT_LP_DIR)
             for i,ins in enumerate(inss):
                 fpath = IOHelper.gen_fpath(i,
                         INPUT_MZN_DIR, INPUT_MZN_PREFIX, INPUT_MZN_EXT)
@@ -722,7 +690,7 @@ class InputGenerator:
 
 
 
-class BatchCoordinator: # TODO
+class BatchCoordinator:
     """ Un batch e' l'insieme degli elementi che matchano le regex
         contenute in BATCH_COMPONENTS.
         BatchCoordinator si preoccupa salvare un batch correttamente
@@ -737,7 +705,7 @@ class BatchCoordinator: # TODO
 
         max_num=0
         for bat in batches_names:
-            num = int(bat.replace(BATCH_DIR_PREFIX, "")) # TODO try catch
+            num = int(bat.replace(BATCH_DIR_PREFIX, ""))
             if num > max_num:
                 max_num = num
 
@@ -962,7 +930,7 @@ class RunnerLp(AbstractRunner):
         # + nel processo principale verifico se il secondario ha finito il grounding e
         #   tengo conto del tempo che passa
         # + se il grounding finisce entro il TIMEOUT allora lancio il grounding in locale (nel processo principale)
-        # + se ho TIMEOUT allora devo gestire la creazione di una soluzione particolare # TODO
+        # + se ho TIMEOUT allora devo gestire la creazione di una soluzione particolare
 
         # Pro: funziona, dato che nessuno degli altri metodi funziona
         #      (Control non e' serializzabile quindi niente passaggio tra thread/processi)
@@ -1006,10 +974,9 @@ class RunnerLp(AbstractRunner):
             msol.sat        = False
             msol.timeouted  = True
             msol.solution   = None
-            #print("timeout per grounding") ## TODO remove
         else:
             process.join()
-            ctl.ground([("base", [])]) # TODO remove
+            ctl.ground([("base", [])])
 
             global cc
             cc = 0
@@ -1018,7 +985,7 @@ class RunnerLp(AbstractRunner):
             global t0
             t0 = time.time()
 
-            def on_model(m): # TODO TIMEOUT come per il grounding
+            def on_model(m):
                 global res_model
                 res_model = m.symbols(atoms=True)
                 global cc
@@ -1028,8 +995,6 @@ class RunnerLp(AbstractRunner):
                 t1 = time.time()
                 delt = t1 - t0
                 return delt < TIMEOUT.total_seconds()
-
-            #if (DEBUG): breakpoint() # TODO Timeout
 
             ctl.solve(on_model=on_model)
 
@@ -1087,21 +1052,6 @@ class RunnerLp(AbstractRunner):
 ### TODO refactor in MySolution ##########################################################
 ### TODO refactor in MySolution ##########################################################
 ### TODO refactor in MySolution ##########################################################
-
-## # Dati il numero e la dir carica ritorna il dizionario
-## # della soluzione relativa all input col numero dato
-## # Se il file non esiste retun None
-## def read_output(num, directory=OUTPUT_DIR, suppress_error=False):
-##     if not directory[-1] == '/':
-##         directory = directory + '/'
-##     fpath = IOHelper.gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
-##     if not os.path.isfile(fpath):
-##         if not suppress_error:
-##             print("File does not exist!\n path: %s " %(fpath))
-##         return None
-##
-##     return json.load(open(fpath))
-
 
 def get_output(num, directory=OUTPUT_MZN_DIR):
     fpath = IOHelper.gen_fpath(num, directory, OUTPUT_PREFIX, OUTPUT_EXT)
