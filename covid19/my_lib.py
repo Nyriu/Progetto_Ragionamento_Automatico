@@ -1006,6 +1006,7 @@ class RunnerLp(AbstractRunner):
             msol.sat        = False
             msol.timeouted  = True
             msol.solution   = None
+            #print("timeout per grounding") ## TODO remove
         else:
             process.join()
             ctl.ground([("base", [])]) # TODO remove
