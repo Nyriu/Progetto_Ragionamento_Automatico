@@ -8,7 +8,7 @@ import json
 
 #import asyncio ## Sperando funzioni per il timeout di clingo... NOPE!
 #import threading ## Sperando funzioni per il timeout di clingo... NOPE!
-import multiprocessing ## Sperando funzioni per il timeout di clingo...
+import multiprocessing ## Sperando funzioni per il timeout di clingo... # Workaround ma YES
 #import pdb # TODO remove
 
 import time
