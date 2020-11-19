@@ -1,0 +1,58 @@
+%!TEX TS-program = pdflatex
+%!TEX root = main.tex
+%!TEX encoding = UTF-8 Unicode
+
+\section{Minizinc}
+\subsection{Il modello}
+%In input vengono forniti
+%\lstinline{K, H, M, O, P, Q}
+Similmente a quanto visto per ASP, in \emph{covid19.mzn} si ha una prima definizione delle stanze
+\lstinputlisting[
+firstline= 1,
+lastline = 16
+]{./code/covid19.mzn}
+
+\noindent
+Le limitazioni sul numero di ospiti per stanza sono date dai seguenti vincoli.
+Notare come questa modellazione permette di usare \emph{alldifferent} sui numeri stanze degli ospiti in osservazione.
+\lstinputlisting[
+firstline= 19,
+lastline = 50
+]{./code/covid19.mzn}
+
+\noindent
+La relazione di \emph{Vicinato 1} è una versione più snella e comprensibile delle formule utilizzate nel modello ASP
+\lstinputlisting[
+firstline= 53,
+lastline = 77
+]{./code/covid19.mzn}
+
+\noindent
+\emph{Vicinato 2} viene soddisfatto se esiste una terza stanza su cui fare ``perno'' in \emph{Vicinato 1} con entrambe le stanze considerate
+\lstinputlisting[
+firstline= 80,
+lastline = 87
+]{./code/covid19.mzn}
+
+\noindent
+Il valore da minimizzare è calcolato allo stesso modo del codice ASP
+\lstinputlisting[
+firstline= 90,
+lastline = 99
+]{./code/covid19.mzn}
+
+\noindent
+La configurazione che ha dato i risultati migliori è riportata nel listato che segue.
+Notare come si tenti fin da subito di raccogliere ospiti malati o in osservazione nelle prime stanze e sui piani più bassi, mentre per ospiti in quarantena o positivi si cerca una stanza nei piani superiori.
+\lstinputlisting[
+firstline= 150,
+lastline = 159
+]{./code/covid19.mzn}
+
+%\cleardoublepage
+\subsection{\emph{Symmetry Breaking}}
+La modellazione scelta permette di implementare facilmente la rottura delle simmetrie descritta per il modello ASP
+\lstinputlisting[
+firstline= 103,
+lastline = 113
+]{./code/covid19.mzn}

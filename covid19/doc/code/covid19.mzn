@@ -1,57 +1,15 @@
-% Isolamento persone su cociera
-%
-% Crociera con camere doppie
-% K corridoi con h camere per lato (h a dx e h a sx)
-% corridoi sono uno sopra l'altro con possibilita'
-% che i condotti d'aerazione diffondano il virus
-% N persone etichettabili con:
-%   - malate
-%   - positive sane
-%   - osservazione (possibile contatto con positivo
-%   - quarantena precauzionale
-% Possono stare assieme nella stessa stanza:
-%   - malati
-%   - positivi sani
-%   - precauzionali % Devono stare in isolamento da soli: quelli in osservazione
-%
-% Definizione di Vicinanaza tra stanze
-% Vicinato 1
-% Le camere adiacenti, quella di fronte, quelle sopra e sotto
-% Ovviamente camere agli estremi dei corridoi e quelle dei corridoi
-% 1 e k hanno meno Vicini 1
-%
-% Vicinato 2
-% Applico Vicinato 1 due volte
-%
-%
-%% Si vuole disporre le persone per avere MINIMO
-%% numero di malati a distanza <= 2 dai precauzionali e
-%%                  a distanza <= 1 dai positivi sani
-%%
-%% (eventuali vincoli extra su positivi sani)
-%
-
 include "globals.mzn"; 
 
 int: K; % corridoi/piani
 int: H; % stanze per lato
 
-% condizioni delle persone
 int: M; % malati
 int: P; % positivi
 int: O; % osservazione
 int: Q; % quarantena precauzionale
 
-
-% in totale ci sono 2*H*K stanze
-% le prime H sono del primo corridio lato dx
-% da H..2*H-1 sono del primo corridio lato sx
-% da 2*H..3*H-1 sono del secondo corridio lato dx
-% ecc...
-
 set of int: stanze = 0..2*H*K-1;
 
-% 
 array[1..M] of var stanze: malati;
 array[1..P] of var stanze: positivi;
 array[1..O] of var stanze: osservazione;
@@ -63,11 +21,6 @@ constraint
   forall(i in 1..M)
     (sum(j in i+1..M)
       (if (malati[i]==malati[j]) then 1 else 0 endif) <= 1)
-
-  %at_most1(malati)
-  %TODO
-  %among(2, malati, stanze)
-
   /\
   % Al piu' due Positivi nella stessa stanza
   forall(i in 1..P)
@@ -83,7 +36,6 @@ constraint
       (if (quarantena[i]==quarantena[j]) then 1 else 0 endif) <= 1)
   /\
   % No stanze miste
-  % TODO esiste un modo migliore?
   forall(i in 1..M)
     (forall(j in 1..P)(malati[i] != positivi[j]    ) /\
      forall(j in 1..O)(malati[i] != osservazione[j]) /\
@@ -110,9 +62,6 @@ predicate vicini1(var stanze: s1, var stanze: s2) =
   \/
   % Sopra/Sotto
   (
-    % TODO verificare che un vinocolo qua non serva
-    % cfr gli altri casi
-
     % Sono sopra-sotto
     (s1 == s2+2*H \/ s1 == s2-2*H)
   )
@@ -130,10 +79,6 @@ predicate vicini1(var stanze: s1, var stanze: s2) =
 % Date due stanze verifico se sono in reciproco Vicinato2
 predicate vicini2(var stanze: s1, var stanze: s2) =
   (s1 != s2 /\
-  % TODO non mi serve scandire tutte le stanze...
-  % mi basta scandire quelle che potrebbero essere vicini1 = num costante
-  %% se solo si riuscisse a fare delle cacchio di funzioni che tornino set of int
-  %% e non var opt set of int che poi che cavolo vuol dire?!?
    exists (s3 in stanze)
     ( s3 != s1 /\ s3 != s2
       /\
@@ -155,19 +100,8 @@ var int: c =
 
 
 % Symmetry
-
 constraint
   (malati[1] == 0)
-
-  % DEBUG
-  % DEBUG
-
-  %/\
-  %(quarantena[5] == 11)
-
-  % END % DEBUG
-  % END % DEBUG
-
   /\
   increasing(malati)
   /\
@@ -218,10 +152,10 @@ solve :: search_ann
       minimize c;
 
 search_ann = seq_search([
-  int_search(malati,       input_order, indomain_min,    complete),
-  int_search(osservazione, input_order, indomain_min ,   complete),
+  int_search(malati,       input_order, indomain_min, complete),
+  int_search(osservazione, input_order, indomain_min, complete),
   int_search(positivi,     input_order, indomain_max, complete),
-  int_search(quarantena,   input_order, indomain_max,    complete)
+  int_search(quarantena,   input_order, indomain_max, complete)
 ]);
 %% FINE %% MODO alternativo per search
 
