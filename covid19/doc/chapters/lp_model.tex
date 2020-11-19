@@ -1,0 +1,86 @@
+%!TEX TS-program = pdflatex
+%!TEX root = main.tex
+%!TEX encoding = UTF-8 Unicode
+
+\section{ASP}
+\subsection{Il modello}
+%In input vengono forniti
+%\lstinline{K, H, M, O, P, Q}
+
+Ad ogni stanza viene associato un intero partendo da 0 ed incrementando di 1.
+Il numero totale di stanze è $2*K*H$, perché abbiamo $K$ corridoi e per ciascun corridoio ci sono $H$ stanze per lato (sinistro o destro).
+Con questa numerazione ogni $K$ numeri si cambierà lato, mentre ogni $2*K$ numeri si indica un corridoio ad un piano superiore.
+La numerazione permette di modellare abbastanza facilmente le relazioni spaziali tra stanze,
+ad esempio:
+le prime $H$ stanze appartengono al lato destro del primo corridoio;
+le stanze dalla $H$ alla $2*H-1$ appartengono al lato sinistro del primo corridoio;
+le stanze dalla $2*H$ alla $3*H-1$ sono sul secondo piano a destra; etc\dots
+
+\noindent
+Nel file \emph{covid19.lp} le stanze vengono definite con
+\lstinputlisting[firstline= 7, lastline = 7]{./code/covid19.lp}
+
+\noindent
+Poiché gli ospiti devono essere assegnati esattamente ad una stanza, si definiscono i vincoli
+\lstinputlisting[
+firstline= 10,
+lastline = 13
+]{./code/covid19.lp}
+
+\noindent
+Poiché le stanze hanno capacità limitate, che dipendono dal tipo di ospite, risulta necessario definire
+\lstinputlisting[
+firstline= 16,
+lastline = 22
+]{./code/covid19.lp}
+
+\noindent
+Inoltre una stanza può essere condivisa solo da ospiti dello stesso tipo (esclusi i positivi),
+quindi vengono vietate tutte le coppie illecite
+\lstinputlisting[
+firstline= 25,
+lastline = 32
+]{./code/covid19.lp}
+
+\noindent
+Due camere sono a distanza \emph{Vicinato 1} se rispettano uno dei vincoli tra
+\lstinputlisting[
+firstline= 36,
+lastline = 62
+]{./code/covid19.lp}
+\todo{spiegare la matematica?}
+
+\noindent
+Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
+In pratica, presa una camera, un elemento nel suo \emph{Vicinato 2} può essere raggiunto in due passi selezionando prima un \emph{Vicinato 1} adeguato e poi un \emph{Vicinato 1} della camera appena selezionata.
+Nel vincolo si richiede l'esistenza di questa terza camera che faccia da ``perno'' per lo spostamento.
+\lstinputlisting[
+firstline= 65,
+lastline = 68
+]{./code/covid19.lp}
+
+\noindent
+La funzione da minimizzare viene calcolata contando che ospiti di che stanze soddisfano la relazione \emph{scomodo}.
+Due ospiti non possono soddisfare la relazione se occupano stanze non in vicinato tra loro, oppure se appartengono a tipologie non problematiche (es. in osservazione).
+\lstinputlisting[
+firstline= 99,
+lastline = 106
+]{./code/covid19.lp}
+\todo{allungare?}
+
+%\cleardoublepage
+\subsection{\emph{Symmetry Breaking}}
+Poiché non ci sono differenze tra malati dello stesso tipo è possible fissare un ordinamento arbitrario.
+In questo caso ad ospiti con un indice inferiore vengono assegnate camera ai piani più bassi.
+\lstinputlisting[
+firstline= 75,
+lastline = 78
+]{./code/covid19.lp}
+
+\noindent
+Osservando che le camere all'inizio ed alla fine dei corridoi hanno un numero inferiore di camere in \emph{Vicinato 1} (e quindi anche in \emph{Vicinato 2}), risulta sensato fissare il primo malato nella prima stanza disponibile, ossia nella prima stanza del primo corridoio.
+\todo{giustificare meglio?}
+\lstinputlisting[ 
+firstline= 73,
+lastline = 73
+]{./code/covid19.lp}
