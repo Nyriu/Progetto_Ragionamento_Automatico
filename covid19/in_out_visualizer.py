@@ -1,44 +1,9 @@
-#### TODO
-#### Esegue il modello MiniZinc su tutti gli input
-#### Per ciascuno mostra input e infomrazioni sulla soluzione trovata
-#### con le frecce sx dx si passa all'input precedente o successivo
-#### TODO # con le frecce su giu' si passa alla soluzione precedente o successiva
-###
-#### Usage:
-#### python in_out_visualizer.py
-###
-####import sys
-###import my_lib
-###
-###def get_args():
-###    args = sys.argv
-###    if len(args) < 2:
-###        print("Put pone arguments!! For example")
-###        print("python run.py 10")
-###        exit(1)
-###
-###    try:
-###        input_num = int(args[1])
-###    except:
-###        print("ERROR! Input num is not ad int!")
-###        exit(2)
-###    return input_num
-###
-###
-###
-###
-#####################################################
-#### Main
-#####################################################
-###def main():
-###    input_num = get_args()
-###    #my_lib.run_minizinc_model(input_num, show_output=True)
-###    my_lib.run_minizinc_model(input_num)
-###
-###
-###if __name__ == "__main__":
-###    main()
-###
+# Usage:
+# python in_out_visualizer.py
+
+# Next/Prev solution with left/right arrows or h/l (from hjkl)
+# Quit with q
+
 from my_globals import *
 import my_lib
 
@@ -46,10 +11,7 @@ import curses
 from curses import textpad, wrapper
 import lipsum
 
-
-#EXIT_KEYS = [ curses.KEY_EXIT , 'q', 'Q' ]
-#NEXT_KEYS = [ curses.KEY_RIGHT, 'l', 'L' ]
-#PREV_KEYS = [ curses.KEY_LEFT , 'h', 'H' ]
+error_log_filename = 'in_out_log.txt'
 
 EXIT_KEYS = [ curses.KEY_EXIT , ord('q'), ord('Q') ]
 NEXT_KEYS = [ curses.KEY_RIGHT, ord('l'), ord('L') ]
@@ -105,18 +67,15 @@ def init_wins():
     bt_begin_y = 2
     bt_begin_x = 2
 
-    #text = lipsum.generate_paragraphs(1)
     text = "Test text"
     l_win.addstr(lt_begin_y, lt_begin_x, text)
     r_win.addstr(rt_begin_y, rt_begin_x, text)
     b_win.addstr(bt_begin_y, bt_begin_x, text)
-    #border(l_win)
-    #border(r_win)
     border(b_win)
 
     return l_win, r_win, b_win
 
-error_log_filename = 'in_out_log.txt'
+
 
 def main(stdscr):
     # Init
@@ -129,23 +88,12 @@ def main(stdscr):
 
     try:
         l_win, r_win, b_win = init_wins()
-        #for w in [l_win, r_win, b_win]:
-        #    text = "Press a button"
-        #    w.clear()
-        #    w.addstr(0,0, text)
-        #    w.refresh()
 
         num = 0
 
-        #c = b_win.getkey()
-        #c = b_win.getch()
-        #c = stdscr.getch()
         c = 'a' # uno a caso
         input_text = "Press a button"
         output = "Press a button"
-
-        print("c=a", file=open(error_log_filename, 'a+'))
-
 
         while not c in EXIT_KEYS:
             old_num = num
@@ -162,18 +110,15 @@ def main(stdscr):
                 print("input_text " + input_text, file=open(error_log_filename, 'a+'))
                 mzn_output = my_lib.get_output(num,OUTPUT_MZN_DIR)
                 lp_output  = my_lib.get_output(num,OUTPUT_LP_DIR)
-                print("in fondo al try", file=open(error_log_filename, 'a+'))
 
             except Exception as inst:
                 input_text = old_input_text
                 output = old_output
                 num = old_num
-                print("Quasi in fondo al except", file=open(error_log_filename, 'a+'))
                 print("Exception", file=open(error_log_filename, 'a+'))
                 print(type(inst) , file=open(error_log_filename, 'a+'))
                 print(inst.args  , file=open(error_log_filename, 'a+'))
                 print(inst       , file=open(error_log_filename, 'a+'))
-                print("in fondo al except", file=open(error_log_filename, 'a+'))
 
             print(input_text, file=open(error_log_filename, 'a+'))
             print(output, file=open(error_log_filename, 'a+'))
@@ -181,7 +126,6 @@ def main(stdscr):
             l_win.clear()
             l_win.addstr(0,0, mzn_output)
             r_win.clear()
-            #r_win.addstr(0,0, input_text)
             r_win.addstr(0,0, lp_output)
             b_win.clear()
             b_win.addstr(0,0, "Input num={:02d}".format(num))
@@ -191,10 +135,6 @@ def main(stdscr):
             inline_input_text = inline_input_text.replace("M", "\tM")
             b_win.addstr(0,40, "{:s}".format(inline_input_text))
 
-
-            #show_input(l_win, num)
-            #show_result(r_win, num)
-
             l_win.refresh()
             r_win.refresh()
             b_win.refresh()
@@ -202,13 +142,6 @@ def main(stdscr):
             print("attendo", file=open(error_log_filename, 'a+'))
             c = b_win.getch()
             print("ho atteso", file=open(error_log_filename, 'a+'))
-
-    #except:
-    #    curses.nocbreak()
-    #    stdscr.keypad(False)
-    #    curses.echo()
-    #    curses.endwin()
-    #    print("Unspecified Error")
 
     finally:
         curses.nocbreak()

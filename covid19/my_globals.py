@@ -2,7 +2,6 @@
 # Globali
 ##################################################
 from datetime import timedelta
-#MAIN_DIR="./" # TODO mettere in testa ad altri path
 
 # Inputs ####################
 INPUT_DIR    = "inputs/"
@@ -32,9 +31,9 @@ OUTPUT_LP_EXT    = OUTPUT_EXT
 
 
 
-#TIMEOUT = timedelta(minutes=5) # TODO use this
+TIMEOUT = timedelta(minutes=5) # use this
 #TIMEOUT = timedelta(minutes=2)
-TIMEOUT = timedelta(minutes=1)
+#TIMEOUT = timedelta(minutes=1)
 #TIMEOUT = timedelta(seconds=30)
 #TIMEOUT = timedelta(seconds=3)
 

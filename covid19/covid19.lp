@@ -21,7 +21,7 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 :- quarantena(Q,S), quarantena(Q1,S), quarantena(Q2,S), % Al piu' 2 quarantena
    Q!=Q1, Q!=Q2, Q1!=Q2.
 
-% No misti % TODO migliorabile?
+% No misti
 :- malato(M,S), positivo(P,S).
 :- malato(M,S), osservazione(O,S).
 :- malato(M,S), quarantena(Q,S).
@@ -52,13 +52,13 @@ vicini1(S,S1) :-                    % CASO: sotto
 vicini1(S,S1) :-                    % CASO: adiacenti dx
   stanza(S), stanza(S1), S!=S1,
   stanze_per_lato(H),
-  S/H == S1/H,                      % sullo lato dello stesso piano
+  S/H == S1/H,                      % sul lato dello stesso piano
   S == S1 + 1.                      % a dx
 
 vicini1(S,S1) :-                    % CASO: adiacenti sx
   stanza(S), stanza(S1), S!=S1,
   stanze_per_lato(H),
-  S/H == S1/H,                      % sullo lato dello stesso piano
+  S/H == S1/H,                      % sul lato dello stesso piano
   S == S1 - 1.                      % a sx
 
 % Vicini2
@@ -80,7 +80,7 @@ malato(1,0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEBUGGING SKILLZ
+% DEBUGGING
 
 %% vicini1
 %debug1(10).

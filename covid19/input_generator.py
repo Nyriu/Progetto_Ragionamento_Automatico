@@ -7,7 +7,7 @@ from my_lib import  InputGenerator
 def main():
     print("Genero inputs")
 
-    n = 3
+    n = 3 # Numero di istanze da generare per coppia H,K
     k_min=1
     h_min=2
 

@@ -63,11 +63,6 @@ constraint
   forall(i in 1..M)
     (sum(j in i+1..M)
       (if (malati[i]==malati[j]) then 1 else 0 endif) <= 1)
-
-  %at_most1(malati)
-  %TODO
-  %among(2, malati, stanze)
-
   /\
   % Al piu' due Positivi nella stessa stanza
   forall(i in 1..P)
@@ -83,7 +78,6 @@ constraint
       (if (quarantena[i]==quarantena[j]) then 1 else 0 endif) <= 1)
   /\
   % No stanze miste
-  % TODO esiste un modo migliore?
   forall(i in 1..M)
     (forall(j in 1..P)(malati[i] != positivi[j]    ) /\
      forall(j in 1..O)(malati[i] != osservazione[j]) /\
@@ -110,9 +104,6 @@ predicate vicini1(var stanze: s1, var stanze: s2) =
   \/
   % Sopra/Sotto
   (
-    % TODO verificare che un vinocolo qua non serva
-    % cfr gli altri casi
-
     % Sono sopra-sotto
     (s1 == s2+2*H \/ s1 == s2-2*H)
   )
@@ -130,10 +121,6 @@ predicate vicini1(var stanze: s1, var stanze: s2) =
 % Date due stanze verifico se sono in reciproco Vicinato2
 predicate vicini2(var stanze: s1, var stanze: s2) =
   (s1 != s2 /\
-  % TODO non mi serve scandire tutte le stanze...
-  % mi basta scandire quelle che potrebbero essere vicini1 = num costante
-  %% se solo si riuscisse a fare delle cacchio di funzioni che tornino set of int
-  %% e non var opt set of int che poi che cavolo vuol dire?!?
    exists (s3 in stanze)
     ( s3 != s1 /\ s3 != s2
       /\
@@ -158,16 +145,6 @@ var int: c =
 
 constraint
   (malati[1] == 0)
-
-  % DEBUG
-  % DEBUG
-
-  %/\
-  %(quarantena[5] == 11)
-
-  % END % DEBUG
-  % END % DEBUG
-
   /\
   increasing(malati)
   /\
@@ -253,38 +230,4 @@ output
   ["]\n"] ++
 
   ["}\n"]
-  
-
-  %%% DEBUG
-  %%% in minizinc il debug e' la morte... non puoi manco stampare quello che vuoi
-  %%++
-  %%["Vicini1\n"] ++
-  %%[ if i==h then "(" else ")" endif |
-  %%  i in 1..M, j in 1..Q
-  %%]
-  %%++
-  %%["\n"]
-
-
-
 ;
-
-
-%% % Circa human readable
-%% output
-%%   ["Malati:\t\t["] ++
-%%   [show(malati[i]) ++ if i==M then "" else "," endif | i in 1..M]
-%%   ++ ["]\n"] ++
-%% 
-%%   ["Positivi:\t["] ++
-%%   [show(positivi[i]) ++ if i==P then "" else "," endif | i in 1..P]
-%%   ++ ["]\n"] ++
-%% 
-%%   ["Osservazione:\t["] ++
-%%   [show(osservazione[i]) ++ if i==O then "" else "," endif | i in 1..O]
-%%   ++ ["]\n"] ++
-%% 
-%%   ["Quarantena:\t["] ++
-%%   [show(quarantena[i]) ++ if i==Q then "" else "," endif | i in 1..Q]
-%%   ++ ["]\n"]
-%% ;
