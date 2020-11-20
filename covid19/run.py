@@ -6,15 +6,15 @@ import time
 import my_globals
 from my_lib import RunnerMzn, RunnerLp
 
+import psutil ## TODO remove
+import objgraph ## TODO remove
+
 ##################################################
 # Main
 ##################################################
 def main():
-    #verbose = True
-    verbose = False
-
     run_mzn = True # False # True
-    run_lp  = True # True  # False
+    run_lp  = not True # True  # False
 
     if not run_mzn:
         print("\tNOT EXECUTING MZN")
@@ -40,18 +40,40 @@ def main():
     ls = None
 
     t0 = time.time()
-    for num in range(len(mzn_inputs)):
-        if run_mzn:
-            ms = mzn.run(num, show=False, save=True)
-        if run_lp:
-            ls = lp.run(num, show=False, save=True)
+    num = 0
+    max_num = len(mzn_inputs)
+    while num < max_num:
+        try:
+            if run_mzn:
+                ms = mzn.run(num, show=False, save=True)
+            if run_lp:
+                ls = lp.run(num, show=False, save=True)
 
-        if verbose:
-            raise Exception("Verbose not implemented!")
-        else:
-            sys.stdout.write("\r")
-            j=(num+1)/len(mzn_inputs)
-            sys.stdout.write("[%-20s] %d%%\t%d" % ('='*int(20*j), 100*j, num))
+        except:
+            max_num+=1
+            if (max_num > 200):
+                break
+
+        sys.stdout.write("\r")
+        j=(num+1)/max_num
+        sys.stdout.write("[%-20s] %d%%\t%d" % ('='*int(20*j), 100*j, num))
+
+        ## DEBUG
+        print(20*'-')
+        current_process = psutil.Process()
+        os.system('pstree -p ' + str(current_process.pid))
+        children = current_process.children(recursive=True)
+        for child in children:
+            print('Child pid is {}'.format(child.pid))
+            child.terminate()
+        print()
+
+        #if (num > 14):
+        #    breakpoint()
+
+        objgraph.show_most_common_types(limit=5)
+        ## DEBUG
+        num+=1
 
     t1 = time.time()
 

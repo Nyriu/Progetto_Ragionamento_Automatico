@@ -1,0 +1,14 @@
+import objgraph
+objgraph.show_most_common_types(limit=50)
+
+obj = objgraph.by_type('function')[50]
+objgraph.show_backrefs(obj, max_depth=10)
+
+
+import psutil
+current_process = psutil.Process()
+children = current_process.children(recursive=True)
+children
+
+
+current_process = psutil.Process(); children = current_process.children(recursive=True); children

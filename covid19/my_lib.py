@@ -29,6 +29,9 @@ from my_globals import *
 
 #DEBUG = True
 #DEBUG = False
+import psutil ## TODO remove
+import objgraph ## TODO remove
+
 
 class IOHelper:
     """ Classe statica ausiliaria per gestire meglio la generazione/distruzione
@@ -657,6 +660,8 @@ class InputGenerator:
         # Dente di sega
         inss = InputGenerator._gen_istanze(n, k_min,h_min, k_max,h_max)
 
+        #breakpoint() # TODO migliorare ordine input
+
         if delete_old:
             IOHelper.del_dir(INPUT_MZN_DIR)
             IOHelper.del_dir(INPUT_LP_DIR)
@@ -940,6 +945,7 @@ class RunnerLp(AbstractRunner):
         ctl=self.model
         ctl.load(fpath)
 
+        #breakpoint() # DEBUG TODO remove
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
 
@@ -948,6 +954,7 @@ class RunnerLp(AbstractRunner):
             ctl.ground([("base", [])])
             #time.sleep(10.0)
             return_dict[0] = True
+
 
         process = multiprocessing.Process(target=killable_ground, args=(ctl,return_dict))
         process.start()
@@ -961,6 +968,11 @@ class RunnerLp(AbstractRunner):
             time.sleep(1)
             kill_t1 = time.time()
             grounded = return_dict[0]
+
+            ### DEBUG ## TODO
+            #print(20*"##")
+            #objgraph.show_most_common_types(limit=10)
+            #print()
         ################################################################################
         # FINE # LAVORO SU TIMEOUT DEL GROUDING
         ################################################################################
@@ -996,7 +1008,9 @@ class RunnerLp(AbstractRunner):
                 delt = t1 - t0
                 return delt < TIMEOUT.total_seconds()
 
+            #breakpoint() # DEBUG TODO remove
             ctl.solve(on_model=on_model)
+            #breakpoint() # DEBUG TODO remove
 
             msol = MySolution.from_lp(res_model,ctl)
 
