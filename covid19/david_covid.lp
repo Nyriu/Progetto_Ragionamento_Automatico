@@ -31,59 +31,59 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 
 
 
-%% Vicini1 tra malato e (quarantena o positivo)
-%scomodo(P,S,P1,S1) :-
-%  P<P1,
-%  in_stanza(P,T,S), in_stanza(P1,T1,S1),
-%  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
-%  T*T1==0,            % almeno uno dei due e' malato
-%  % Vicini1 % CASO: di fronte
-%  stanza(S), stanza(S1), S!=S1,
-%  stanze_per_lato(H),
-%  S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano
-%  S == S1 + H*(-1)**(1+ (S/H)\2).   % sono di fronte
-%
-%scomodo(P,S,P1,S1) :-
-%  P<P1,
-%  in_stanza(P,T,S), in_stanza(P1,T1,S1),
-%  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
-%  T*T1==0,            % almeno uno dei due e' malato
-%  % Vicini1 % CASO: sopra
-%  stanza(S), stanza(S1), S!=S1,
-%  stanze_per_lato(H),
-%  S == S1 +2*H.
-%
-%scomodo(P,S,P1,S1) :-
-%  P<P1,
-%  in_stanza(P,T,S), in_stanza(P1,T1,S1),
-%  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
-%  T*T1==0,            % almeno uno dei due e' malato
-%  % Vicini1 % CASO: sotto
-%  stanza(S), stanza(S1), S!=S1,
-%  stanze_per_lato(H),
-%  S == S1 -2*H.
-%
-%scomodo(P,S,P1,S1) :-
-%  P<P1,
-%  in_stanza(P,T,S), in_stanza(P1,T1,S1),
-%  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
-%  T*T1==0,            % almeno uno dei due e' malato
-%  % Vicini1 % CASO: adiacenti dx
-%  stanza(S), stanza(S1), S!=S1,
-%  stanze_per_lato(H),
-%  S/H == S1/H,                      % sul lato dello stesso piano
-%  S == S1 + 1.                      % a dx
-%
-%scomodo(P,S,P1,S1) :-
-%  P<P1,
-%  in_stanza(P,T,S), in_stanza(P1,T1, S1),
-%  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
-%  T*T1==0,            % almeno uno dei due e' malato
-%  % Vicini1 % CASO: adiacenti sx
-%  stanza(S), stanza(S1), S!=S1,
-%  stanze_per_lato(H),
-%  S/H == S1/H,                      % sul lato dello stesso piano
-%  S == S1 - 1.                      % a sx
+% Vicini1 tra malato e (quarantena o positivo)
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1,S1),
+  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
+  T*T1==0,            % almeno uno dei due e' malato
+  % Vicini1 % CASO: di fronte
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano
+  S == S1 + H*(-1)**(1+ (S/H)\2).   % sono di fronte
+
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1,S1),
+  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
+  T*T1==0,            % almeno uno dei due e' malato
+  % Vicini1 % CASO: sopra
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S == S1 +2*H.
+
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1,S1),
+  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
+  T*T1==0,            % almeno uno dei due e' malato
+  % Vicini1 % CASO: sotto
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S == S1 -2*H.
+
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1,S1),
+  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
+  T*T1==0,            % almeno uno dei due e' malato
+  % Vicini1 % CASO: adiacenti dx
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S/H == S1/H,                      % sul lato dello stesso piano
+  S == S1 + 1.                      % a dx
+
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1, S1),
+  T!=T1, T!=2, T1!=2, % Sono diversi e nessuno e' osservazione
+  T*T1==0,            % almeno uno dei due e' malato
+  % Vicini1 % CASO: adiacenti sx
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S/H == S1/H,                      % sul lato dello stesso piano
+  S == S1 - 1.                      % a sx
 
 
 
@@ -187,15 +187,57 @@ scomodo(P,S,P1,S1) :-
   S + 1 == S2,                      % a dx
   S1 == S2 -2*H.                    % sotto al dx
 
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1, S1),
+  |(T-T1)|==3, % Uno dei due e' quarantena l'altro e' malato
+  % Vicini2 % CASO: up front
+  stanza(S), stanza(S1), S!=S1,
+  stanza(S2), S2!=S, S2!=S1, 
+  stanze_per_lato(H),
+  S2 == S + 2*H, % sopra
+  %S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano % TODO
+  S2 == S1 + H*(-1)**(1+ (S2/H)\2).  % di fronte al sopra
 
-%% INPUT PER DEBUG
-corridoi(       4).
-stanze_per_lato(5).
-soggetto(1, 0).
-%soggetto(2..3, 3).
-soggetto(2, 3).
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1, S1),
+  |(T-T1)|==3, % Uno dei due e' quarantena l'altro e' malato
+  % Vicini2 % CASO: down front
+  stanza(S), stanza(S1), S!=S1,
+  stanza(S2), S2!=S, S2!=S1, 
+  stanze_per_lato(H),
+  S2 == S - 2*H, % sotto
+  %S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano % TODO
+  S2 == S1 + H*(-1)**(1+ (S2/H)\2).  % di fronte al sotto
 
-in_stanza(1,0,17).
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1, S1),
+  |(T-T1)|==3, % Uno dei due e' quarantena l'altro e' malato
+  % Vicini2 % CASO: down down
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S1 == S - 4*H. % sotto sotto
+
+scomodo(P,S,P1,S1) :-
+  P<P1,
+  in_stanza(P,T,S), in_stanza(P1,T1, S1),
+  |(T-T1)|==3, % Uno dei due e' quarantena l'altro e' malato
+  % Vicini2 % CASO: up up
+  stanza(S), stanza(S1), S!=S1,
+  stanze_per_lato(H),
+  S1 == S + 4*H. % sopra sopra
+
+
+%%%% INPUT PER DEBUG
+%%corridoi(       4).
+%%stanze_per_lato(5).
+%%soggetto(1, 0).
+%%%soggetto(2..3, 3).
+%%soggetto(2, 3).
+
+%in_stanza(1,0,37).
 
 %%sx
 %in_stanza(2,3,16).
@@ -224,21 +266,19 @@ in_stanza(1,0,17).
 %%dx down
 %in_stanza(2,3,8).
 
+%%up front
+%in_stanza(2,3,22).
 
+%%down front
+%in_stanza(2,3,2).
 
-% TODO vicini2
-%scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1),
-%  % Vicini2
-%  stanza(S), stanza(S1), S!=S1,
-%  stanza(S2), S2!=S, S2!=S1,
-%  vicini1(S,S2), vicini1(S2,S1).
+%%up up
+%in_stanza(2,3,17).
 
-
-%cost(C) :- C == #count { S,S1 : scomodo(S,S1) }.
 cost(C) :- C == #count { P,S,P1,S1 : scomodo(P,S,P1,S1) }.
 #minimize {C : cost(C)}.
 
 %#show stanza/1.
 %#show soggetto/2.
-%#show in_stanza/3.
-#show scomodo/4.
+#show in_stanza/3.
+%#show scomodo/4.
