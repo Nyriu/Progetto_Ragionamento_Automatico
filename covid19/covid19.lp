@@ -61,11 +61,11 @@ vicini1(S,S1) :-                    % CASO: adiacenti sx
   S/H == S1/H,                      % sul lato dello stesso piano
   S == S1 - 1.                      % a sx
 
-% Vicini2
-vicini2(S,S1) :-
-  stanza(S), stanza(S1), S!=S1,
-  stanza(S2), S2!=S, S2!=S1,
-  vicini1(S,S2), vicini1(S2,S1).
+%% Vicini2
+%vicini2(S,S1) :-
+%  stanza(S), stanza(S1), S!=S1,
+%  stanza(S2), S2!=S, S2!=S1,
+%  vicini1(S,S2), vicini1(S2,S1).
 
 
 
@@ -96,9 +96,18 @@ malato(1,0).
 %#show scomodo/4.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1), vicini1(S,S1).
+%scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1), vicini2(S,S1).
+%scomodo(M,P,S,S1) :- malato(M,S), positivo(P,S1)  , vicini1(S,S1).
+
 scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1), vicini1(S,S1).
-scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1), vicini2(S,S1).
+scomodo(M,Q,S,S1) :- malato(M,S), quarantena(Q,S1),
+  % Vicini2
+  stanza(S), stanza(S1), S!=S1,
+  stanza(S2), S2!=S, S2!=S1,
+  vicini1(S,S2), vicini1(S2,S1).
 scomodo(M,P,S,S1) :- malato(M,S), positivo(P,S1)  , vicini1(S,S1).
+
 
 cost(C) :- C == #count { M,F,S,S1 : scomodo(M,F,S,S1) }.
 #minimize {C : cost(C)}.
