@@ -1,4 +1,4 @@
-## Esegue i modelli su tutti gli input
+#thon; # Esegue i modelli su tutti gli input
 
 import sys
 import os
@@ -13,8 +13,8 @@ import objgraph ## TODO remove
 # Main
 ##################################################
 def main():
-    run_mzn = True # False # True
-    run_lp  = not True # True  # False
+    run_mzn = True
+    run_lp  = True
 
     if not run_mzn:
         print("\tNOT EXECUTING MZN")
@@ -26,7 +26,8 @@ def main():
     mzn_path="./covid19.mzn"
     mzn = RunnerMzn(mzn_path)
 
-    lp_path = "./covid19.lp"
+    #lp_path = "./covid19.lp"
+    lp_path = "./david_covid.lp"
     lp = RunnerLp(lp_path)
 
     mzn_inputs = os.listdir(my_globals.INPUT_MZN_DIR)

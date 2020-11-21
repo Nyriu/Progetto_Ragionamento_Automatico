@@ -119,6 +119,45 @@ class MyInstance:
         assert(self.values['K']>0  and self.values['H']>0  and
                self.values['M']>=0 and self.values['P']>=0 and
                self.values['O']>=0 and self.values['Q']>=0)
+
+        dzn_ids_to_lp = {
+                "K":"corridoi(       ",
+                "H":"stanze_per_lato(",
+                "M":"soggetto(",
+                "P":"soggetto(",
+                "O":"soggetto(",
+                "Q":"soggetto("
+                }
+        lp_type_encode = {
+                "M":"0",
+                "P":"1",
+                "O":"2",
+                "Q":"3"
+                }
+
+        p_num = 1 # numero identificativo persona
+
+        lp_enc = ""
+        for k in self.values.keys():
+            if self.values[k] != 0:
+                lp_enc += dzn_ids_to_lp[k]
+                val = self.values[k]
+                if not (k == "K" or k == "H"):
+                    lp_enc += str(p_num) + ".."
+                    p_num += val - 1
+                    lp_enc += str(p_num) + ", " + lp_type_encode[k]
+                    p_num += 1
+                else:
+                    lp_enc += str(val)
+                lp_enc += ").\n"
+        return lp_enc
+
+
+    def to_str_lp_old(self):
+        """ DEPRECATED! Ritorna la strina dell'istanza in formato lp """
+        assert(self.values['K']>0  and self.values['H']>0  and
+               self.values['M']>=0 and self.values['P']>=0 and
+               self.values['O']>=0 and self.values['Q']>=0)
         dzn_ids_to_lp = {
                 "K":"corridoi(       ",
                 "H":"stanze_per_lato(",
@@ -426,15 +465,7 @@ class MySolution():
           ("corridoi",1),
           ("stanze_per_lato",1),
 
-          ("malato",       2),
-          ("positivo",     2),
-          ("osservazione", 2),
-          ("quarantena",   2)
-
-          ## BEGIN DEBUG #
-          ,("vicini1",   2)
-          ,("vicini2",   2)
-          ## END DEBUG
+          ("in_stanza",      3),
         ]
 
         sol = {
@@ -445,10 +476,81 @@ class MySolution():
           "P":[],
           "O":[],
           "Q":[]
-          ## BEGIN DEBUG #
-          ,"vicini1":[]
-          ,"vicini2":[]
-          ## END DEBUG
+        }
+
+        type_num_to_letter = {
+          0:"M",
+          1:"P",
+          2:"O",
+          3:"Q"
+        }
+
+        for symb in res_model:
+            name = symb.name
+            args = symb.arguments
+            if (name, len(args)) in to_consider:
+                if name == "corridoi":
+                    sol["K"]=args[0].number
+                elif name == "stanze_per_lato":
+                    sol["H"]=args[0].number
+                #elif "in_stanza" in name:
+                else:
+                    #p_id   = args[0].number
+                    p_type = type_num_to_letter[args[1].number]
+                    s      = args[2].number
+                    sol[p_type].append(s)
+
+        statistics=ctl.statistics
+
+        msol.sat = True
+        msol.obj = int(statistics["summary"]["costs"][0])
+
+        msol.time = statistics["summary"]["times"]["total"]
+        msol.solveTime = statistics["summary"]["times"]["solve"]
+        #msol.sols_num = int(res.statistics['solutions'])
+
+        msol.solution['K'] = sol['K']
+        msol.solution['H'] = sol['H']
+
+        msol.solution['M'] = sol['M']
+        msol.solution['P'] = sol['P']
+        msol.solution['O'] = sol['O']
+        msol.solution['Q'] = sol['Q']
+
+
+        return msol
+
+    def from_lp_old(res_model,ctl):
+        """ DEPRECATED Preso un modello soluzione e il controller di istanza
+            di un modello lp ritorna la MySolution equivalente """
+        msol = MySolution()
+        msol.model_type = "LP"
+
+        if res_model is None: # Il modello e' UNSAT
+            msol.sat = False
+            msol.solution = None
+            return msol
+
+        # Lista di coppie (nome, len(args)) dei predicati e
+        # del loro numero di argomenti da usare per la soluzione
+        to_consider = [
+          ("corridoi",1),
+          ("stanze_per_lato",1),
+
+          ("malato",       2),
+          ("positivo",     2),
+          ("osservazione", 2),
+          ("quarantena",   2)
+        ]
+
+        sol = {
+          "K":0,
+          "H":0,
+
+          "M":[],
+          "P":[],
+          "O":[],
+          "Q":[]
         }
 
         for symb in res_model:
@@ -484,11 +586,9 @@ class MySolution():
         msol.solution['P'] = sol['P']
         msol.solution['O'] = sol['O']
         msol.solution['Q'] = sol['Q']
-        ## BEGIN DEBUG
-        msol.solution['vicini1'] = sol['vicini1']
-        msol.solution['vicini2'] = sol['vicini2']
-        ## END DEBUG
         return msol
+
+
 
     # Metodi debug ####################
     def _debug_vicini1(self):
@@ -916,7 +1016,7 @@ class RunnerLp(AbstractRunner):
 
     def load_model(self, model_path=None):
         ctl = clingo.Control(message_limit=0)
-        ctl.configuration.configuration = 'tweety'
+        #ctl.configuration.configuration = 'tweety'
         ctl.load(model_path)
         self.model=ctl
 
@@ -942,16 +1042,19 @@ class RunnerLp(AbstractRunner):
 
         # Cons: alla peggio si rischia di aspettare 2*(TIMEOUT-e) con e piccolo a piacere
 
+
+        self.load_model(self.model_path)
         ctl=self.model
         ctl.load(fpath)
 
-        #breakpoint() # DEBUG TODO remove
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
 
         def killable_ground(ctl,return_dict):
+            #print("inside killable")
             return_dict[0] = False
             ctl.ground([("base", [])])
+            #ctl.ground()
             #time.sleep(10.0)
             return_dict[0] = True
 
@@ -977,6 +1080,7 @@ class RunnerLp(AbstractRunner):
         # FINE # LAVORO SU TIMEOUT DEL GROUDING
         ################################################################################
 
+
         msol = MySolution()
 
         grounded = return_dict[0]
@@ -988,7 +1092,6 @@ class RunnerLp(AbstractRunner):
             msol.solution   = None
         else:
             process.join()
-            ctl.ground([("base", [])])
 
             global cc
             cc = 0
@@ -997,19 +1100,29 @@ class RunnerLp(AbstractRunner):
             global t0
             t0 = time.time()
 
+            #def on_model(m):
+            #    global res_model
+            #    res_model = m.symbols(shown=True)
+            #    global cc
+            #    #print("before cc = ", cc)
+            #    cc += 1
+            #    #print("after cc = ", cc)
+            #    t1 = time.time()
+            #    delt = t1 - t0
+            #    return delt < TIMEOUT.total_seconds()
+
             def on_model(m):
                 global res_model
-                res_model = m.symbols(atoms=True)
-                global cc
-                #print("before cc = ", cc)
-                cc += 1
-                #print("after cc = ", cc)
-                t1 = time.time()
-                delt = t1 - t0
-                return delt < TIMEOUT.total_seconds()
+                res_model = m.symbols(shown=True)
 
             #breakpoint() # DEBUG TODO remove
-            ctl.solve(on_model=on_model)
+            self.load_model(self.model_path)
+            ctl=self.model
+            ctl.load(fpath)
+            ctl.ground([("base", [])])
+            #ctl.solve()
+            #ctl.solve(on_model=lambda m: print("Answer: {}".format(m)))
+            ctl.solve(on_model=on_model) # TODO readd timeout
             #breakpoint() # DEBUG TODO remove
 
             msol = MySolution.from_lp(res_model,ctl)
@@ -1021,7 +1134,12 @@ class RunnerLp(AbstractRunner):
             IOHelper.create_dir(self.output_dir)
             fpath = IOHelper.gen_fpath(instance_num, self.output_dir,
                                    self.output_prefix, self.output_ext)
+            print(40*"+")
+            print("salvo msol in", fpath)
+            print("msol:\n", msol)
             msol.write(fpath)
+            print("salvato")
+            print(40*"+")
 
 
         # Devo ricaricarlo ogni volta perche' l'ho sporcato con

@@ -19,12 +19,17 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 %1 { in_stanza(P,S) : stanza(S) } 1 :- soggetto(P,T). % TODO provare cosi'
 
 % Ogni stanza ha capacita' limitata
-:- in_stanza(P,T,S), in_stanza(P1,T,S),
+:- T!=1, in_stanza(P,T,S), in_stanza(P1,T,S),
    in_stanza(P2,T,S),
    P!=P1, P!=P2, P1!=P2.
 % Nel caso osservazione limito di piu'
-:- T=1, in_stanza(P,T,S),    % Un osservazione in stanza
-   in_stanza(P1,T,S), P!=P1. % Non puo' condividere stanza con nessuno
+:- T=1, in_stanza(P,T,S),
+   in_stanza(P1,T1,S), P!=P1.
+   %% TODO fix this shit
+%:- T=1, in_stanza(P,T,S),
+%   in_stanza(P1,T1,S), P!=P1, T!=T1.
+%:- T=1, in_stanza(P,T,S),
+%   in_stanza(P1,T,S), P!=P1.
 
 % No misti
 :- in_stanza(P,T,S), in_stanza(P1,T1,S), T!=T1.
@@ -229,55 +234,20 @@ scomodo(P,S,P1,S1) :-
   stanze_per_lato(H),
   S1 == S + 4*H. % sopra sopra
 
-
-%%%% INPUT PER DEBUG
-%%corridoi(       4).
-%%stanze_per_lato(5).
-%%soggetto(1, 0).
-%%%soggetto(2..3, 3).
-%%soggetto(2, 3).
-
-%in_stanza(1,0,37).
-
-%%sx
-%in_stanza(2,3,16).
-
-%%sx sx
-%in_stanza(3,3,17-2).
-
-%%dx dx
-%in_stanza(2,3,17+2).
-
-%%sx front
-%in_stanza(2,3,17-1-5).
-
-%%dx front
-%in_stanza(2,3,13).
-
-%%sx up
-%in_stanza(2,3,26).
-
-%%dx up
-%in_stanza(2,3,28).
-
-%%sx down
-%in_stanza(2,3,6).
-
-%%dx down
-%in_stanza(2,3,8).
-
-%%up front
-%in_stanza(2,3,22).
-
-%%down front
-%in_stanza(2,3,2).
-
-%%up up
-%in_stanza(2,3,17).
+% Symmetry
+in_stanza(1,0,0).
+%% Ai primi malati assegno prime stanze (idem per gli altri)
+%:- malato(M,S),       malato(M1,S1),       M<M1, S>S1.
+%:- positivo(P,S),     positivo(P1,S1),     P<P1, S>S1.
+%:- osservazione(O,S), osservazione(O1,S1), O<O1, S>S1.
+%:- quarantena(Q,S),   quarantena(Q1,S1),   Q<Q1, S>S1.
 
 cost(C) :- C == #count { P,S,P1,S1 : scomodo(P,S,P1,S1) }.
 #minimize {C : cost(C)}.
 
+
+#show corridoi/1.
+#show stanze_per_lato/1.
 %#show stanza/1.
 %#show soggetto/2.
 #show in_stanza/3.
