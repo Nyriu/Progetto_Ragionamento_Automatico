@@ -8,8 +8,8 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 
 %Tipologie:
 % 0 malato
-% 1 osservazione
-% 2 positivo
+% 1 positivo
+% 2 osservazione
 % 3 quarantena
 %tipo(0..3).
 
@@ -19,21 +19,16 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 %1 { in_stanza(P,S) : stanza(S) } 1 :- soggetto(P,T). % TODO provare cosi'
 
 % Ogni stanza ha capacita' limitata
-:- T!=1, in_stanza(P,T,S), in_stanza(P1,T,S),
+:- T!=2, in_stanza(P,T,S), in_stanza(P1,T,S),
    in_stanza(P2,T,S),
    P!=P1, P!=P2, P1!=P2.
+
 % Nel caso osservazione limito di piu'
-:- T=1, in_stanza(P,T,S),
-   in_stanza(P1,T1,S), P!=P1.
-   %% TODO fix this shit
-%:- T=1, in_stanza(P,T,S),
-%   in_stanza(P1,T1,S), P!=P1, T!=T1.
-%:- T=1, in_stanza(P,T,S),
-%   in_stanza(P1,T,S), P!=P1.
+:- T=2, in_stanza(P,T,S), in_stanza(P1,T,S),
+   P!=P1.
 
 % No misti
 :- in_stanza(P,T,S), in_stanza(P1,T1,S), T!=T1.
-
 
 
 % Vicini1 tra malato e (quarantena o positivo)
@@ -236,11 +231,8 @@ scomodo(P,S,P1,S1) :-
 
 % Symmetry
 in_stanza(1,0,0).
-%% Ai primi malati assegno prime stanze (idem per gli altri)
-%:- malato(M,S),       malato(M1,S1),       M<M1, S>S1.
-%:- positivo(P,S),     positivo(P1,S1),     P<P1, S>S1.
-%:- osservazione(O,S), osservazione(O1,S1), O<O1, S>S1.
-%:- quarantena(Q,S),   quarantena(Q1,S1),   Q<Q1, S>S1.
+% Ai primi malati assegno prime stanze (idem per gli altri)
+:- in_stanza(P,T,S), in_stanza(P1,T1,S1), T=T1, P<T1, S>S1.
 
 cost(C) :- C == #count { P,S,P1,S1 : scomodo(P,S,P1,S1) }.
 #minimize {C : cost(C)}.

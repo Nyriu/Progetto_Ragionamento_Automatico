@@ -66,6 +66,7 @@ SYMBOLS = {
         "positivo"     : "-P",
         "positivi"     : "PP",
         "osservazione" : "-O",
+        "osservazioni" : "OO",
         "quarantena"   : "-Q",
         "quaranteni"   : "QQ"
         }

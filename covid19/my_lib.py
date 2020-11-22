@@ -162,8 +162,8 @@ class MyInstance:
                 "K":"corridoi(       ",
                 "H":"stanze_per_lato(",
                 "M":"malato(1..      ",
-                "P":"positivo(1..    ",
                 "O":"osservazione(1..",
+                "P":"positivo(1..    ",
                 "Q":"quarantena(1..  "
                 }
 
@@ -348,6 +348,8 @@ class MySolution():
 
         elif (self.solution['O'].count(s) == 1):
             symb = SYMBOLS['osservazione']
+        elif (self.solution['O'].count(s) == 2):
+            symb = SYMBOLS['osservazioni']
 
         elif (self.solution['Q'].count(s) == 1):
             symb = SYMBOLS['quarantena']
