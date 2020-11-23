@@ -26,8 +26,7 @@ def main():
     mzn_path="./covid19.mzn"
     mzn = RunnerMzn(mzn_path)
 
-    #lp_path = "./covid19.lp"
-    lp_path = "./david_covid.lp"
+    lp_path = "./covid19.lp"
     lp = RunnerLp(lp_path)
 
     mzn_inputs = os.listdir(my_globals.INPUT_MZN_DIR)
@@ -44,6 +43,7 @@ def main():
     num = 0
     max_num = len(mzn_inputs)
     while num < max_num:
+        #print(20*"-", str(num), 20*"-")
         try:
             if run_mzn:
                 ms = mzn.run(num, show=False, save=True)
@@ -59,21 +59,23 @@ def main():
         j=(num+1)/max_num
         sys.stdout.write("[%-20s] %d%%\t%d" % ('='*int(20*j), 100*j, num))
 
-        ## DEBUG
-        print(20*'-')
-        current_process = psutil.Process()
-        os.system('pstree -p ' + str(current_process.pid))
-        children = current_process.children(recursive=True)
-        for child in children:
-            print('Child pid is {}'.format(child.pid))
-            child.terminate()
-        print()
+        #print(str(num), " done\n")
 
-        #if (num > 14):
-        #    breakpoint()
+        ### DEBUG
+        #print(20*'-')
+        #current_process = psutil.Process()
+        #os.system('pstree -p ' + str(current_process.pid))
+        #children = current_process.children(recursive=True)
+        #for child in children:
+        #    print('Child pid is {}'.format(child.pid))
+        #    child.terminate()
+        #print()
 
-        objgraph.show_most_common_types(limit=5)
-        ## DEBUG
+        ##if (num > 14):
+        ##    breakpoint()
+
+        #objgraph.show_most_common_types(limit=5)
+        ### DEBUG
         num+=1
 
     t1 = time.time()

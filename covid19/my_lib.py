@@ -29,7 +29,7 @@ from my_globals import *
 
 #DEBUG = True
 #DEBUG = False
-import psutil ## TODO remove
+import psutil
 import objgraph ## TODO remove
 
 
@@ -999,7 +999,6 @@ class RunnerMzn(AbstractRunner):
         instance["Q"]= myIns.get_quarantena()
         return instance
 
-
 class RunnerLp(AbstractRunner):
     """ Permette di eseguire un modello lp su tutte le istanze oppure
         su un'istanza specificata dal numero """
@@ -1029,8 +1028,24 @@ class RunnerLp(AbstractRunner):
         super().run(instance_num,show,save)
         fpath = IOHelper.gen_fpath(instance_num, self.input_dir,
                                    self.input_prefix, self.input_ext)
+
+        global dummy_res_model
+        dummy_res_model = None
+        global dummy_t0
+        dummy_t0 = time.time()
+        global max_models_to_consider
+        max_models_to_consider=0
+        def dummy_on_model(m):
+            dummy_res_model = m.symbols(shown=True)
+            #dummy_t1 = time.time()
+            #dummy_delt = dummy_t1 - dummy_t0
+            global max_models_to_consider
+            max_models_to_consider+=1
+            #return dummy_delt < TIMEOUT.total_seconds()
+            return True
+
         ################################################################################
-        # LAVORO SU TIMEOUT DEL GROUDING
+        # LAVORO SU TIMEOUT DEL GROUDING+SOLVE
         ################################################################################
         # Workaround per il timeout
         # + lancio il grounding in un processo secondario
@@ -1043,6 +1058,7 @@ class RunnerLp(AbstractRunner):
         #      (Control non e' serializzabile quindi niente passaggio tra thread/processi)
 
         # Cons: alla peggio si rischia di aspettare 2*(TIMEOUT-e) con e piccolo a piacere
+        #       si perde eventuale soluzione parziale
 
 
         self.load_model(self.model_path)
@@ -1051,82 +1067,63 @@ class RunnerLp(AbstractRunner):
 
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
+        return_dict[0] = False
+        return_dict[1] = 0
 
-        def killable_ground(ctl,return_dict):
-            #print("inside killable")
+        def killable_ground_solution(ctl,return_dict):
             return_dict[0] = False
             ctl.ground([("base", [])])
-            #ctl.ground()
-            #time.sleep(10.0)
+            ctl.solve(on_model=dummy_on_model)
             return_dict[0] = True
+            return_dict[1] = max_models_to_consider
 
-
-        process = multiprocessing.Process(target=killable_ground, args=(ctl,return_dict))
+        process = multiprocessing.Process(target=killable_ground_solution, args=(ctl,return_dict))
         process.start()
 
         time.sleep(1)
 
         kill_t0 = time.time()
         kill_t1 = time.time()
-        grounded = return_dict[0]
-        while (not grounded) and (timedelta(seconds=kill_t1 - kill_t0) < TIMEOUT):
+        solvable_in_time = False
+        while (not solvable_in_time) and (kill_t1 - kill_t0 < TIMEOUT.total_seconds()):
             time.sleep(1)
             kill_t1 = time.time()
-            grounded = return_dict[0]
-
-            ### DEBUG ## TODO
-            #print(20*"##")
-            #objgraph.show_most_common_types(limit=10)
-            #print()
+            solvable_in_time = return_dict[0]
         ################################################################################
-        # FINE # LAVORO SU TIMEOUT DEL GROUDING
+        # FINE # LAVORO SU TIMEOUT DEL GROUDING+SOLVE
         ################################################################################
-
 
         msol = MySolution()
 
-        grounded = return_dict[0]
-        if (not grounded):
-            process.terminate()
+        solvable_in_time = return_dict[0]
+        max_models_to_consider = return_dict[1]
+        if (not solvable_in_time) and (max_models_to_consider<2):
+            #print("\ndon't even try...")
             msol.model_type = "LP"
             msol.sat        = False
             msol.timeouted  = True
             msol.solution   = None
         else:
-            process.join()
-
-            global cc
-            cc = 0
             global res_model
             res_model = None
-            global t0
-            t0 = time.time()
+            global models_considered
+            models_considered=0
 
-            #def on_model(m):
-            #    global res_model
-            #    res_model = m.symbols(shown=True)
-            #    global cc
-            #    #print("before cc = ", cc)
-            #    cc += 1
-            #    #print("after cc = ", cc)
-            #    t1 = time.time()
-            #    delt = t1 - t0
-            #    return delt < TIMEOUT.total_seconds()
+            #print("let's try...")
 
             def on_model(m):
                 global res_model
                 res_model = m.symbols(shown=True)
+                global max_models_to_consider
+                global models_considered
+                models_considered+=1
+                return models_considered <= max_models_to_consider
 
-            #breakpoint() # DEBUG TODO remove
             self.load_model(self.model_path)
             ctl=self.model
             ctl.load(fpath)
             ctl.ground([("base", [])])
-            #ctl.solve()
-            #ctl.solve(on_model=lambda m: print("Answer: {}".format(m)))
-            ctl.solve(on_model=on_model) # TODO readd timeout
-            #breakpoint() # DEBUG TODO remove
-
+            ctl.solve(on_model=on_model)
             msol = MySolution.from_lp(res_model,ctl)
 
         if show:
@@ -1136,13 +1133,9 @@ class RunnerLp(AbstractRunner):
             IOHelper.create_dir(self.output_dir)
             fpath = IOHelper.gen_fpath(instance_num, self.output_dir,
                                    self.output_prefix, self.output_ext)
-            print(40*"+")
-            print("salvo msol in", fpath)
-            print("msol:\n", msol)
             msol.write(fpath)
-            print("salvato")
-            print(40*"+")
 
+        terminate_process_children()
 
         # Devo ricaricarlo ogni volta perche' l'ho sporcato con
         # l'istanza in input. ctl non si puo' copiare/clonare...
@@ -1268,3 +1261,11 @@ def read_dzn(fpath):
 
     return values
 
+
+def terminate_process_children():
+    current_process = psutil.Process()
+    #os.system('pstree -p ' + str(current_process.pid))
+    children = current_process.children(recursive=True)
+    for child in children:
+        #print('Child pid is {}'.format(child.pid))
+        child.terminate()
