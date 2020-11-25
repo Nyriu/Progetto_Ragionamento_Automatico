@@ -1,0 +1,397 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+knitr::opts_chunk$set(dev.args = list(png = list(type = "cairo")))
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidyjson)
+library(Cairo)
+```
+## Collect Data
+
+Set Up Paths
+```{r}
+#batches_nums = 4:6
+#batches_nums = 5:6
+#batches_nums = 6
+batches_nums = 8
+
+batches_paths = lapply(batches_nums, function (t) paste("../batches/batch_",t, sep=""))
+path_mzn = "outputs_mzn"
+path_lp  = "outputs_lp"
+
+listBatchFiles =
+  function (batch_path, target_dir) {
+    dir_path = paste(batch_path,target_dir, sep="/")
+    dir_files = list.files(dir_path, pattern = "*.json")
+    lapply(dir_files, function(t) paste(batch_path,target_dir,t, sep="/"))
+  }
+
+mzn_files =
+  unlist(
+    lapply(
+      batches_paths,
+      function (p) listBatchFiles(p, path_mzn)
+    )
+  )
+
+lp_files =
+  unlist(
+    lapply(
+      batches_paths,
+      function (p) listBatchFiles(p, path_lp)
+    )
+  )
+```
+
+Load data
+
+```{r}
+#TIMEOUT_time = 2.5*60 # seconds
+TIMEOUT_time = 5*60 # seconds
+
+tabelFromFiles = function (files, convertTimeout=F) {
+  data =
+    files %>% 
+    map_df(
+      function(t)
+        read_json(t) %>%
+        spread_all() %>%
+        as_tibble() %>%
+        select(-document.id)
+    ) %>%
+    #select(-sol) %>%
+    mutate(file_path=unlist(files)) %>%
+    mutate(num = row_number() - 1) %>%
+    select(num, file_path, everything())
+  
+  data =
+    data %>%
+    mutate(batch     = lapply(data$file_path, FUN=function(t) as.character(unlist(strsplit(t, "/")[[1]][[3]])))) %>%
+    mutate(file_name = lapply(data$file_path, FUN=function(t) as.character(unlist(strsplit(t, "/")[[1]][[5]])))) # %>%
+  
+  if (convertTimeout) {
+    data =
+      data %>%
+      mutate(time = ifelse(timeouted, TIMEOUT_time, time)) %>%
+      mutate(solveTime = ifelse(timeouted, TIMEOUT_time, solveTime))
+  }
+  return(data)
+}
+
+mzn_data = tabelFromFiles(mzn_files, convertTimeout = T)
+#View(mzn_data)
+
+lp_data = tabelFromFiles(lp_files, convertTimeout = T)
+#View(lp_data)
+
+
+intersect_cols = intersect(names(lp_data), names(mzn_data))
+data = rbind(
+  mzn_data %>% select(all_of(intersect_cols)),
+  lp_data  %>% select(all_of(intersect_cols))
+  )
+
+if (TIMEOUT_time <= max(max(data$time), max(data$solveTime))) {
+  TIMEOUT_time = max(max(data$time), max(data$solveTime)) + 10
+  mzn_data =
+    mzn_data %>%
+    mutate(time      = ifelse(timeouted, TIMEOUT_time, time)) %>%
+    mutate(solveTime = ifelse(timeouted, TIMEOUT_time, solveTime))
+  
+  lp_data =
+    lp_data %>%
+    mutate(time      = ifelse(timeouted, TIMEOUT_time, time)) %>%
+    mutate(solveTime = ifelse(timeouted, TIMEOUT_time, solveTime))
+  
+   mzn_data = mzn_data %>% select(all_of(intersect_cols))
+   lp_data = lp_data  %>% select(all_of(intersect_cols))
+  
+  data = rbind(
+    mzn_data,
+    lp_data
+  )
+}
+#View(data)
+```
+
+First plot
+```{r}
+mzn_timeouted =
+  data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'MZN')
+
+lp_timeouted =
+  data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'LP')
+
+data %>%
+  ggplot(aes(x=num, y=solveTime, color=model_type)) +
+  geom_line() +
+  geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+```
+
+## Sorted By mzn time
+
+```{r}
+sorted_mzn_data = mzn_data %>%
+  arrange(time) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+
+sorted_lp_data = lp_data %>%
+  arrange( order(sorted_mzn_data$num) ) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+  
+  
+time_sorted_data = rbind(sorted_mzn_data, sorted_lp_data)
+#View(time_sorted_data)
+```
+
+
+```{r}
+cairo = F
+mzn_timeouted =
+  time_sorted_data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'MZN')
+
+lp_timeouted =
+  time_sorted_data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'LP')
+
+if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
+time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
+  geom_line() +
+  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+
+if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
+time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=time, color=model_type)) +
+  geom_line() +
+  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+```
+## Sorted By lp time
+
+```{r}
+lp_sorted_lp_data = lp_data %>%
+  arrange(time) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+
+lp_sorted_mzn_data = mzn_data %>%
+  arrange( order(lp_sorted_lp_data$num) ) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+  
+  
+lp_time_sorted_data = rbind(lp_sorted_mzn_data, lp_sorted_lp_data)
+#View(lp_time_sorted_data)
+```
+
+
+```{r}
+cairo = F
+lp_mzn_timeouted =
+  lp_time_sorted_data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'MZN')
+
+lp_lp_timeouted =
+  lp_time_sorted_data %>%
+    filter(timeouted) %>%
+    filter(model_type == 'LP')
+
+if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
+lp_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
+  geom_line() +
+  geom_point(lp_mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+
+if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
+lp_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=time, color=model_type)) +
+  geom_line() +
+  geom_point(lp_mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+```
+## Sorted By lp time timouted removed
+
+```{r}
+tr_sorted_lp_data = lp_data %>%
+  filter(! lp_data$timeouted) %>%
+  arrange(time) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+
+tr_sorted_mzn_data = mzn_data %>%
+  filter(! lp_data$timeouted) %>%
+  arrange( order(tr_sorted_lp_data$num) ) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+  
+  
+tr_time_sorted_data = rbind(tr_sorted_mzn_data, tr_sorted_lp_data)
+#View(tr_time_sorted_data)
+```
+
+
+```{r}
+cairo = F
+
+if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
+tr_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
+  geom_line()
+
+if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
+tr_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=time, color=model_type)) +
+  geom_line()
+```
+
+## Analisi
+
+* Numero di timeout
+* quante volte LP e' migliore di MZN
+* Ordinare dati per H + K
+
+# Numero Timeout
+```{r, show=F}
+timeout_count =
+  data %>%
+  group_by(model_type) %>%
+  filter(timeouted) %>%
+  count(timeouted) %>%
+  select(-timeouted)
+
+show( paste (
+  "MZN va in timeout",
+  timeout_count %>% filter(model_type == 'MZN') %>% pull(n),
+  "volte su",
+  nrow(data %>% filter(model_type == 'MZN')),
+  "(",
+  timeout_count %>% filter(model_type == 'MZN') %>% pull(n) / nrow(data %>% filter(model_type == 'MZN')) * 100, 
+  "%)"
+  )
+)
+show( paste (
+  "LP va in timeout",
+  timeout_count %>% filter(model_type == 'LP') %>% pull(n),
+  "volte su",
+  nrow(data %>% filter(model_type == 'LP')),
+  "(",
+  timeout_count %>% filter(model_type == 'LP') %>% pull(n) / nrow(data %>% filter(model_type == 'LP')) * 100, 
+  "%)"
+  )
+)
+```
+# Quante volte MZN e' migliore di LP (time)
+```{r, show=F}
+time_wins_count =
+  mzn_data %>%
+  select(-file_path, -sol.H, -sol.K, -num) %>%
+  inner_join(lp_data, by=c("batch","file_name"), suffix=c(".mzn", ".lp")) %>%
+  select(-file_path, -sol.H, -sol.K) %>%
+  select(num, batch, file_name, sat.mzn, sat.lp, everything()) %>%
+  count(mzn_wins=time.mzn < time.lp)
+
+time_wins_count
+
+show( paste (
+  "MZN batte sul tempo complessivo LP",
+  time_wins_count %>% filter(mzn_wins) %>% pull(n),
+  "volte",
+  "(",
+  time_wins_count %>% filter(mzn_wins) %>% pull(n) / sum(time_wins_count$n) * 100, 
+  "%)"
+  )
+)
+
+```
+
+
+# Quante volte MZN e' migliore di LP (solveTime)
+```{r, show=F}
+solveTime_wins_count =
+  mzn_data %>%
+  select(-file_path, -sol.H, -sol.K, -num) %>%
+  inner_join(lp_data, by=c("batch","file_name"), suffix=c(".mzn", ".lp")) %>%
+  #select(-file_path, -sol.H, -sol.K) %>%
+  #select(num, batch, file_name, sat.mzn, sat.lp, everything()) %>%
+  select(solveTime.mzn, solveTime.lp) %>%
+  count(mzn_wins=solveTime.mzn < solveTime.lp)
+
+time_wins_count
+
+show( paste (
+  "MZN batte sul solveTime LP",
+  solveTime_wins_count %>% filter(mzn_wins) %>% pull(n),
+  "volte",
+  "(",
+  solveTime_wins_count %>% filter(mzn_wins) %>% pull(n) / sum(time_wins_count$n) * 100, 
+  "%)"
+  )
+)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

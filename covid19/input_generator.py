@@ -1,15 +1,14 @@
 import sys
 from my_lib import  InputGenerator
 
-##################################################
-# Main
+################################################## # Main
 ##################################################
 def main():
     print("Genero inputs")
 
-    n = 2 # Numero di istanze da generare per coppia H,K
+    n = 1 # Numero di istanze da generare per coppia H,K
     k_min=1
-    h_min=2
+    h_min=1
 
     k_max=11
     h_max=11

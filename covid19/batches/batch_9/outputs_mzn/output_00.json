@@ -1,0 +1,19 @@
+{
+ "model_type": "MZN",
+ "sat": true,
+ "timeouted": false,
+ "obj": 0,
+ "solveTime": 0.002548,
+ "time": 0.12,
+ "sol": {
+  "K": 1,
+  "H": 1,
+  "M": [
+   0,
+   0
+  ],
+  "P": [],
+  "O": [],
+  "Q": []
+ }
+}
