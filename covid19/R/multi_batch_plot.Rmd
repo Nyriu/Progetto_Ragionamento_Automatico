@@ -15,7 +15,7 @@ library(tidyjson)
 library(Cairo)
 ```
 ```{r}
-cairo = F
+cairo = !F
 ```
 ## Collect Data
 
@@ -145,7 +145,6 @@ inputs =
     H = rep(1:H_max, K_max)
   ) %>% gather("K", "H", key = "type", value = "val") 
 
-cairo=T
 if (cairo){ Cairo(900, 700, file="input_sizes.png", type="png", bg="white") }
 inputs %>%
   ggplot(aes(x=num, y = val, fill = type)) + # , alpha=0.1)) +
@@ -173,6 +172,7 @@ inputs %>%
 
 First plot
 ```{r}
+cairo = T
 mzn_timeouted =
   data %>%
     filter(timeouted) %>%
@@ -207,28 +207,28 @@ data %>%
   scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) # legenda
 ```
 ```{r}
-## WIP
-data %>%
-  filter(num < 30) %>%
-  ggplot(aes(x=num, y=solveTime, color=model_type)) +
-  #geom_bar(data=inputs %>% filter(num<30), mapping=aes(x=num, y=-KxH, color="zz", fill="zz"), stat="identity", show.legend = F) +
-  #ggplot(aes(x=num, y=solveTime)) +
-  geom_line() +
-  #geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  #geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
-  #geom_bar(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-val, color=type, fill=type, alpha=0.1), stat="identity", show.legend = F) # +
-  geom_line(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-KxH, color="green"), show.legend = F) # +
-
-ggplot() + 
-  geom_bar(mapping = aes(x = dt$when, y = dt$numinter), stat = "identity", fill = "grey") +
-  geom_line(mapping = aes(x = dt$when, y = dt$prod*5), size = 2, color = "blue") + 
-  scale_x_date(name = "Day", labels = NULL) +
-  scale_y_continuous(name = "Interruptions/day", 
-    sec.axis = sec_axis(~./5, name = "Productivity % of best", 
-      labels = function(b) { paste0(round(b * 100, 0), "%")})) + 
-  theme(
-      axis.title.y = element_text(color = "grey"),
-      axis.title.y.right = element_text(color = "blue"))
+## ## WIP
+## data %>%
+##   filter(num < 30) %>%
+##   ggplot(aes(x=num, y=solveTime, color=model_type)) +
+##   #geom_bar(data=inputs %>% filter(num<30), mapping=aes(x=num, y=-KxH, color="zz", fill="zz"), stat="identity", show.legend = F) +
+##   #ggplot(aes(x=num, y=solveTime)) +
+##   geom_line() +
+##   #geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+##   #geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+##   #geom_bar(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-val, color=type, fill=type, alpha=0.1), stat="identity", show.legend = F) # +
+##   geom_line(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-KxH, color="green"), show.legend = F) # +
+## 
+## ggplot() + 
+##   geom_bar(mapping = aes(x = dt$when, y = dt$numinter), stat = "identity", fill = "grey") +
+##   geom_line(mapping = aes(x = dt$when, y = dt$prod*5), size = 2, color = "blue") + 
+##   scale_x_date(name = "Day", labels = NULL) +
+##   scale_y_continuous(name = "Interruptions/day", 
+##     sec.axis = sec_axis(~./5, name = "Productivity % of best", 
+##       labels = function(b) { paste0(round(b * 100, 0), "%")})) + 
+##   theme(
+##       axis.title.y = element_text(color = "grey"),
+##       axis.title.y.right = element_text(color = "blue"))
 ```
 
 
