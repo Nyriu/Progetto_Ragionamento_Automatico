@@ -14,6 +14,9 @@ library(dplyr)
 library(tidyjson)
 library(Cairo)
 ```
+```{r}
+cairo = F
+```
 ## Collect Data
 
 Set Up Paths
@@ -21,7 +24,8 @@ Set Up Paths
 #batches_nums = 4:6
 #batches_nums = 5:6
 #batches_nums = 6
-batches_nums = 8
+#batches_nums = 8
+batches_nums = 9
 
 batches_paths = lapply(batches_nums, function (t) paste("../batches/batch_",t, sep=""))
 path_mzn = "outputs_mzn"
@@ -55,9 +59,10 @@ Load data
 
 ```{r}
 #TIMEOUT_time = 2.5*60 # seconds
-TIMEOUT_time = 5*60 # seconds
+#TIMEOUT_time = 5*60 + 20 # seconds
+TIMEOUT_time = 5*60 - 3.0 # seconds
 
-tabelFromFiles = function (files, convertTimeout=F) {
+tabelFromFiles = function (files, timeoutToTime=F, timeToTimeout=F) {
   data =
     files %>% 
     map_df(
@@ -77,7 +82,13 @@ tabelFromFiles = function (files, convertTimeout=F) {
     mutate(batch     = lapply(data$file_path, FUN=function(t) as.character(unlist(strsplit(t, "/")[[1]][[3]])))) %>%
     mutate(file_name = lapply(data$file_path, FUN=function(t) as.character(unlist(strsplit(t, "/")[[1]][[5]])))) # %>%
   
-  if (convertTimeout) {
+  if (timeToTimeout) {
+    data =
+      data %>%
+      mutate(timeouted = solveTime >= TIMEOUT_time) %>%
+      mutate(timeouted = time >= TIMEOUT_time)
+  }
+  if (timeoutToTime) {
     data =
       data %>%
       mutate(time = ifelse(timeouted, TIMEOUT_time, time)) %>%
@@ -86,10 +97,10 @@ tabelFromFiles = function (files, convertTimeout=F) {
   return(data)
 }
 
-mzn_data = tabelFromFiles(mzn_files, convertTimeout = T)
+mzn_data = tabelFromFiles(mzn_files, T,!T)
 #View(mzn_data)
 
-lp_data = tabelFromFiles(lp_files, convertTimeout = T)
+lp_data = tabelFromFiles(lp_files, T,!T)
 #View(lp_data)
 
 
@@ -100,7 +111,8 @@ data = rbind(
   )
 
 if (TIMEOUT_time <= max(max(data$time), max(data$solveTime))) {
-  TIMEOUT_time = max(max(data$time), max(data$solveTime)) + 10
+  #TIMEOUT_time = max(max(data$time), max(data$solveTime)) + 10
+  TIMEOUT_time = max(max(data$time), max(data$solveTime))
   mzn_data =
     mzn_data %>%
     mutate(time      = ifelse(timeouted, TIMEOUT_time, time)) %>%
@@ -122,6 +134,43 @@ if (TIMEOUT_time <= max(max(data$time), max(data$solveTime))) {
 #View(data)
 ```
 
+Create data for H and K (without reading inputs)
+```{r}
+K_max = H_max = 10
+
+inputs =
+  data.frame(
+    num = 1:(K_max*H_max),
+    K = rep(1:K_max, each=K_max),
+    H = rep(1:H_max, K_max)
+  ) %>% gather("K", "H", key = "type", value = "val") 
+
+cairo=T
+if (cairo){ Cairo(900, 700, file="input_sizes.png", type="png", bg="white") }
+inputs %>%
+  ggplot(aes(x=num, y = val, fill = type)) + # , alpha=0.1)) +
+  #geom_bar(stat="identity", show.legend = F)
+  #geom_bar(stat="identity", alpha=0.9, show.legend = F) +
+  #geom_bar(stat="identity", alpha=0.9) +
+  geom_bar(stat="identity", alpha=0.9, position = position_dodge()) +
+  xlab("Numero Input") +
+  ylab("Value") +
+  scale_fill_discrete(name="")
+
+#inputs_bars =
+#  geom_bar(data=inputs, mapping=aes(x=num, y=-val, color=type, alpha=0.1), stat="identity", show.legend = F)
+
+# ) %>% mutate(KxH=K*H)
+#if (cairo){ Cairo(900, 700, file="input_sizes.png", type="png", bg="white") }
+#inputs %>%
+#  ggplot(aes(x=num, y = -KxH)) +
+#  geom_bar(stat="identity") #+
+#  #scale_fill_discrete(c("ff0000", "00ff00"))
+#
+##inputs_bars =
+##  geom_bar(data=inputs, mapping=aes(x=num, y=-KxH), stat="identity", show.legend = F)
+```
+
 First plot
 ```{r}
 mzn_timeouted =
@@ -134,12 +183,54 @@ lp_timeouted =
     filter(timeouted) %>%
     filter(model_type == 'LP')
 
+if (cairo){ Cairo(900, 700, file="first_plot.png", type="png", bg="white") }
 data %>%
   ggplot(aes(x=num, y=solveTime, color=model_type)) +
   geom_line() +
-  geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+  geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  #geom_bar(data=inputs, mapping=aes(x=num, y=-val, color=type, fill=type, alpha=0.1), stat="identity", show.legend = F) # +
+  #geom_line(data=inputs, mapping=aes(x=num, y=-KxH-10, color="green"), show.legend = F) #+
+  #geom_bar(data=inputs, mapping=aes(x=num, y=-KxH, color=""), stat="identity", show.legend = F) #+
+  xlab("Numero Input") +
+  ylab("Tempo di Risoluzione (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc"))
+
+if (cairo){ Cairo(900, 700, file="second_plot.png", type="png", bg="white") }
+data %>%
+  ggplot(aes(x=num, y=time, color=model_type)) +
+  geom_line() +
+  geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  xlab("Numero Input") +
+  ylab("Tempo Totale (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) # legenda
 ```
+```{r}
+## WIP
+data %>%
+  filter(num < 30) %>%
+  ggplot(aes(x=num, y=solveTime, color=model_type)) +
+  #geom_bar(data=inputs %>% filter(num<30), mapping=aes(x=num, y=-KxH, color="zz", fill="zz"), stat="identity", show.legend = F) +
+  #ggplot(aes(x=num, y=solveTime)) +
+  geom_line() +
+  #geom_point(mzn_timeouted, mapping=aes(x=num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  #geom_point(lp_timeouted,  mapping=aes(x=num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  #geom_bar(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-val, color=type, fill=type, alpha=0.1), stat="identity", show.legend = F) # +
+  geom_line(data=inputs %>% filter(num < 30), mapping=aes(x=num, y=-KxH, color="green"), show.legend = F) # +
+
+ggplot() + 
+  geom_bar(mapping = aes(x = dt$when, y = dt$numinter), stat = "identity", fill = "grey") +
+  geom_line(mapping = aes(x = dt$when, y = dt$prod*5), size = 2, color = "blue") + 
+  scale_x_date(name = "Day", labels = NULL) +
+  scale_y_continuous(name = "Interruptions/day", 
+    sec.axis = sec_axis(~./5, name = "Productivity % of best", 
+      labels = function(b) { paste0(round(b * 100, 0), "%")})) + 
+  theme(
+      axis.title.y = element_text(color = "grey"),
+      axis.title.y.right = element_text(color = "blue"))
+```
+
 
 ## Sorted By mzn time
 
@@ -161,7 +252,6 @@ time_sorted_data = rbind(sorted_mzn_data, sorted_lp_data)
 
 
 ```{r}
-cairo = F
 mzn_timeouted =
   time_sorted_data %>%
     filter(timeouted) %>%
@@ -176,15 +266,32 @@ if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
 time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
   geom_line() +
-  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  xlab("Numero Input (mzn time order)") +
+  ylab("SolveTime(s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
+    
 
 if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
 time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=time, color=model_type)) +
   geom_line() +
-  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(-5 ,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(-10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+  geom_point(mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
+  geom_point(lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  xlab("Numero Input (mzn time order)") +
+  ylab("Tempo Totale (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
 ```
 ## Sorted By lp time
 
@@ -206,7 +313,6 @@ lp_time_sorted_data = rbind(lp_sorted_mzn_data, lp_sorted_lp_data)
 
 
 ```{r}
-cairo = F
 lp_mzn_timeouted =
   lp_time_sorted_data %>%
     filter(timeouted) %>%
@@ -217,20 +323,38 @@ lp_lp_timeouted =
     filter(timeouted) %>%
     filter(model_type == 'LP')
 
-if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
+if (cairo){ Cairo(900, 700, file="sorted_lp_time_solveTimes.png", type="png", bg="white") }
 lp_time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
   geom_line() +
   geom_point(lp_mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  xlab("Numero Input (lp time order)") +
+  ylab("SolveTime (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
+    
 
-if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
+if (cairo) { Cairo(900, 700, file="sorted_lp_time_times.png", type="png", bg="white") }
 lp_time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=time, color=model_type)) +
   geom_line() +
   geom_point(lp_mzn_timeouted, mapping=aes(x=sorted_num, y=rep(TIMEOUT_time +  5,nrow(mzn_timeouted)), color=model_type), show.legend = F) +
-  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F)
+  geom_point(lp_lp_timeouted,  mapping=aes(x=sorted_num, y=rep(TIMEOUT_time + 10,nrow(lp_timeouted )), color=model_type), show.legend = F) +
+  xlab("Numero Input (lp time order)") +
+  ylab("Tempo Totale (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
 ```
+
 ## Sorted By lp time timouted removed
 
 ```{r}
@@ -253,17 +377,82 @@ tr_time_sorted_data = rbind(tr_sorted_mzn_data, tr_sorted_lp_data)
 
 
 ```{r}
-cairo = F
-
-if (cairo){ Cairo(600, 600, file="solveTimes.png", type="png", bg="white") }
+if (cairo) { Cairo(900, 700, file="sorted_lp_time_no_timeout_solveTimes.png", type="png", bg="white") }
 tr_time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
-  geom_line()
+  geom_line() +
+  xlab("Numero Input (lp time order)") +
+  ylab("SolveTime (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
 
-if (cairo) { Cairo(600, 600, file="times.png", type="png", bg="white") }
+if (cairo) { Cairo(900, 700, file="sorted_lp_time_no_timeout_times.png", type="png", bg="white") }
 tr_time_sorted_data %>%
   ggplot(aes(x=sorted_num, y=time, color=model_type)) +
-  geom_line()
+  geom_line() +
+  xlab("Numero Input (lp time order)") +
+  ylab("Tempo Totale (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
+```
+
+
+
+## Sorted By lp solveTime timouted removed
+
+```{r}
+tr_sorted_lp_data = lp_data %>%
+  filter(! lp_data$timeouted) %>%
+  arrange(solveTime) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+
+tr_sorted_mzn_data = mzn_data %>%
+  filter(! lp_data$timeouted) %>%
+  arrange( order(tr_sorted_lp_data$num) ) %>%
+  mutate(sorted_num = row_number() - 1) %>%
+  select(sorted_num, num, everything())
+  
+  
+tr_time_sorted_data = rbind(tr_sorted_mzn_data, tr_sorted_lp_data)
+#View(tr_time_sorted_data)
+```
+
+
+```{r}
+if (cairo) { Cairo(900, 700, file="sorted_lp_solveTime_no_timeout_solveTimes.png", type="png", bg="white") }
+tr_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=solveTime, color=model_type)) +
+  geom_line() +
+  xlab("Numero Input (lp time order)") +
+  ylab("SolveTime (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
+
+if (cairo) { Cairo(900, 700, file="sorted_lp_solveTime_no_timeout_times.png", type="png", bg="white") }
+tr_time_sorted_data %>%
+  ggplot(aes(x=sorted_num, y=time, color=model_type)) +
+  geom_line() +
+  xlab("Numero Input (lp time order)") +
+  ylab("Tempo Totale (s)") +
+  scale_colour_discrete(name="Modello", labels=c("ASP", "Minizinc")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+    )
 ```
 
 ## Analisi
