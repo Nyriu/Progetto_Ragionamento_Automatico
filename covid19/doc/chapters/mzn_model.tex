@@ -6,7 +6,14 @@
 \subsection{Il modello}
 %In input vengono forniti
 %\lstinline{K, H, M, O, P, Q}
-Similmente a quanto visto per ASP, in \emph{covid19.mzn} si ha una prima definizione delle stanze
+Ad ogni stanza viene associato un intero partendo da 0 ed incrementando di 1.
+Il numero totale di stanze è $2*K*H$, perché abbiamo $K$ corridoi e per ciascun corridoio ci sono $H$ stanze per lato (sinistro o destro).
+Con questa numerazione ogni $K$ numeri si cambierà lato, mentre ogni $2*K$ numeri si indica un corridoio ad un piano superiore.
+La numerazione permette di modellare abbastanza facilmente le relazioni spaziali tra stanze,
+ad esempio:
+le prime $H$ stanze appartengono al lato sinistro del primo corridoio;
+le stanze dalla $H$ alla $2*H-1$ appartengono al lato destro del primo corridoio;
+le stanze dalla $2*H$ alla $3*H-1$ sono sul secondo piano a sinistra; etc\dots
 \lstinputlisting[
 firstline= 1,
 lastline = 16
@@ -21,25 +28,41 @@ lastline = 50
 ]{./code/covid19.mzn}
 
 \noindent
-La relazione di \emph{Vicinato 1} è una versione più snella e comprensibile delle formule utilizzate nel modello ASP
+La relazione di \emph{Vicinato 1} verifica se due stanze sono adiacenti per una delle cinque direzioni (sopra, sotto, destra, sinistra e di fronte).
 \lstinputlisting[
 firstline= 53,
 lastline = 77
 ]{./code/covid19.mzn}
 
 \noindent
-\emph{Vicinato 2} viene soddisfatto se esiste una terza stanza su cui fare ``perno'' in \emph{Vicinato 1} con entrambe le stanze considerate
+Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
+In pratica, presa una camera, un elemento nel suo \emph{Vicinato 2} può essere raggiunto in due passi selezionando prima un \emph{Vicinato 1} adeguato e poi un \emph{Vicinato 1} della camera appena selezionata.
+Nel vincolo si richiede l'esistenza di questa terza camera che faccia da ``perno'' per lo spostamento.
+%\emph{Vicinato 2} viene soddisfatto se esiste una terza stanza su cui fare ``perno'' in \emph{Vicinato 1} con entrambe le stanze considerate
 \lstinputlisting[
 firstline= 80,
 lastline = 87
 ]{./code/covid19.mzn}
 
 \noindent
-Il valore da minimizzare è calcolato allo stesso modo del codice ASP
+%%Il valore da minimizzare è calcolato allo stesso modo del codice ASP
+%La funzione da minimizzare viene calcolata contando che ospiti di che stanze soddisfano la relazione \emph{scomodo}.
+%Due ospiti non possono soddisfare la relazione se occupano stanze non in vicinato tra loro, oppure se appartengono a tipologie non problematiche (es. in osservazione).
+Si vuole minimizzare un intero $c$ calcolato contando tutte le coppie di ospiti con tipologia scomoda (malato, quarantena precauzionale, positivo) in \emph{Vicinato 1} oppure \emph{Vicinato 2}, a seconda della tipologia.
+%In particolare si vuole che i malati non siano i
+Notare che $c$ ha un valore più grande se nelle stanze in vicinato ci sono più ospiti, come si vede in \autoref{fig:esempio_1}, in cui $c=4$ a causa dei malati nella stanza $1$ in \emph{Vicinato 2} con gli ospiti in quarantena della stanza $7$.
+Le stanze si contano partendo da quella in alto a sinistra, stanza numero 0 e prima stanza a sinistra del primo corridoio, e procedendo per righe.
+Ogni due righe si sale al corridoio superiore, come indicato dai numeri sulla destra.
 \lstinputlisting[
 firstline= 90,
 lastline = 99
 ]{./code/covid19.mzn}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=.8\textwidth]{esempio_1}
+  \caption{Schermata di \emph{in\_out\_visualizer.py}}
+  \label{fig:esempio_1}
+\end{figure}
 
 \noindent
 La configurazione che ha dato i risultati migliori è riportata nel listato che segue.
@@ -51,7 +74,9 @@ lastline = 159
 
 %\cleardoublepage
 \subsection{\emph{Symmetry Breaking}}
-La modellazione scelta permette di implementare facilmente la rottura delle simmetrie descritta per il modello ASP
+Osservando che le camere all'inizio ed alla fine dei corridoi hanno un numero inferiore di camere in \emph{Vicinato 1} (e quindi anche in \emph{Vicinato 2}), risulta sensato fissare il primo malato nella prima stanza disponibile, ossia nella prima stanza del primo corridoio.
+Inoltre, poiché non ci sono differenze tra malati dello stesso tipo è possible fissare un ordinamento arbitrario.
+In questo caso ad ospiti con un indice inferiore vengono assegnate camera ai piani più bassi.
 \lstinputlisting[
 firstline= 103,
 lastline = 113

@@ -7,48 +7,47 @@
 %In input vengono forniti
 %\lstinline{K, H, M, O, P, Q}
 
-Ad ogni stanza viene associato un intero partendo da 0 ed incrementando di 1.
-Il numero totale di stanze è $2*K*H$, perché abbiamo $K$ corridoi e per ciascun corridoio ci sono $H$ stanze per lato (sinistro o destro).
-Con questa numerazione ogni $K$ numeri si cambierà lato, mentre ogni $2*K$ numeri si indica un corridoio ad un piano superiore.
-La numerazione permette di modellare abbastanza facilmente le relazioni spaziali tra stanze,
-ad esempio:
-le prime $H$ stanze appartengono al lato destro del primo corridoio;
-le stanze dalla $H$ alla $2*H-1$ appartengono al lato sinistro del primo corridoio;
-le stanze dalla $2*H$ alla $3*H-1$ sono sul secondo piano a destra; etc\dots
-
-\noindent
-Nel file \emph{covid19.lp} le stanze vengono definite con
+Similmente a quanto visto per Minizinc, in \emph{covid19.lp} si ha una prima definizione delle stanze.
+Le stanze vengono definite con
 \lstinputlisting[firstline= 7, lastline = 7]{./code/covid19.lp}
 
 \noindent
 Poiché gli ospiti devono essere assegnati esattamente ad una stanza, si definiscono i vincoli
 \lstinputlisting[
-firstline= 10,
-lastline = 13
+firstline= 16,
+lastline = 16
 ]{./code/covid19.lp}
-
+in cui \emph{soggetto(P,T)} indica il numero identificativo $P$ associato ad un ospite e la sua tipologia:
+0 significa malato;
+1 significa positivo;
+2 significa osservazione;
+3 significa quarantena.
+I predicati vengono forniti nell'input e si suppone siano corretti, quindi non è possibile che un $P$ soddisfi la relazione con due $T$ differenti.
+\\
 \noindent
 Poiché le stanze hanno capacità limitate, che dipendono dal tipo di ospite, risulta necessario definire
 \lstinputlisting[
-firstline= 16,
-lastline = 22
+firstline= 18,
+lastline = 25
 ]{./code/covid19.lp}
 
 \noindent
 Inoltre una stanza può essere condivisa solo da ospiti dello stesso tipo (esclusi i positivi),
 quindi vengono vietate tutte le coppie illecite
 \lstinputlisting[
-firstline= 25,
-lastline = 32
+firstline= 28,
+lastline = 28
 ]{./code/covid19.lp}
 
 \noindent
-Due camere sono a distanza \emph{Vicinato 1} se rispettano uno dei vincoli tra
+Due camere sono a distanza \emph{Vicinato 1} se rispettano uno dei cinque vincoli di vicinanza.
+Per motivi di efficienza vengono calcolati soltanto le vicinanze tra ospiti  \todo{TODO here}
+Qui vengono riportati i primi due
 \lstinputlisting[
-firstline= 36,
-lastline = 62
+firstline= 31,
+lastline = 51
 ]{./code/covid19.lp}
-\todo{spiegare la matematica?}
+%\todo{spiegare la matematica?}
 
 \noindent
 Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
@@ -78,7 +77,6 @@ lastline = 78
 ]{./code/covid19.lp}
 
 \noindent
-Osservando che le camere all'inizio ed alla fine dei corridoi hanno un numero inferiore di camere in \emph{Vicinato 1} (e quindi anche in \emph{Vicinato 2}), risulta sensato fissare il primo malato nella prima stanza disponibile, ossia nella prima stanza del primo corridoio.
 \todo{giustificare meglio?}
 \lstinputlisting[ 
 firstline= 73,
