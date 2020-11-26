@@ -150,7 +150,7 @@ def main(stdscr):
         curses.endwin()
 
 
-
+inst = None
 if __name__ == '__main__':
     try:
         wrapper(main)
