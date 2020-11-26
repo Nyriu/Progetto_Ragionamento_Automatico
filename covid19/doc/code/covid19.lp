@@ -96,7 +96,7 @@ scomodo(P,P1) :-
   stanza(S), stanza(S1), S!=S1,
   stanza(S2), S2!=S, S2!=S1, 
   stanze_per_lato(H),
-  %S/H == S1/H, S2/H == S1/H,       % tutti stesso lato dello stesso piano
+  S/H == S1/H, S2/H == S1/H,       % tutti stesso lato dello stesso piano
   S - 2 == S1,                     % sx
   S - 1 == S2.                     % sx sx
 
@@ -228,7 +228,7 @@ scomodo(P,P1) :-
 
 % Symmetry
 in_stanza(1,0,0).
-% Ai primi malati assegno prime stanze (idem per gli altri)
+% Ai primi assegno prime stanze
 :- in_stanza(P,T,S), in_stanza(P1,T1,S1), T=T1, P<T1, S>S1.
 
 cost(C) :- C == #count { P,P1 : scomodo(P,P1) }.

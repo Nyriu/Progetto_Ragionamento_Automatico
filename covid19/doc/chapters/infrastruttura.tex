@@ -8,9 +8,10 @@
 %%lastline = 16
 %%]{./code/covid19.mzn}
 Per agevolare la raccolta dati e l'analisi delle soluzioni fornite dai due modelli ho sviluppato una piccola libreria python sfruttando i pacchetti \emph{minizinc} e \emph{clingo} che permettono di caricare, configurare e lanciare i rispettivi modelli.
-Inoltre ho implementato un visualizzatore delle soluzioni per poterle valutare manualmente e confrontare meglio, questo è risultato molto utile per trovare errori durante la fase di modellazione.
+Inoltre, ho implementato un visualizzatore delle soluzioni con \emph{ncurses} in python per potere valutare manualmente e confrontare meglio le soluzioni, questo è risultato molto utile per trovare errori durante la fase di modellazione.
 
-\subsection{La libreria}
+\noindent
+%\subsection{La libreria}
 I file che permettono l'esecuzione dei modelli e salvano i loro output sono:
 \begin{itemize}
   \item \emph{input\_generator.py} genera le istanze e le salva nei formati \emph{.lp} e \emph{.dzn} nelle relative cartelle \emph{inputs\_mzn} ed \emph{inputs\_lp}.
@@ -46,12 +47,16 @@ Eseguendo \lstinline{python run.py} verranno create due cartelle, una per modell
  }
 }
 \end{lstlisting}
-
-Infine eseguendo il file \emph{in\_out\_visualizer.py} è possibile scorrere tra le soluzioni prodotte.
-\todo[inline]{add image}
+Infine, eseguendo il file \emph{in\_out\_visualizer.py} è possibile scorrere tra le soluzioni prodotte dai due modelli.
+In \autoref{fig:esempio_2} sì può vedere il programma in esecuzione:
+a sinistra si ha la soluzione di Minizinc con rappresentazione grafica di camere e dei posti occupati;
+a destra il modello ASP non ha generato alcuna soluzione perché è andato in timeout;
+in basso si hanno informazioni riguardo all'input di partenza.
+Il visualizzatore permette di scorrere avanti ed indietro tra le soluzioni contenute nelle cartelle \emph{outputs\_mzn} ed \emph{outputs\_lp}.
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=.5\textwidth]{example-image-a}
-  \caption{TODO img in\_out\_visualizer}
-  %\label{fig:ex_zombie}
+  \includegraphics[width=.8\textwidth]{esempio_2}
+  \caption{Schermata di \emph{in\_out\_visualizer.py}}
+  \label{fig:esempio_2}
 \end{figure}
+

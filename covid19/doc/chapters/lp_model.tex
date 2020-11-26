@@ -7,8 +7,7 @@
 %In input vengono forniti
 %\lstinline{K, H, M, O, P, Q}
 
-Similmente a quanto visto per Minizinc, in \emph{covid19.lp} si ha una prima definizione delle stanze.
-Le stanze vengono definite con
+Similmente a quanto visto per Minizinc, in \emph{covid19.lp} si ha una prima definizione delle stanze
 \lstinputlisting[firstline= 7, lastline = 7]{./code/covid19.lp}
 
 \noindent
@@ -32,7 +31,7 @@ lastline = 25
 ]{./code/covid19.lp}
 
 \noindent
-Inoltre una stanza può essere condivisa solo da ospiti dello stesso tipo (esclusi i positivi),
+Inoltre una stanza può essere condivisa solo da ospiti dello stesso tipo,
 quindi vengono vietate tutte le coppie illecite
 \lstinputlisting[
 firstline= 28,
@@ -41,8 +40,8 @@ lastline = 28
 
 \noindent
 Due camere sono a distanza \emph{Vicinato 1} se rispettano uno dei cinque vincoli di vicinanza.
-Per motivi di efficienza vengono calcolati soltanto le vicinanze tra ospiti  \todo{TODO here}
-Qui vengono riportati i primi due
+Per motivi di efficienza vengono calcolati soltanto le vicinanze tra ospiti che danno un contributo nel calcolo della funzione di costo, quindi malati, quarantena e positivi.
+Qui vengono riportati i primi due vincoli
 \lstinputlisting[
 firstline= 31,
 lastline = 51
@@ -51,38 +50,31 @@ lastline = 51
 
 \noindent
 Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
-In pratica, presa una camera, un elemento nel suo \emph{Vicinato 2} può essere raggiunto in due passi selezionando prima un \emph{Vicinato 1} adeguato e poi un \emph{Vicinato 1} della camera appena selezionata.
-Nel vincolo si richiede l'esistenza di questa terza camera che faccia da ``perno'' per lo spostamento.
+Diversamente da quanto fatto in Minizinc, qui è stato definito un vincolo per ciascuno dei $12$ possibili vicini 2 di una stanza, considerando soltanto le stanze coppie di stanze contenenti malati od ospiti in quarantena.
+Nei listati seguenti sono riportati due vincoli di questo tipo
 \lstinputlisting[
-firstline= 65,
-lastline = 68
+firstline= 90,
+lastline = 101
+]{./code/covid19.lp}
+\lstinputlisting[
+firstline= 127,
+lastline = 137
 ]{./code/covid19.lp}
 
 \noindent
 La funzione da minimizzare viene calcolata contando che ospiti di che stanze soddisfano la relazione \emph{scomodo}.
 Due ospiti non possono soddisfare la relazione se occupano stanze non in vicinato tra loro, oppure se appartengono a tipologie non problematiche (es. in osservazione).
 \lstinputlisting[
-firstline= 99,
-lastline = 106
+firstline= 234,
+lastline = 235
 ]{./code/covid19.lp}
-\todo{allungare?}
 
-%\cleardoublepage
 \subsection{\emph{Symmetry Breaking}}
-Poiché non ci sono differenze tra malati dello stesso tipo è possible fissare un ordinamento arbitrario.
-In questo caso ad ospiti con un indice inferiore vengono assegnate camera ai piani più bassi.
+Come nel modello Minizinc, il primo malato viene assegnato alla prima stanze e viene fissato un ordinamento arbitrario.
 \lstinputlisting[
-firstline= 75,
-lastline = 78
+firstline= 229,
+lastline = 232
 ]{./code/covid19.lp}
-
-\noindent
-\todo{giustificare meglio?}
-\lstinputlisting[ 
-firstline= 73,
-lastline = 73
-]{./code/covid19.lp}
-
-
 
 \todo[inline]{commentare la configurazione migliore}
+tweety
