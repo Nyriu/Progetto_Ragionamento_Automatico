@@ -4,11 +4,11 @@
 
 \section{Minizinc}
 \subsection{Il modello}
-%In input vengono forniti
-%\lstinline{K, H, M, O, P, Q}
-Ad ogni stanza viene associato un intero partendo da 0 ed incrementando di 1.
-Il numero totale di stanze è $2*K*H$, perché abbiamo $K$ corridoi e per ciascun corridoio ci sono $H$ stanze per lato (sinistro o destro).
-Con questa numerazione ogni $K$ numeri si cambierà lato, mentre ogni $2*K$ numeri si indica un corridoio ad un piano superiore.
+Il modello riceve in input i valori $K$, $H$, $M$, $O$, $P$ e $Q$.
+I primi due indicano numero di corridoi e numero di stanze per lato, mentre i restanti il numero di ospiti per ogni tipo (anche zero per alcuni).
+Si suppone $M \geq 1$ altrimenti ogni assegnamento di stanza sarebbe lecito, purché ci sia un numero sufficiente di stanze.
+Nella codifica utilizzata nel modello ad ogni stanza viene associato un intero partendo da 0 ed incrementando di 1 fino a raggiungere il numero totale di stanze, cioè $2*K*H$, perché abbiamo $K$ corridoi e per ciascun corridoio ci sono $H$ stanze per lato (sinistro o destro).
+Con questa numerazione ogni $K$ numeri si cambia lato, mentre ogni $2*K$ numeri si indica un corridoio ad un piano superiore.
 La numerazione permette di modellare abbastanza facilmente le relazioni spaziali tra stanze,
 ad esempio:
 le prime $H$ stanze appartengono al lato sinistro del primo corridoio;
@@ -21,23 +21,23 @@ lastline = 16
 
 \noindent
 Le limitazioni sul numero di ospiti per stanza sono date dai seguenti vincoli.
-Notare come questa modellazione permette di usare \emph{alldifferent} sui numeri stanze degli ospiti in osservazione.
+Notare come questa modellazione permette di usare \emph{alldifferent} sui numeri delle stanze degli ospiti in osservazione.
 \lstinputlisting[
 firstline= 19,
 lastline = 50
 ]{./code/covid19.mzn}
 
 \noindent
-La relazione di \emph{Vicinato 1} verifica se due stanze sono adiacenti per una delle cinque direzioni (sopra, sotto, destra, sinistra e di fronte).
+La relazione di \emph{Vicinato 1} verifica se due stanze sono adiacenti secondo una delle cinque direzioni: sopra, sotto, destra, sinistra e di fronte.
 \lstinputlisting[
 firstline= 53,
 lastline = 77
 ]{./code/covid19.mzn}
 
 \noindent
-Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
-In pratica, presa una camera, un elemento nel suo \emph{Vicinato 2} può essere raggiunto in due passi selezionando prima un \emph{Vicinato 1} adeguato e poi un \emph{Vicinato 1} della camera appena selezionata.
-Nel vincolo si richiede l'esistenza di questa terza camera che faccia da ``perno'' per lo spostamento.
+Due stanze sono a distanza \emph{Vicinato 2} se condividono una stanza a distanza \emph{Vicinato 1}.
+In pratica, presa una stanza, un elemento nel suo \emph{Vicinato 2} può essere raggiunto in due passi selezionando prima un \emph{Vicinato 1} adeguato e poi un \emph{Vicinato 1} della stanza appena selezionata.
+Nel vincolo si richiede l'esistenza di questa terza stanza che faccia da ``perno'' per lo spostamento.
 %\emph{Vicinato 2} viene soddisfatto se esiste una terza stanza su cui fare ``perno'' in \emph{Vicinato 1} con entrambe le stanze considerate
 \lstinputlisting[
 firstline= 80,
@@ -74,9 +74,9 @@ lastline = 159
 
 %\cleardoublepage
 \subsection{\emph{Symmetry Breaking}}
-Osservando che le camere all'inizio ed alla fine dei corridoi hanno un numero inferiore di camere in \emph{Vicinato 1} (e quindi anche in \emph{Vicinato 2}), risulta sensato fissare il primo malato nella prima stanza disponibile, ossia nella prima stanza del primo corridoio.
+Osservando che le stanze all'inizio ed alla fine dei corridoi hanno un numero inferiore di stanze in \emph{Vicinato 1} (e quindi anche in \emph{Vicinato 2}), risulta sensato fissare il primo malato nella prima stanza disponibile, ossia nella prima stanza del primo corridoio.
 Inoltre, poiché non ci sono differenze tra malati dello stesso tipo è possible fissare un ordinamento arbitrario.
-In questo caso ad ospiti con un indice inferiore vengono assegnate camera ai piani più bassi.
+In questo caso ad ospiti con un indice inferiore vengono assegnate stanze ai piani più bassi.
 \lstinputlisting[
 firstline= 103,
 lastline = 113

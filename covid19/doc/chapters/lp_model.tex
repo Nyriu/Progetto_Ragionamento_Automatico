@@ -11,7 +11,7 @@ Similmente a quanto visto per Minizinc, in \emph{covid19.lp} si ha una prima def
 \lstinputlisting[firstline= 7, lastline = 7]{./code/covid19.lp}
 
 \noindent
-Poiché gli ospiti devono essere assegnati esattamente ad una stanza, si definiscono i vincoli
+Poiché gli ospiti devono essere assegnati esattamente ad una stanza, si definisce il vincolo
 \lstinputlisting[
 firstline= 16,
 lastline = 16
@@ -24,7 +24,7 @@ in cui \emph{soggetto(P,T)} indica il numero identificativo $P$ associato ad un 
 I predicati vengono forniti nell'input e si suppone siano corretti, quindi non è possibile che un $P$ soddisfi la relazione con due $T$ differenti.
 \\
 \noindent
-Poiché le stanze hanno capacità limitate, che dipendono dal tipo di ospite, risulta necessario definire
+Poiché le stanze hanno capacità limitate, che dipendono dal tipo di ospite, risulta necessario definire i vincoli
 \lstinputlisting[
 firstline= 18,
 lastline = 25
@@ -50,7 +50,7 @@ lastline = 51
 
 \noindent
 Due camere sono a distanza \emph{Vicinato 2} se condividono una camera a distanza \emph{Vicinato 1}.
-Diversamente da quanto fatto in Minizinc, qui è stato definito un vincolo per ciascuno dei $12$ possibili vicini 2 di una stanza, considerando soltanto le stanze coppie di stanze contenenti malati od ospiti in quarantena.
+Diversamente da quanto fatto in Minizinc, qui è stato definito un vincolo per ciascuno dei $12$ possibili vicini 2 di una stanza, considerando soltanto le coppie di stanze contenenti malati od ospiti in quarantena.
 Nei listati seguenti sono riportati due vincoli di questo tipo
 \lstinputlisting[
 firstline= 90,
@@ -70,11 +70,11 @@ lastline = 235
 ]{./code/covid19.lp}
 
 \subsection{\emph{Symmetry Breaking}}
-Come nel modello Minizinc, il primo malato viene assegnato alla prima stanze e viene fissato un ordinamento arbitrario.
+Come nel modello Minizinc, il primo malato viene assegnato alla prima stanza e viene fissato un ordinamento arbitrario.
 \lstinputlisting[
 firstline= 229,
 lastline = 232
 ]{./code/covid19.lp}
 
-\todo[inline]{commentare la configurazione migliore}
-tweety
+%\todo[inline]{commentare la configurazione migliore}
+%tweety
