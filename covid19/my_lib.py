@@ -27,10 +27,9 @@ import clingo
 # Le mie globali
 from my_globals import *
 
-#DEBUG = True
-#DEBUG = False
-import psutil
-import objgraph ## TODO remove
+##DEBUG = True
+#import psutil
+#import objgraph
 
 
 class IOHelper:
@@ -761,8 +760,6 @@ class InputGenerator:
             """
         # Dente di sega
         inss = InputGenerator._gen_istanze(n, k_min,h_min, k_max,h_max)
-
-        #breakpoint() # TODO migliorare ordine input
 
         if delete_old:
             IOHelper.del_dir(INPUT_MZN_DIR)

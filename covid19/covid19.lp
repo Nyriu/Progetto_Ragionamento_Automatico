@@ -14,9 +14,7 @@ stanza(S) :- corridoi(K), stanze_per_lato(H), S=0..2*K*H-1.
 %tipo(0..3).
 
 % Ad ogni ospite (numero ospite, tipologia) deve essere associata esattamente una stanza
-%1 { in_stanza(P,T,S) : stanza(S), tipo(T) } 1 :- soggetto(P,T).
 1 { in_stanza(P,T,S) : stanza(S) } 1 :- soggetto(P,T).
-%1 { in_stanza(P,S) : stanza(S) } 1 :- soggetto(P,T). % TODO provare cosi'
 
 % Ogni stanza ha capacita' limitata
 :- T!=2, in_stanza(P,T,S), in_stanza(P1,T,S),
@@ -99,7 +97,6 @@ scomodo(P,P1) :-
   stanza(S), stanza(S1), S!=S1,
   stanza(S2), S2!=S, S2!=S1, 
   stanze_per_lato(H),
-  %S/H == S1/H, S2/H == S1/H,       % tutti stesso lato dello stesso piano
   S - 2 == S1,                     % sx
   S - 1 == S2.                     % sx sx
 
@@ -196,7 +193,6 @@ scomodo(P,P1) :-
   stanza(S2), S2!=S, S2!=S1, 
   stanze_per_lato(H),
   S2 == S + 2*H, % sopra
-  %S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano % TODO
   S2 == S1 + H*(-1)**(1+ (S2/H)\2).  % di fronte al sopra
 
 scomodo(P,P1) :-
@@ -208,7 +204,6 @@ scomodo(P,P1) :-
   stanza(S2), S2!=S, S2!=S1, 
   stanze_per_lato(H),
   S2 == S - 2*H, % sotto
-  %S/H == S1/H + (-1)**(1+ (S/H)\2), % sullo stesso piano % TODO
   S2 == S1 + H*(-1)**(1+ (S2/H)\2).  % di fronte al sotto
 
 scomodo(P,P1) :-
@@ -237,10 +232,6 @@ in_stanza(1,0,0).
 cost(C) :- C == #count { P,P1 : scomodo(P,P1) }.
 #minimize {C : cost(C)}.
 
-
 #show corridoi/1.
 #show stanze_per_lato/1.
-%#show stanza/1.
-%#show soggetto/2.
 #show in_stanza/3.
-%#show scomodo/4.
